@@ -1,0 +1,106 @@
+name: kivicare_clinic_admin
+description: A new Flutter project.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.9.0+25
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  #Commons
+  nb_utils: ^7.1.8
+  google_fonts: ^6.3.2
+  html: ^0.15.6
+  http: ^1.6.0
+  intl: ^0.20.2
+  cached_network_image: ^3.4.1
+  url_launcher: ^6.3.2
+  flutter_vector_icons: ^2.0.0
+  lottie: ^3.3.2
+  flutter_svg: ^2.2.3
+  flutter_svg_provider: ^1.0.7
+  stream_transform: ^2.1.1
+  flutter_local_notifications: ^19.5.0
+  carousel_slider: ^5.1.1
+  flutter_spinkit: ^5.2.2
+  responsive_navigation_bar: ^6.1.0
+  date_picker_timeline: ^1.2.7
+  signature: ^6.3.0
+  syncfusion_flutter_charts: ^31.2.12
+  expandable_page_view: ^1.0.17
+  datepicker_dropdown: ^1.0.1
+  pro_image_editor: ^11.14.0
+  playx_version_update: ^1.0.1
+  
+
+  #firebase
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  firebase_crashlytics: ^5.0.5
+  firebase_messaging: ^16.0.4
+
+  # SOCIAL LOGIN
+  the_apple_sign_in: ^1.1.1
+  google_sign_in: ^7.2.0
+  googleapis: ^15.0.0
+  googleapis_auth: ^2.0.0
+  extension_google_sign_in_as_googleapis_auth: ^3.0.0
+  permission_handler: ^12.0.1
+  path_provider: ^2.1.5
+
+  # State Management
+  get: ^4.7.2
+
+  #Storage
+  get_storage: ^2.1.1
+  path: ^1.9.1
+
+  #PhotoViewGallery
+  photo_view: ^0.15.0
+
+  #Pickers
+  file_picker: ^10.3.7
+  image_picker: ^1.2.1
+  country_picker: ^2.0.27
+  flutter_time_picker_spinner: ^2.0.0
+
+  # Google Map
+  google_maps_flutter: ^2.14.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+
+  flutter_localizations:
+    sdk: flutter
+  percent_indicator: ^4.2.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo_app.jpeg"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo_app.jpeg"
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/
+    - assets/flags/
+    - assets/images/
+    - assets/icons/
+    - assets/lottie/
+    - assets/icons/navigation/
+    - assets/icons/social_media/

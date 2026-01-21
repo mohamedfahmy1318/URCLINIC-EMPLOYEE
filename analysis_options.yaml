@@ -1,0 +1,19 @@
+analyzer:
+  errors:
+    unused_local_variable: warning
+    unused_element: warning
+    avoid_print: warning
+    use_setters_to_change_properties: warning
+    avoid_catching_errors: warning
+    avoid_empty_else: warning
+    unnecessary_this: warning
+    always_declare_return_types: warning
+    unnecessary_new: warning
+    camel_case_types: warning
+
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+  # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+  # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule

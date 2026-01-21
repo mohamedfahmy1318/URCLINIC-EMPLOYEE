@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "1033255788496",
+    "project_id": "clinic-app-86bcf",
+    "storage_bucket": "clinic-app-86bcf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033255788496:android:3c933da2e604c0c36f63d5",
+        "android_client_info": {
+          "package_name": "com.wellness.customer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArKI9CO5llksF76LC1Bgi4IblwnhURLOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1033255788496-d9buarf94cjb6jobj7q8muhova6ahjgt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wellness.customer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033255788496:android:cb596c760e95123f6f63d5",
+        "android_client_info": {
+          "package_name": "com.wellness.vendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArKI9CO5llksF76LC1Bgi4IblwnhURLOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1033255788496-d9buarf94cjb6jobj7q8muhova6ahjgt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wellness.customer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
