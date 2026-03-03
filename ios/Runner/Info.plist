@@ -32,17 +32,19 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>KiviCare - Clinic Admin App requires access to the Camera to upload your profile photo.</string>
+	<string>URCLINIC Employee requires access to the Camera to upload your profile photo.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>KiviCare - Clinic Admin App requires address permission access to get the current location of the user instead of typing address manually. </string>
+	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>KiviCare - Clinic Admin App requires address permission access to get the current location of the user instead of typing address manually. </string>
+	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>KiviCare - Clinic Admin App requires address permission access to get the current location of the user instead of typing address manually. </string>
+	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>KiviCare - Clinic Admin App requires access to the photo library to upload your profile photo.</string>
-	<key>Privacy-Location Usage Description</key>
-	<string>KiviCare - Clinic Admin App requires address permission access to get the current location of the user instead of typing address manually. </string>
+	<string>URCLINIC Employee requires access to the photo library to upload your profile photo.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

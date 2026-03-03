@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyBzlC7XSSjOAewBp_jh3XmUeukgGm_PJ-w</string>
+	<string>AIzaSyCJOVCOFAvHYfdBLfWyZAZNX6tzHHxqRmY</string>
 	<key>GCM_SENDER_ID</key>
-	<string>207755062367</string>
+	<string>584658171555</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.wellness.vendor</string>
+	<string>com.urclinic.employee</string>
 	<key>PROJECT_ID</key>
-	<string>health-and-wellness-flutter</string>
+	<string>urclinic-72a3e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>health-and-wellness-flutter.appspot.com</string>
+	<string>urclinic-72a3e.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:207755062367:ios:9052d322039007b7b97fea</string>
+	<string>1:584658171555:ios:5c0c0d1e4814374b9bf116</string>
 </dict>
 </plist>
