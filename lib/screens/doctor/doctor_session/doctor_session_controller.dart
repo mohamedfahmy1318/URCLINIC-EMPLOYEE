@@ -10,7 +10,8 @@ import '../model/doctor_list_res.dart';
 class DoctorSessionController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isLastPage = false.obs;
-  Rx<Future<RxList<DoctorSessionModel>>> getDoctorSession = Future(() => RxList<DoctorSessionModel>()).obs;
+  Rx<Future<RxList<DoctorSessionModel>>> getDoctorSession =
+      Future(() => RxList<DoctorSessionModel>()).obs;
   RxList<DoctorSessionModel> doctorSession = RxList();
   RxInt page = 1.obs;
   Rx<Doctor> selectDoctorData = Doctor().obs;
@@ -24,20 +25,12 @@ class DoctorSessionController extends GetxController {
     super.onInit();
   }
 
-  Future<void> getDcotorsSession({bool showloader = true, String search = ""}) async {
+  Future<void> getDcotorsSession(
+      {bool showloader = true, String search = ""}) async {
     if (showloader) {
       isLoading(true);
     }
-    await getDoctorSession(
-      CoreServiceApis.getDoctorSessionList(
-        page: page.value,
-        doctorSession: doctorSession,
-        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? selectedAppClinic.value.id : null,
-        lastPageCallBack: (p0) {
-          isLastPage(p0);
-        },
-      ),
-    ).then((value) {}).catchError((e) {
+    await getDoctorSession().then((value) {}).catchError((e) {
       log('getDoctorSession: $e');
     }).whenComplete(() => isLoading(false));
   }

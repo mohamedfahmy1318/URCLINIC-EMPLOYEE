@@ -32,25 +32,30 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   log('${FirebaseTopicConst.notificationBodyKey} -->: ${message.notification!.body}');
 }
 
-Rx<BaseLanguage> locale = LanguageEn().obs;
+Rx<BaseLanguage> locale = Rx<BaseLanguage>(LanguageEn());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform).then((value) {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+      .then((value) {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     PushNotificationService().initFirebaseMessaging();
     if (kReleaseMode) {
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
     }
   }).catchError(onError);
 
   await GetStorage.init();
   //
-  fontFamilyPrimaryGlobal = GoogleFonts.interTight(fontWeight: FontWeight.w500).fontFamily;
+  fontFamilyPrimaryGlobal =
+      GoogleFonts.interTight(fontWeight: FontWeight.w500).fontFamily;
   textPrimarySizeGlobal = 14;
-  fontFamilySecondaryGlobal = GoogleFonts.interTight(fontWeight: FontWeight.w400).fontFamily;
+  fontFamilySecondaryGlobal =
+      GoogleFonts.interTight(fontWeight: FontWeight.w400).fontFamily;
   textSecondarySizeGlobal = 12;
-  fontFamilyBoldGlobal = GoogleFonts.interTight(fontWeight: FontWeight.w600).fontFamily;
+  fontFamilyBoldGlobal =
+      GoogleFonts.interTight(fontWeight: FontWeight.w600).fontFamily;
   //
   defaultBlurRadius = 0;
   defaultRadius = 12;
@@ -62,13 +67,15 @@ void main() async {
   //minimum passoword length validation
   passwordLengthGlobal = 8;
 
-  selectedLanguageCode(getValueFromLocal(SELECTED_LANGUAGE_CODE) ?? DEFAULT_LANGUAGE);
+  selectedLanguageCode(
+      getValueFromLocal(SELECTED_LANGUAGE_CODE) ?? DEFAULT_LANGUAGE);
 
-  await initialize(aLocaleLanguageList: languageList(), defaultLanguage: selectedLanguageCode.value);
+  await initialize(
+      aLocaleLanguageList: languageList(),
+      defaultLanguage: selectedLanguageCode.value);
 
-  final BaseLanguage temp = await const AppLocalizations().load(Locale(selectedLanguageCode.value));
-  locale = temp.obs;
-  locale.value = await const AppLocalizations().load(Locale(selectedLanguageCode.value));
+  locale.value =
+      await const AppLocalizations().load(Locale(selectedLanguageCode.value));
 
   try {
     final getThemeFromLocal = getValueFromLocal(SettingsLocalConst.THEME_MODE);
@@ -105,11 +112,13 @@ class MyApp extends StatelessWidget {
           ],
           builder: (context, child) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: const TextScaler.linear(1.0)),
               child: child!,
             );
           },
-          localeResolutionCallback: (locale, supportedLocales) => Locale(selectedLanguageCode.value),
+          localeResolutionCallback: (locale, supportedLocales) =>
+              Locale(selectedLanguageCode.value),
           fallbackLocale: const Locale(DEFAULT_LANGUAGE),
           locale: Locale(selectedLanguageCode.value),
           theme: AppTheme.lightTheme,

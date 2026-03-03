@@ -1,4 +1,4 @@
-package com.wellness.vendor
+package com.urclinic.employee
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity

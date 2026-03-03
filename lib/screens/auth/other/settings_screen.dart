@@ -34,12 +34,16 @@ class SettingScreen extends StatelessWidget {
             Obx(
               () => SettingItemWidget(
                 title: locale.value.language,
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                 titleTextStyle: primaryTextStyle(),
-                leading: commonLeadingWid(imgPath: Assets.iconsIcLanguage, color: appColorPrimary),
+                leading: commonLeadingWid(
+                    imgPath: Assets.iconsIcLanguage, color: appColorPrimary),
                 trailing: DropdownButtonHideUnderline(
                   child: Container(
-                    decoration: BoxDecoration(color: context.cardColor, borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: BorderRadius.circular(10)),
                     child: DropdownButton(
                       elevation: 1,
                       dropdownColor: context.cardColor,
@@ -50,9 +54,15 @@ class SettingScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (element.flag != null) CachedImageWidget(url: element.flag.validate(), height: 24, width: 24),
+                              if (element.flag != null)
+                                CachedImageWidget(
+                                    url: element.flag.validate(),
+                                    height: 24,
+                                    width: 24),
                               6.width,
-                              if (element.name != null) Text(element.name.validate(), style: primaryTextStyle(size: 14)),
+                              if (element.name != null)
+                                Text(element.name.validate(),
+                                    style: primaryTextStyle(size: 14)),
                             ],
                           ).paddingSymmetric(horizontal: 12),
                         );
@@ -61,19 +71,26 @@ class SettingScreen extends StatelessWidget {
                         if (newValue is LanguageDataModel) {
                           settingsController.selectedLang(newValue);
                           settingsController.isLoading(true);
-                          await setValue(SELECTED_LANGUAGE_CODE, newValue.languageCode);
+                          await setValue(
+                              SELECTED_LANGUAGE_CODE, newValue.languageCode);
                           selectedLanguageDataModel = newValue;
-                          settingsController.selectedLang(newValue);
-                          final BaseLanguage temp = await const AppLocalizations().load(Locale(newValue.languageCode.validate()));
-                          locale = temp.obs;
-                          setValueToLocal(SELECTED_LANGUAGE_CODE, newValue.languageCode.validate());
+                          setValueToLocal(SELECTED_LANGUAGE_CODE,
+                              newValue.languageCode.validate());
                           selectedLanguageCode(newValue.languageCode);
-                          Get.updateLocale(Locale(newValue.languageCode.validate()));
+                          // Update only the value to preserve Rx observers
+                          locale.value = await const AppLocalizations()
+                              .load(Locale(newValue.languageCode.validate()));
+                          Get.updateLocale(
+                              Locale(newValue.languageCode.validate()));
                           settingsController.isLoading(false);
                           settingsController.onLanguageChange();
                         }
                       },
-                      value: settingsController.selectedLang.value.id.validate() > 0 ? settingsController.selectedLang.value : localeLanguageList.first,
+                      value:
+                          settingsController.selectedLang.value.id.validate() >
+                                  0
+                              ? settingsController.selectedLang.value
+                              : localeLanguageList.first,
                     ),
                   ),
                 ),
@@ -82,12 +99,16 @@ class SettingScreen extends StatelessWidget {
             Obx(
               () => SettingItemWidget(
                 title: locale.value.appTheme,
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                 titleTextStyle: primaryTextStyle(),
-                leading: commonLeadingWid(imgPath: Assets.iconsIcDarkMode, color: appColorPrimary),
+                leading: commonLeadingWid(
+                    imgPath: Assets.iconsIcDarkMode, color: appColorPrimary),
                 trailing: DropdownButtonHideUnderline(
                   child: Container(
-                    decoration: BoxDecoration(color: context.cardColor, borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                        color: context.cardColor,
+                        borderRadius: BorderRadius.circular(10)),
                     child: DropdownButton(
                       elevation: 1,
                       dropdownColor: context.cardColor,
@@ -95,7 +116,9 @@ class SettingScreen extends StatelessWidget {
                       items: settingsController.themeModes.map((element) {
                         return DropdownMenuItem(
                           value: element,
-                          child: Text(element.mode, style: primaryTextStyle(size: 13)).paddingSymmetric(horizontal: 12),
+                          child: Text(element.mode,
+                                  style: primaryTextStyle(size: 13))
+                              .paddingSymmetric(horizontal: 12),
                         );
                       }).toList(),
                       onChanged: (newValue) {
@@ -104,7 +127,10 @@ class SettingScreen extends StatelessWidget {
                           toggleThemeMode(themeId: newValue.id);
                         }
                       },
-                      value: !settingsController.dropdownValue.value.id.isNegative ? settingsController.dropdownValue.value : settingsController.themeModes.first,
+                      value:
+                          !settingsController.dropdownValue.value.id.isNegative
+                              ? settingsController.dropdownValue.value
+                              : settingsController.themeModes.first,
                     ),
                   ),
                 ),
@@ -116,7 +142,8 @@ class SettingScreen extends StatelessWidget {
                 Get.to(() => ChangePassword());
               },
               titleTextStyle: primaryTextStyle(),
-              leading: commonLeadingWid(imgPath: Assets.iconsIcLock, color: appColorPrimary),
+              leading: commonLeadingWid(
+                  imgPath: Assets.iconsIcLock, color: appColorPrimary),
             ).visible(isLoggedIn.value),
             SettingItemWidget(
               title: locale.value.deleteAccount,
@@ -143,7 +170,8 @@ class SettingScreen extends StatelessWidget {
                 });
               },
               titleTextStyle: primaryTextStyle(),
-              leading: commonLeadingWid(imgPath: Assets.iconsIcDelete, color: appColorPrimary),
+              leading: commonLeadingWid(
+                  imgPath: Assets.iconsIcDelete, color: appColorPrimary),
             ).visible(isLoggedIn.value),
             SettingItemWidget(
               title: locale.value.aboutApp,
@@ -152,7 +180,8 @@ class SettingScreen extends StatelessWidget {
                 Get.to(() => const AboutScreen());
               },
               titleTextStyle: primaryTextStyle(),
-              leading: commonLeadingWid(imgPath: Assets.iconsIcInfo, color: appColorPrimary),
+              leading: commonLeadingWid(
+                  imgPath: Assets.iconsIcInfo, color: appColorPrimary),
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             ).visible(!isLoggedIn.value),
             SettingItemWidget(
@@ -161,7 +190,8 @@ class SettingScreen extends StatelessWidget {
                 doIfLoggedIn(() {});
               },
               titleTextStyle: primaryTextStyle(),
-              leading: commonLeadingWid(imgPath: Assets.iconsIcLogin, color: appColorPrimary),
+              leading: commonLeadingWid(
+                  imgPath: Assets.iconsIcLogin, color: appColorPrimary),
             ).visible(!isLoggedIn.value),
           ],
         ),

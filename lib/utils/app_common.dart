@@ -15,7 +15,9 @@ import '../locale/app_localizations.dart';
 import '../locale/languages.dart';
 import 'local_storage.dart';
 
-bool isIqonicProduct = DOMAIN_URL.contains("apps.iqonic.design") || DOMAIN_URL.contains("iqonic.design") || DOMAIN_URL.contains("innoquad.in");
+bool isIqonicProduct = DOMAIN_URL.contains("apps.iqonic.design") ||
+    DOMAIN_URL.contains("iqonic.design") ||
+    DOMAIN_URL.contains("innoquad.in");
 
 //Firebase App Name Topic
 String get appNameTopic => APP_NAME
@@ -48,24 +50,35 @@ Rx<ClinicData> selectedAppClinic = ClinicData().obs;
 RxList<CommissionModel> selectedAppCommission = <CommissionModel>[].obs;
 
 // Currency position common
-bool get isCurrencyPositionLeft => appCurrency.value.currencyPosition == CurrencyPosition.CURRENCY_POSITION_LEFT;
+bool get isCurrencyPositionLeft =>
+    appCurrency.value.currencyPosition ==
+    CurrencyPosition.CURRENCY_POSITION_LEFT;
 
-bool get isCurrencyPositionRight => appCurrency.value.currencyPosition == CurrencyPosition.CURRENCY_POSITION_RIGHT;
+bool get isCurrencyPositionRight =>
+    appCurrency.value.currencyPosition ==
+    CurrencyPosition.CURRENCY_POSITION_RIGHT;
 
-bool get isCurrencyPositionLeftWithSpace => appCurrency.value.currencyPosition == CurrencyPosition.CURRENCY_POSITION_LEFT_WITH_SPACE;
+bool get isCurrencyPositionLeftWithSpace =>
+    appCurrency.value.currencyPosition ==
+    CurrencyPosition.CURRENCY_POSITION_LEFT_WITH_SPACE;
 
-bool get isCurrencyPositionRightWithSpace => appCurrency.value.currencyPosition == CurrencyPosition.CURRENCY_POSITION_RIGHT_WITH_SPACE;
+bool get isCurrencyPositionRightWithSpace =>
+    appCurrency.value.currencyPosition ==
+    CurrencyPosition.CURRENCY_POSITION_RIGHT_WITH_SPACE;
 //endregion
 
 RxList<AboutDataModel> aboutPages = RxList();
 
-Rx<SaveBookingRes> saveBookingRes = SaveBookingRes(saveBookingResData: SaveBookingResData()).obs;
+Rx<SaveBookingRes> saveBookingRes =
+    SaveBookingRes(saveBookingResData: SaveBookingResData()).obs;
 //Booking Success
 RxString bookingSuccessDate = "".obs;
 // Rx<SaveBookingRes> saveBookingRes = SaveBookingRes().obs;
 //
 
-bool canLaunchVideoCall({required String status}) => status.toLowerCase().contains(StatusConst.confirmed) || status.toLowerCase().contains(StatusConst.check_in);
+bool canLaunchVideoCall({required String status}) =>
+    status.toLowerCase().contains(StatusConst.confirmed) ||
+    status.toLowerCase().contains(StatusConst.check_in);
 
 String getBookingStatus({required String status}) {
   if (status.toLowerCase().contains(StatusConst.pending)) {
@@ -110,6 +123,7 @@ Color getBookingStatusColor({required String status}) {
     return defaultStatusColor;
   }
 }
+
 String getBookingPaymentStatus({required String status}) {
   // Convert numeric values to correct status name
   switch (status) {
@@ -144,7 +158,8 @@ String getBookingPaymentStatus({required String status}) {
 String getPrescriptionStatus({required String status}) {
   if (status.toLowerCase().contains(StatusConst.pending)) {
     return locale.value.pending;
-  } else if (status.toLowerCase().contains(StatusConst.completed) || status.toLowerCase().contains(PaymentStatus.PAID)) {
+  } else if (status.toLowerCase().contains(StatusConst.completed) ||
+      status.toLowerCase().contains(PaymentStatus.PAID)) {
     return locale.value.completed;
   } else {
     return status;
@@ -162,9 +177,11 @@ Color getPrescriptionStatusColor({required String status}) {
 }
 
 String getPrescriptionPaymentStatus({required String status}) {
-  if (status.toLowerCase().contains(PaymentStatus.pending) || status.toLowerCase().contains(PaymentStatus.UNPAID)) {
+  if (status.toLowerCase().contains(PaymentStatus.pending) ||
+      status.toLowerCase().contains(PaymentStatus.UNPAID)) {
     return locale.value.unpaid;
-  } else if (status.toLowerCase().contains(StatusConst.completed) || status.toLowerCase().contains(PaymentStatus.PAID)) {
+  } else if (status.toLowerCase().contains(StatusConst.completed) ||
+      status.toLowerCase().contains(PaymentStatus.PAID)) {
     return locale.value.paid;
   } else {
     return status;
@@ -172,9 +189,11 @@ String getPrescriptionPaymentStatus({required String status}) {
 }
 
 Color getPrescriptionPaymentStatusColor({required String paymentStatus}) {
-  if (paymentStatus.toLowerCase().contains(PaymentStatus.pending) || paymentStatus.toLowerCase().contains(PaymentStatus.UNPAID)) {
+  if (paymentStatus.toLowerCase().contains(PaymentStatus.pending) ||
+      paymentStatus.toLowerCase().contains(PaymentStatus.UNPAID)) {
     return pendingStatusColor;
-  } else if (paymentStatus.toLowerCase().contains(StatusConst.completed) || paymentStatus.toLowerCase().contains(PaymentStatus.PAID)) {
+  } else if (paymentStatus.toLowerCase().contains(StatusConst.completed) ||
+      paymentStatus.toLowerCase().contains(PaymentStatus.PAID)) {
     return completedStatusColor;
   } else {
     return confirmedStatusColor;
@@ -188,7 +207,9 @@ Color getPriceStatusColor({required String paymentStatus}) {
     return completedStatusColor;
   } else if (paymentStatus.toLowerCase().contains(PaymentStatus.PAID)) {
     return completedStatusColor;
-  } else if (paymentStatus.toLowerCase().contains(PaymentStatus.ADVANCE_REFUNDED)) {
+  } else if (paymentStatus
+      .toLowerCase()
+      .contains(PaymentStatus.ADVANCE_REFUNDED)) {
     return confirmedStatusColor;
   } else if (paymentStatus.toLowerCase().contains(PaymentStatus.REFUNDED)) {
     return confirmedStatusColor;
@@ -196,12 +217,13 @@ Color getPriceStatusColor({required String paymentStatus}) {
     return defaultStatusColor;
   }
 }
+
 Color getNewPriceStatusColor({required String paymentStatus}) {
   switch (paymentStatus) {
     case "1":
       return completedStatusColor;
     case "2":
-      return  defaultStatusColor;
+      return defaultStatusColor;
     case "0":
     default:
       return pendingStatusColor;
@@ -211,7 +233,8 @@ Color getNewPriceStatusColor({required String paymentStatus}) {
 String getRequestStatus({required String status}) {
   if (status.toLowerCase().contains(RequestStatus.pending)) {
     return locale.value.pending;
-  } else if (status.toLowerCase().contains(RequestStatus.approved) || status.toLowerCase().contains(RequestStatus.accept)) {
+  } else if (status.toLowerCase().contains(RequestStatus.approved) ||
+      status.toLowerCase().contains(RequestStatus.accept)) {
     return locale.value.approved;
   } else if (status.toLowerCase().contains(RequestStatus.rejected)) {
     return locale.value.rejected;
@@ -223,7 +246,8 @@ String getRequestStatus({required String status}) {
 Color getRequestStatusColor({required String requestStatus}) {
   if (requestStatus.toLowerCase().contains(RequestStatus.pending)) {
     return pendingStatusColor;
-  } else if (requestStatus.toLowerCase().contains(RequestStatus.approved) || requestStatus.toLowerCase().contains(RequestStatus.accept)) {
+  } else if (requestStatus.toLowerCase().contains(RequestStatus.approved) ||
+      requestStatus.toLowerCase().contains(RequestStatus.accept)) {
     return completedStatusColor;
   } else if (requestStatus.toLowerCase().contains(RequestStatus.rejected)) {
     return cancelStatusColor;
@@ -235,16 +259,17 @@ Color getRequestStatusColor({required String requestStatus}) {
 String getOrderStatus({required String status}) {
   if (status.toLowerCase().contains(StatusConst.pending)) {
     return locale.value.pending;
-  } else if (status.toLowerCase().contains(StatusConst.delivered) ) {
+  } else if (status.toLowerCase().contains(StatusConst.delivered)) {
     return locale.value.delivered;
   } else {
     return status;
   }
 }
+
 Color getOrderStatusColor({required String orderStatus}) {
-  if (orderStatus.toLowerCase().contains(PaymentStatus.pending) ) {
+  if (orderStatus.toLowerCase().contains(PaymentStatus.pending)) {
     return pendingStatusColor;
-  } else if (orderStatus.toLowerCase().contains(StatusConst.delivered) ) {
+  } else if (orderStatus.toLowerCase().contains(StatusConst.delivered)) {
     return completedStatusColor;
   } else {
     return cancelStatusColor;
@@ -262,10 +287,19 @@ String _normalizeLanguageCode(String code) {
   return parts.isNotEmpty ? parts.first : code;
 }
 
-// Apply admin default language live if it differs from current
+// Apply admin default language only on first launch (when no user preference is saved)
+// Don't override if user has already selected a language
 Future<void> applyLanguageFromConfigIfChanged(String languageCode) async {
   try {
-    final String newCode = _normalizeLanguageCode(languageCode.validate(value: DEFAULT_LANGUAGE));
+    // Check if user has already saved a language preference
+    final savedLang = getValueFromLocal(SELECTED_LANGUAGE_CODE);
+    if (savedLang != null && savedLang.toString().isNotEmpty) {
+      // User has a saved preference, don't override
+      return;
+    }
+
+    final String newCode =
+        _normalizeLanguageCode(languageCode.validate(value: DEFAULT_LANGUAGE));
     if (newCode.isEmpty || newCode == selectedLanguageCode.value) return;
 
     await setValue(SELECTED_LANGUAGE_CODE, newCode);
@@ -283,7 +317,9 @@ Future<void> applyLanguageFromConfigIfChanged(String languageCode) async {
 bool checkTimeDifference({required DateTime inputDateTime}) {
   final DateTime currentTime = DateTime.now();
 
-  if (currentTime.isBefore(inputDateTime) && inputDateTime.difference(currentTime).inHours <= appConfigs.value.cancellationChargeHours) {
+  if (currentTime.isBefore(inputDateTime) &&
+      inputDateTime.difference(currentTime).inHours <=
+          appConfigs.value.cancellationChargeHours) {
     return true;
   }
 
@@ -342,4 +378,3 @@ Future<int?> getBedIdFromNameCached(String bedName) async {
 void clearBedNameToIdCache() {
   _bedNameToIdCache.clear();
 }
-

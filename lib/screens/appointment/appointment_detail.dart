@@ -31,13 +31,15 @@ import 'package:kivicare_clinic_admin/screens/bed_management/components/bed_comp
 class AppointmentDetail extends StatelessWidget {
   AppointmentDetail({super.key});
 
-  final AppointmentDetailController appointmentDetailCont = Get.put(AppointmentDetailController());
+  final AppointmentDetailController appointmentDetailCont =
+      Get.put(AppointmentDetailController());
 
   @override
   Widget build(BuildContext context) {
     return AppScaffoldNew(
       isLoading: appointmentDetailCont.isUpdateLoading,
-      appBartitleText: "${locale.value.appointment} #${appointmentDetailCont.appintmentData.value.id}",
+      appBartitleText:
+          "${locale.value.appointment} #${appointmentDetailCont.appintmentData.value.id}",
       appBarVerticalSize: Get.height * 0.12,
       body: RefreshIndicator(
         onRefresh: () {
@@ -56,19 +58,24 @@ class AppointmentDetail extends StatelessWidget {
                 },
               ).paddingSymmetric(horizontal: 16);
             },
-            loadingWidget: appointmentDetailCont.isUpdateLoading.value ? const Offstage() : const LoaderWidget(),
+            loadingWidget: appointmentDetailCont.isUpdateLoading.value
+                ? const Offstage()
+                : const LoaderWidget(),
             onSuccess: (appointmentDetailRes) {
               return Obx(
                 () => AnimatedScrollView(
                   listAnimationType: ListAnimationType.FadeIn,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: showBtns.obs.value ? 64 : 16),
+                  padding:
+                      EdgeInsets.only(bottom: showBtns.obs.value ? 64 : 16),
                   children: [
                     16.height,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(locale.value.sessionSummary, style: boldTextStyle(size: Constants.labelTextSize)),
+                        Text(locale.value.sessionSummary,
+                            style:
+                                boldTextStyle(size: Constants.labelTextSize)),
 
                         ///Invoice Download
                         SizedBox(
@@ -76,7 +83,8 @@ class AppointmentDetail extends StatelessWidget {
                           child: AppButton(
                             padding: EdgeInsets.zero,
                             textStyle: secondaryTextStyle(color: Colors.white),
-                            shapeBorder: RoundedRectangleBorder(borderRadius: radius(4)),
+                            shapeBorder:
+                                RoundedRectangleBorder(borderRadius: radius(4)),
                             onTap: () {
                               appointmentDetailCont.getAppointmentInvoice();
                             },
@@ -89,36 +97,49 @@ class AppointmentDetail extends StatelessWidget {
                                   color: white,
                                 ),
                                 6.width,
-                                Text(locale.value.invoice, style: primaryTextStyle(size: 12, color: white)),
+                                Text(locale.value.invoice,
+                                    style: primaryTextStyle(
+                                        size: 12, color: white)),
                               ],
                             ),
                           ),
-                        ).visible(appointmentDetailCont.appintmentData.value.status == StatusConst.checkout || appointmentDetailCont.appintmentData.value.status == StatusConst.completed),
+                        ).visible(appointmentDetailCont
+                                    .appintmentData.value.status ==
+                                StatusConst.checkout ||
+                            appointmentDetailCont.appintmentData.value.status ==
+                                StatusConst.completed),
                       ],
                     ),
                     8.height,
                     ApppointmentInfoCardWidget(
-                      appointmentDet: appointmentDetailCont.appintmentData.value,
+                      appointmentDet:
+                          appointmentDetailCont.appintmentData.value,
                     ),
-                    if (appointmentDetailCont.appintmentData.value.medicalReport.isNotEmpty) ...[
+                    if (appointmentDetailCont
+                        .appintmentData.value.medicalReport.isNotEmpty) ...[
                       8.height,
                       medicalReportWidget(),
                     ],
-                    if (appointmentDetailCont.appintmentData.value.appointmentExtraInfo.isNotEmpty)
+                    if (appointmentDetailCont
+                        .appintmentData.value.appointmentExtraInfo.isNotEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           8.height,
-                          ViewAllLabel(label: locale.value.medicalHistory, isShowAll: false),
+                          ViewAllLabel(
+                              label: locale.value.medicalHistory,
+                              isShowAll: false),
                           Container(
                             width: Get.width,
                             padding: const EdgeInsets.all(16),
-                            decoration: boxDecorationDefault(color: context.cardColor),
+                            decoration:
+                                boxDecorationDefault(color: context.cardColor),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ReadMoreText(
-                                  appointmentDetailCont.appintmentData.value.appointmentExtraInfo,
+                                  appointmentDetailCont.appintmentData.value
+                                      .appointmentExtraInfo,
                                   trimLines: 3,
                                   trimMode: TrimMode.Line,
                                   style: secondaryTextStyle(size: 14),
@@ -128,16 +149,22 @@ class AppointmentDetail extends StatelessWidget {
                           ),
                         ],
                       ),
-                    if (appointmentDetailCont.appintmentData.value.medicalReport.isEmpty && appointmentDetailCont.appintmentData.value.appointmentExtraInfo.isEmpty)
+                    if (appointmentDetailCont
+                            .appintmentData.value.medicalReport.isEmpty &&
+                        appointmentDetailCont
+                            .appintmentData.value.appointmentExtraInfo.isEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           8.height,
-                          ViewAllLabel(label: locale.value.medicalHistory, isShowAll: false),
+                          ViewAllLabel(
+                              label: locale.value.medicalHistory,
+                              isShowAll: false),
                           Container(
                             width: Get.width,
                             padding: const EdgeInsets.all(16),
-                            decoration: boxDecorationDefault(color: context.cardColor),
+                            decoration:
+                                boxDecorationDefault(color: context.cardColor),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -151,7 +178,8 @@ class AppointmentDetail extends StatelessWidget {
                                     8.width,
                                     Text(
                                       locale.value.noMedicalReportsFound,
-                                      style: secondaryTextStyle(size: 14, color: dividerColor),
+                                      style: secondaryTextStyle(
+                                          size: 14, color: dividerColor),
                                     ),
                                   ],
                                 ),
@@ -159,34 +187,53 @@ class AppointmentDetail extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ).visible(appointmentDetailCont.appintmentData.value.appointmentExtraInfo.isNotEmpty),
-                    if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist)) ...[
-                      if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) ...[
+                      ).visible(appointmentDetailCont.appintmentData.value
+                          .appointmentExtraInfo.isNotEmpty),
+                    if (loginUserData.value.userRole
+                            .contains(EmployeeKeyConst.vendor) ||
+                        loginUserData.value.userRole
+                            .contains(EmployeeKeyConst.receptionist)) ...[
+                      if (loginUserData.value.userRole
+                          .contains(EmployeeKeyConst.vendor)) ...[
                         16.height,
-                        Text(locale.value.clinicInfo, style: boldTextStyle(size: Constants.labelTextSize)),
+                        Text(locale.value.clinicInfo,
+                            style:
+                                boldTextStyle(size: Constants.labelTextSize)),
                         8.height,
                         ClinicInfoCardWidget(
-                          clinicInfo: appointmentDetailCont.appintmentData.value,
+                          clinicInfo:
+                              appointmentDetailCont.appintmentData.value,
                         ),
                       ],
                       16.height,
-                      Text(locale.value.doctorInfo, style: boldTextStyle(size: Constants.labelTextSize)),
+                      Text(locale.value.doctorInfo,
+                          style: boldTextStyle(size: Constants.labelTextSize)),
                       8.height,
                       DoctorInfoCardWidget(
                         doctorInfo: appointmentDetailCont.appintmentData.value,
                       ),
                     ],
                     16.height,
-                    Text(locale.value.patientInfo, style: boldTextStyle(size: Constants.labelTextSize)),
+                    Text(locale.value.patientInfo,
+                        style: boldTextStyle(size: Constants.labelTextSize)),
                     8.height,
                     PatientInfoCardWidget(
-                      appointmentDet: appointmentDetailCont.appintmentData.value,
+                      appointmentDet:
+                          appointmentDetailCont.appintmentData.value,
                     ),
                     16.height,
-                    Text(locale.value.aboutService, style: boldTextStyle(size: Constants.labelTextSize)),
+                    Text(locale.value.aboutService,
+                        style: boldTextStyle(size: Constants.labelTextSize)),
                     8.height,
-                    ServiceInfoCardWidget(appointmentDet: appointmentDetailCont.appintmentData.value),
-                    if (appointmentDetailCont.appintmentData.value.encounterId > 0 && (appointmentDetailCont.appintmentData.value.status == StatusConst.check_in || appointmentDetailCont.appintmentData.value.status == StatusConst.checkout))
+                    ServiceInfoCardWidget(
+                        appointmentDet:
+                            appointmentDetailCont.appintmentData.value),
+                    if (appointmentDetailCont.appintmentData.value.encounterId >
+                            0 &&
+                        (appointmentDetailCont.appintmentData.value.status ==
+                                StatusConst.check_in ||
+                            appointmentDetailCont.appintmentData.value.status ==
+                                StatusConst.checkout))
                       Column(
                         children: [
                           16.height,
@@ -195,26 +242,43 @@ class AppointmentDetail extends StatelessWidget {
                             trailingText: locale.value.viewAll,
                             onTap: () {
                               final encounterDetail = EncounterElement(
-                                id: appointmentDetailCont.appintmentData.value.encounterId,
-                                appointmentId: appointmentDetailCont.appintmentData.value.id,
-                                clinicId: appointmentDetailCont.appintmentData.value.clinicId,
-                                clinicName: appointmentDetailCont.appintmentData.value.clinicName,
-                                description: appointmentDetailCont.appintmentData.value.encounterDescription,
-                                doctorId: appointmentDetailCont.appintmentData.value.doctorId,
-                                doctorName: appointmentDetailCont.appintmentData.value.doctorName,
-                                encounterDate: appointmentDetailCont.appintmentData.value.appointmentDate,
-                                userId: appointmentDetailCont.appintmentData.value.userId,
-                                userName: appointmentDetailCont.appintmentData.value.userName,
-                                userImage: appointmentDetailCont.appintmentData.value.userImage,
-                                serviceId: appointmentDetailCont.appintmentData.value.serviceId,
-                                address: appointmentDetailCont.appintmentData.value.address,
-                                userEmail: appointmentDetailCont.appintmentData.value.userEmail,
-                                status: appointmentDetailCont.appintmentData.value.encounterStatus,
+                                id: appointmentDetailCont
+                                    .appintmentData.value.encounterId,
+                                appointmentId: appointmentDetailCont
+                                    .appintmentData.value.id,
+                                clinicId: appointmentDetailCont
+                                    .appintmentData.value.clinicId,
+                                clinicName: appointmentDetailCont
+                                    .appintmentData.value.clinicName,
+                                description: appointmentDetailCont
+                                    .appintmentData.value.encounterDescription,
+                                doctorId: appointmentDetailCont
+                                    .appintmentData.value.doctorId,
+                                doctorName: appointmentDetailCont
+                                    .appintmentData.value.doctorName,
+                                encounterDate: appointmentDetailCont
+                                    .appintmentData.value.appointmentDate,
+                                userId: appointmentDetailCont
+                                    .appintmentData.value.userId,
+                                userName: appointmentDetailCont
+                                    .appintmentData.value.userName,
+                                userImage: appointmentDetailCont
+                                    .appintmentData.value.userImage,
+                                serviceId: appointmentDetailCont
+                                    .appintmentData.value.serviceId,
+                                address: appointmentDetailCont
+                                    .appintmentData.value.address,
+                                userEmail: appointmentDetailCont
+                                    .appintmentData.value.userEmail,
+                                status: appointmentDetailCont
+                                    .appintmentData.value.encounterStatus,
                               );
 
                               Get.to(
-                                () => EncountersDashboardScreen(encounterDetail: encounterDetail),
-                                arguments: appointmentDetailCont.appintmentData.value.encounterId,
+                                () => EncountersDashboardScreen(
+                                    encounterDetail: encounterDetail),
+                                arguments: appointmentDetailCont
+                                    .appintmentData.value.encounterId,
                               )?.then((value) {
                                 if (value == true) {
                                   appointmentDetailCont.init();
@@ -225,19 +289,24 @@ class AppointmentDetail extends StatelessWidget {
                           Container(
                             width: Get.width,
                             padding: const EdgeInsets.all(16),
-                            decoration: boxDecorationDefault(color: context.cardColor),
+                            decoration:
+                                boxDecorationDefault(color: context.cardColor),
                             child: Column(
                               children: [
                                 detailWidget(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   leadingWidget: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('${locale.value.doctorName}: ', style: secondaryTextStyle()),
+                                      Text('${locale.value.doctorName}: ',
+                                          style: secondaryTextStyle()),
                                       Marquee(
                                         child: Text(
-                                          appointmentDetailCont.appintmentData.value.doctorName,
+                                          appointmentDetailCont
+                                              .appintmentData.value.doctorName,
                                           style: boldTextStyle(size: 12),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -246,42 +315,64 @@ class AppointmentDetail extends StatelessWidget {
                                     ],
                                   ).expand(flex: 3),
                                   trailingWidget: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 6),
                                     decoration: boxDecorationDefault(
-                                      color: appointmentDetailCont.appintmentData.value.encounterStatus ? lightGreenColor : lightSecondaryColor,
+                                      color: appointmentDetailCont
+                                              .appintmentData
+                                              .value
+                                              .encounterStatus
+                                          ? lightGreenColor
+                                          : lightSecondaryColor,
                                       borderRadius: radius(22),
                                     ),
                                     child: Text(
-                                      appointmentDetailCont.appintmentData.value.encounterStatus ? locale.value.active : locale.value.closed,
+                                      appointmentDetailCont.appintmentData.value
+                                              .encounterStatus
+                                          ? locale.value.active
+                                          : locale.value.closed,
                                       style: boldTextStyle(
                                         size: 12,
-                                        color: appointmentDetailCont.appintmentData.value.encounterStatus ? completedStatusColor : pendingStatusColor,
+                                        color: appointmentDetailCont
+                                                .appintmentData
+                                                .value
+                                                .encounterStatus
+                                            ? completedStatusColor
+                                            : pendingStatusColor,
                                       ),
                                     ),
                                   ).paddingLeft(16),
                                 ),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('${locale.value.clinicName}: ', style: secondaryTextStyle()),
+                                    Text('${locale.value.clinicName}: ',
+                                        style: secondaryTextStyle()),
                                     Text(
-                                      appointmentDetailCont.appintmentData.value.clinicName,
+                                      appointmentDetailCont
+                                          .appintmentData.value.clinicName,
                                       style: boldTextStyle(size: 12),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ).expand(),
                                   ],
                                 ),
-                                if (appointmentDetailCont.appintmentData.value.encounterDescription.isNotEmpty) ...[
+                                if (appointmentDetailCont.appintmentData.value
+                                    .encounterDescription.isNotEmpty) ...[
                                   commonDivider.paddingSymmetric(vertical: 16),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('${locale.value.description}: ', style: secondaryTextStyle()),
+                                      Text('${locale.value.description}: ',
+                                          style: secondaryTextStyle()),
                                       Text(
-                                        appointmentDetailCont.appintmentData.value.encounterDescription,
+                                        appointmentDetailCont.appintmentData
+                                            .value.encounterDescription,
                                         style: boldTextStyle(size: 12),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -292,33 +383,52 @@ class AppointmentDetail extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (appointmentDetailCont.appintmentData.value.bedAllocation.isNotEmpty) ...[
+                          if (appointmentDetailCont.appintmentData.value
+                              .bedAllocation.isNotEmpty) ...[
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 16.height,
                                 Text(
                                   locale.value.bedDetails,
-                                  style: boldTextStyle(size: Constants.labelTextSize),
+                                  style: boldTextStyle(
+                                      size: Constants.labelTextSize),
                                 ),
                                 8.height,
                                 Column(
                                   children: [
                                     ListView.builder(
-                                      itemCount: appointmentDetailCont.appintmentData.value.bedAllocation.length,
+                                      itemCount: appointmentDetailCont
+                                          .appintmentData
+                                          .value
+                                          .bedAllocation
+                                          .length,
                                       shrinkWrap: true,
                                       padding: EdgeInsets.zero,
                                       physics: NeverScrollableScrollPhysics(),
                                       itemBuilder: (context, index) {
-                                        final bed = appointmentDetailCont.appintmentData.value.bedAllocation[index];
+                                        final bed = appointmentDetailCont
+                                            .appintmentData
+                                            .value
+                                            .bedAllocation[index];
                                         return Padding(
-                                          padding: const EdgeInsets.only(bottom: 16),
+                                          padding:
+                                              const EdgeInsets.only(bottom: 16),
                                           child: BedComponent(
                                             bedData: bed,
-                                            isEncounterOpen: appointmentDetailCont.appintmentData.value.encounterStatus,
-                                            patientId: appointmentDetailCont.appintmentData.value.userId,
-                                            patientName: appointmentDetailCont.appintmentData.value.userName,
-                                            encounterId: appointmentDetailCont.appintmentData.value.encounterId,
+                                            isEncounterOpen:
+                                                appointmentDetailCont
+                                                    .appintmentData
+                                                    .value
+                                                    .encounterStatus,
+                                            patientId: appointmentDetailCont
+                                                .appintmentData.value.userId,
+                                            patientName: appointmentDetailCont
+                                                .appintmentData.value.userName,
+                                            encounterId: appointmentDetailCont
+                                                .appintmentData
+                                                .value
+                                                .encounterId,
                                           ),
                                         );
                                       },
@@ -346,7 +456,8 @@ class AppointmentDetail extends StatelessWidget {
           child: Obx(
             () {
               if (!showBtns) return const Offstage();
-              if (appointmentDetailCont.appintmentData.value.status == RequestStatus.pending) {
+              if (appointmentDetailCont.appintmentData.value.status ==
+                  RequestStatus.pending) {
                 return Row(
                   children: [
                     AppButton(
@@ -354,30 +465,48 @@ class AppointmentDetail extends StatelessWidget {
                       height: 48,
                       padding: EdgeInsets.zero,
                       color: appColorPrimary,
-                      shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
+                      shapeBorder: RoundedRectangleBorder(
+                          borderRadius: radius(defaultAppButtonRadius / 2)),
                       text: locale.value.confirm,
-                      textStyle: appButtonPrimaryColorText.copyWith(color: white),
+                      textStyle:
+                          appButtonPrimaryColorText.copyWith(color: white),
                       onTap: () {
                         final encounterDetail = EncounterElement(
-                          id: appointmentDetailCont.appintmentData.value.encounterId,
-                          appointmentId: appointmentDetailCont.appintmentData.value.id,
-                          clinicId: appointmentDetailCont.appintmentData.value.clinicId,
-                          clinicName: appointmentDetailCont.appintmentData.value.clinicName,
-                          description: appointmentDetailCont.appintmentData.value.encounterDescription,
-                          doctorId: appointmentDetailCont.appintmentData.value.doctorId,
-                          doctorName: appointmentDetailCont.appintmentData.value.doctorName,
-                          encounterDate: appointmentDetailCont.appintmentData.value.appointmentDate,
-                          userId: appointmentDetailCont.appintmentData.value.userId,
-                          userName: appointmentDetailCont.appintmentData.value.userName,
-                          userImage: appointmentDetailCont.appintmentData.value.userImage,
-                          address: appointmentDetailCont.appintmentData.value.address,
-                          userEmail: appointmentDetailCont.appintmentData.value.userEmail,
-                          status: appointmentDetailCont.appintmentData.value.encounterStatus,
+                          id: appointmentDetailCont
+                              .appintmentData.value.encounterId,
+                          appointmentId:
+                              appointmentDetailCont.appintmentData.value.id,
+                          clinicId: appointmentDetailCont
+                              .appintmentData.value.clinicId,
+                          clinicName: appointmentDetailCont
+                              .appintmentData.value.clinicName,
+                          description: appointmentDetailCont
+                              .appintmentData.value.encounterDescription,
+                          doctorId: appointmentDetailCont
+                              .appintmentData.value.doctorId,
+                          doctorName: appointmentDetailCont
+                              .appintmentData.value.doctorName,
+                          encounterDate: appointmentDetailCont
+                              .appintmentData.value.appointmentDate,
+                          userId:
+                              appointmentDetailCont.appintmentData.value.userId,
+                          userName: appointmentDetailCont
+                              .appintmentData.value.userName,
+                          userImage: appointmentDetailCont
+                              .appintmentData.value.userImage,
+                          address: appointmentDetailCont
+                              .appintmentData.value.address,
+                          userEmail: appointmentDetailCont
+                              .appintmentData.value.userEmail,
+                          status: appointmentDetailCont
+                              .appintmentData.value.encounterStatus,
                         );
 
                         appointmentDetailCont.updateStatus(
                           id: appointmentDetailCont.appintmentData.value.id,
-                          status: getUpdateStatusText(status: appointmentDetailCont.appintmentData.value.status),
+                          status: getUpdateStatusText(
+                              status: appointmentDetailCont
+                                  .appintmentData.value.status),
                           context: context,
                           isClockOut: false,
                           encountDetails: encounterDetail,
@@ -390,9 +519,11 @@ class AppointmentDetail extends StatelessWidget {
                       height: 48,
                       padding: EdgeInsets.zero,
                       color: Colors.red,
-                      shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
+                      shapeBorder: RoundedRectangleBorder(
+                          borderRadius: radius(defaultAppButtonRadius / 2)),
                       text: locale.value.cancel,
-                      textStyle: appButtonPrimaryColorText.copyWith(color: white),
+                      textStyle:
+                          appButtonPrimaryColorText.copyWith(color: white),
                       onTap: () {
                         Get.bottomSheet(
                           isScrollControlled: true,
@@ -401,14 +532,20 @@ class AppointmentDetail extends StatelessWidget {
                               bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
                             child: CancellationsBookingChargeDialog(
-                              appointmentData: appointmentDetailCont.appintmentData.value,
-                              isDurationMode: checkTimeDifference(inputDateTime: DateTime.parse(appointmentDetailCont.appintmentData.value.appointmentDate.validate())),
+                              appointmentData:
+                                  appointmentDetailCont.appintmentData.value,
+                              isDurationMode: checkTimeDifference(
+                                  inputDateTime: DateTime.parse(
+                                      appointmentDetailCont
+                                          .appintmentData.value.appointmentDate
+                                          .validate())),
                               loaderOnOFF: (p0) {
                                 appointmentDetailCont.isLoading(p0);
                               },
                               onBookingCancelled: () {
                                 appointmentDetailCont.init();
-                                Get.find<AppointmentsController>().getAppointmentList();
+                                Get.find<AppointmentsController>()
+                                    .getAppointmentList();
                               },
                             ),
                           ),
@@ -425,36 +562,59 @@ class AppointmentDetail extends StatelessWidget {
                       height: 48,
                       padding: EdgeInsets.zero,
                       color: appColorPrimary,
-                      shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
-                      text: getUpdateStatusText(status: appointmentDetailCont.appintmentData.value.status),
-                      textStyle: appButtonPrimaryColorText.copyWith(color: white),
+                      shapeBorder: RoundedRectangleBorder(
+                          borderRadius: radius(defaultAppButtonRadius / 2)),
+                      text: getUpdateStatusText(
+                          status: appointmentDetailCont
+                              .appintmentData.value.status),
+                      textStyle:
+                          appButtonPrimaryColorText.copyWith(color: white),
                       onTap: () {
                         final encounterDetail = EncounterElement(
-                          id: appointmentDetailCont.appintmentData.value.encounterId,
-                          appointmentId: appointmentDetailCont.appintmentData.value.id,
-                          clinicId: appointmentDetailCont.appintmentData.value.clinicId,
-                          clinicName: appointmentDetailCont.appintmentData.value.clinicName,
-                          description: appointmentDetailCont.appintmentData.value.encounterDescription,
-                          doctorId: appointmentDetailCont.appintmentData.value.doctorId,
-                          doctorName: appointmentDetailCont.appintmentData.value.doctorName,
-                          encounterDate: appointmentDetailCont.appintmentData.value.appointmentDate,
-                          userId: appointmentDetailCont.appintmentData.value.userId,
-                          userName: appointmentDetailCont.appintmentData.value.userName,
-                          userImage: appointmentDetailCont.appintmentData.value.userImage,
-                          address: appointmentDetailCont.appintmentData.value.address,
-                          userEmail: appointmentDetailCont.appintmentData.value.userEmail,
-                          status: appointmentDetailCont.appintmentData.value.encounterStatus,
+                          id: appointmentDetailCont
+                              .appintmentData.value.encounterId,
+                          appointmentId:
+                              appointmentDetailCont.appintmentData.value.id,
+                          clinicId: appointmentDetailCont
+                              .appintmentData.value.clinicId,
+                          clinicName: appointmentDetailCont
+                              .appintmentData.value.clinicName,
+                          description: appointmentDetailCont
+                              .appintmentData.value.encounterDescription,
+                          doctorId: appointmentDetailCont
+                              .appintmentData.value.doctorId,
+                          doctorName: appointmentDetailCont
+                              .appintmentData.value.doctorName,
+                          encounterDate: appointmentDetailCont
+                              .appintmentData.value.appointmentDate,
+                          userId:
+                              appointmentDetailCont.appintmentData.value.userId,
+                          userName: appointmentDetailCont
+                              .appintmentData.value.userName,
+                          userImage: appointmentDetailCont
+                              .appintmentData.value.userImage,
+                          address: appointmentDetailCont
+                              .appintmentData.value.address,
+                          userEmail: appointmentDetailCont
+                              .appintmentData.value.userEmail,
+                          status: appointmentDetailCont
+                              .appintmentData.value.encounterStatus,
                         );
 
-                        if (appointmentDetailCont.appintmentData.value.status == StatusConst.check_in) {
+                        if (appointmentDetailCont.appintmentData.value.status ==
+                            StatusConst.check_in) {
                           Get.to(
-                            () => EncountersDashboardScreen(encounterDetail: encounterDetail),
-                            arguments: appointmentDetailCont.appintmentData.value.encounterId,
+                            () => EncountersDashboardScreen(
+                                encounterDetail: encounterDetail),
+                            arguments: appointmentDetailCont
+                                .appintmentData.value.encounterId,
                           );
                         } else {
                           appointmentDetailCont.updateStatus(
                             id: appointmentDetailCont.appintmentData.value.id,
-                            status: getUpdateStatusText(status: appointmentDetailCont.appintmentData.value.status),
+                            status: getUpdateStatusText(
+                                status: appointmentDetailCont
+                                    .appintmentData.value.status),
                             context: context,
                             isClockOut: false,
                             encountDetails: encounterDetail,
@@ -472,18 +632,35 @@ class AppointmentDetail extends StatelessWidget {
     );
   }
 
-  bool get showBtns =>
-      (appointmentDetailCont.appintmentData.value.status != StatusConst.checkout && appointmentDetailCont.appintmentData.value.status != StatusConst.cancelled) ||
-      (appointmentDetailCont.appintmentData.value.isEnableAdvancePayment && appointmentDetailCont.appintmentData.value.paymentStatus == PaymentStatus.ADVANCE_PAID);
+  bool get isDoctor =>
+      loginUserData.value.userRole.contains(EmployeeKeyConst.doctor);
+
+  bool get showBtns {
+    // Doctor can only access Encounter screen (when status is check_in), no Confirm/Cancel/Check-In
+    if (isDoctor) {
+      return appointmentDetailCont.appintmentData.value.status ==
+          StatusConst.check_in;
+    }
+    return (appointmentDetailCont.appintmentData.value.status !=
+                StatusConst.checkout &&
+            appointmentDetailCont.appintmentData.value.status !=
+                StatusConst.cancelled) ||
+        (appointmentDetailCont.appintmentData.value.isEnableAdvancePayment &&
+            appointmentDetailCont.appintmentData.value.paymentStatus ==
+                PaymentStatus.ADVANCE_PAID);
+  }
 
   Widget paymentDetails(BuildContext context) {
-    bool isPaidShow = appointmentDetailCont.appintmentData.value.status == StatusConst.checkout &&
-        appointmentDetailCont.appintmentData.value.paymentStatus == PaymentStatus.PAID;
+    bool isPaidShow = appointmentDetailCont.appintmentData.value.status ==
+            StatusConst.checkout &&
+        appointmentDetailCont.appintmentData.value.paymentStatus ==
+            PaymentStatus.PAID;
 
     // 👉 FIX: Calculate bed total up front
-    num bedTotal = appointmentDetailCont.appintmentData.value.bedAllocation.fold(
+    num bedTotal =
+        appointmentDetailCont.appintmentData.value.bedAllocation.fold(
       0,
-          (sum, item) => sum + item.charge.validate(),
+      (sum, item) => sum + item.charge.validate(),
     );
 
     return Column(
@@ -493,7 +670,8 @@ class AppointmentDetail extends StatelessWidget {
         Container(
           width: Get.width,
           padding: const EdgeInsets.all(16),
-          decoration: boxDecorationDefault(color: context.cardColor, borderRadius: BorderRadius.circular(6)),
+          decoration: boxDecorationDefault(
+              color: context.cardColor, borderRadius: BorderRadius.circular(6)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -501,9 +679,12 @@ class AppointmentDetail extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(locale.value.serviceTotal, style: secondaryTextStyle()).expand(),
+                  Text(locale.value.serviceTotal, style: secondaryTextStyle())
+                      .expand(),
                   PriceWidget(
-                    price: num.parse(appointmentDetailCont.appintmentData.value.serviceTotal.toString())
+                    price: num.parse(appointmentDetailCont
+                            .appintmentData.value.serviceTotal
+                            .toString())
                         .toStringAsFixed(Constants.DECIMAL_POINT)
                         .toDouble(),
                     color: isDarkMode.value ? null : darkGrayTextColor,
@@ -514,27 +695,34 @@ class AppointmentDetail extends StatelessWidget {
               ),
               8.height,
 
-              if (appointmentDetailCont.appintmentData.value.enableFinalBillingDiscount) ...[
+              if (appointmentDetailCont
+                  .appintmentData.value.enableFinalBillingDiscount) ...[
                 8.height,
                 detailWidgetPrice(
                   leadingWidget: Row(
                     children: [
                       Text(locale.value.discount, style: secondaryTextStyle()),
-                      if (appointmentDetailCont.appintmentData.value.billingFinalDiscountType == TaxType.PERCENTAGE)
+                      if (appointmentDetailCont
+                              .appintmentData.value.billingFinalDiscountType ==
+                          TaxType.PERCENTAGE)
                         Text(
                           ' (${appointmentDetailCont.appintmentData.value.billingFinalDiscountValue}% ${locale.value.off})',
                           style: boldTextStyle(color: Colors.green, size: 12),
                         )
-                      else if (appointmentDetailCont.appintmentData.value.billingFinalDiscountType == TaxType.FIXED)
+                      else if (appointmentDetailCont
+                              .appintmentData.value.billingFinalDiscountType ==
+                          TaxType.FIXED)
                         PriceWidget(
-                          price: appointmentDetailCont.appintmentData.value.billingFinalDiscountValue,
+                          price: appointmentDetailCont
+                              .appintmentData.value.billingFinalDiscountValue,
                           color: Colors.green,
                           size: 12,
                           isDiscountedPrice: true,
                         )
                     ],
                   ),
-                  value: appointmentDetailCont.appintmentData.value.billingFinalDiscountAmount,
+                  value: appointmentDetailCont
+                      .appintmentData.value.billingFinalDiscountAmount,
                   textColor: Colors.green,
                 ),
                 detailWidgetPrice(
@@ -544,13 +732,18 @@ class AppointmentDetail extends StatelessWidget {
               ],
 
               /// TAX
-              if (appointmentDetailCont.appintmentData.value.isExclusiveTaxesAvailable)
+              if (appointmentDetailCont
+                  .appintmentData.value.isExclusiveTaxesAvailable)
                 detailWidgetPrice(
                   leadingWidget: Row(
                     children: [
-                      Text(locale.value.exclusiveTax, style: secondaryTextStyle()).expand(),
-                      const Icon(Icons.info_outline_rounded, size: 20, color: appColorPrimary).onTap(
-                            () {
+                      Text(locale.value.exclusiveTax,
+                              style: secondaryTextStyle())
+                          .expand(),
+                      const Icon(Icons.info_outline_rounded,
+                              size: 20, color: appColorPrimary)
+                          .onTap(
+                        () {
                           showModalBottomSheet(
                             context: context,
                             shape: RoundedRectangleBorder(
@@ -561,7 +754,8 @@ class AppointmentDetail extends StatelessWidget {
                             ),
                             builder: (_) {
                               return AppointmentDetailAppliedTaxListBottomSheet(
-                                taxes: appointmentDetailCont.appintmentData.value.exclusiveTaxList,
+                                taxes: appointmentDetailCont
+                                    .appintmentData.value.exclusiveTaxList,
                                 title: locale.value.appliedExclusiveTaxes,
                               );
                             },
@@ -571,7 +765,8 @@ class AppointmentDetail extends StatelessWidget {
                       8.width,
                     ],
                   ).expand(),
-                  value: appointmentDetailCont.appintmentData.value.totalExclusiveTax,
+                  value: appointmentDetailCont
+                      .appintmentData.value.totalExclusiveTax,
                   isSemiBoldText: true,
                   textColor: appColorSecondary,
                 ),
@@ -596,30 +791,45 @@ class AppointmentDetail extends StatelessWidget {
                 children: [
                   Text(locale.value.total, style: boldTextStyle(size: 14)),
                   PriceWidget(
-                    price: (appointmentDetailCont.appintmentData.value.totalAmount),
+                    price: (appointmentDetailCont
+                        .appintmentData.value.totalAmount),
                     color: appColorPrimary,
                   ),
                 ],
               ),
               8.height,
-              if (appointmentDetailCont.appintmentData.value.paymentStatus == PaymentStatus.PAID &&
-                  appointmentDetailCont.appintmentData.value.isEnableAdvancePayment &&
-                  !appointmentDetailCont.appintmentData.value.status.toLowerCase().contains(StatusConst.cancel.toLowerCase()) &&
-                  appointmentDetailCont.appintmentData.value.advancePaidAmount > 0)
+              if (appointmentDetailCont.appintmentData.value.paymentStatus ==
+                      PaymentStatus.PAID &&
+                  appointmentDetailCont
+                      .appintmentData.value.isEnableAdvancePayment &&
+                  !appointmentDetailCont.appintmentData.value.status
+                      .toLowerCase()
+                      .contains(StatusConst.cancel.toLowerCase()) &&
+                  appointmentDetailCont.appintmentData.value.advancePaidAmount >
+                      0)
                 detailWidgetPrice(
-                  leadingWidget: Text(locale.value.advancePaidAmount, style: boldTextStyle(size: 14)),
-                  value: appointmentDetailCont.appintmentData.value.advancePaidAmount,
+                  leadingWidget: Text(locale.value.advancePaidAmount,
+                      style: boldTextStyle(size: 14)),
+                  value: appointmentDetailCont
+                      .appintmentData.value.advancePaidAmount,
                   textColor: completedStatusColor,
                 ),
-              if (appointmentDetailCont.appintmentData.value.paymentStatus == PaymentStatus.PAID &&
-                  appointmentDetailCont.appintmentData.value.isEnableAdvancePayment &&
-                  !appointmentDetailCont.appintmentData.value.status.toLowerCase().contains(StatusConst.cancel.toLowerCase()) &&
-                  appointmentDetailCont.appintmentData.value.remainingPayableAmount > 0)
+              if (appointmentDetailCont.appintmentData.value.paymentStatus ==
+                      PaymentStatus.PAID &&
+                  appointmentDetailCont
+                      .appintmentData.value.isEnableAdvancePayment &&
+                  !appointmentDetailCont.appintmentData.value.status
+                      .toLowerCase()
+                      .contains(StatusConst.cancel.toLowerCase()) &&
+                  appointmentDetailCont
+                          .appintmentData.value.remainingPayableAmount >
+                      0)
                 detailWidgetPrice(
                   leadingWidget: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(locale.value.remainingAmount, style: boldTextStyle(size: 14)),
+                      Text(locale.value.remainingAmount,
+                          style: boldTextStyle(size: 14)),
                       8.width,
                       Text(
                         '(${locale.value.paid})',
@@ -627,37 +837,51 @@ class AppointmentDetail extends StatelessWidget {
                       ).visible(isPaidShow)
                     ],
                   ),
-                  value: appointmentDetailCont.appintmentData.value.remainingPayableAmount,
+                  value: appointmentDetailCont
+                      .appintmentData.value.remainingPayableAmount,
                 ),
 
               /// Advance Paid (ADVANCE_PAID mode)
-              if (appointmentDetailCont.appintmentData.value.paymentStatus == PaymentStatus.ADVANCE_PAID &&
-                  appointmentDetailCont.appintmentData.value.isEnableAdvancePayment &&
-                  appointmentDetailCont.appintmentData.value.advancePaidAmount > 0) ...[
+              if (appointmentDetailCont.appintmentData.value.paymentStatus ==
+                      PaymentStatus.ADVANCE_PAID &&
+                  appointmentDetailCont
+                      .appintmentData.value.isEnableAdvancePayment &&
+                  appointmentDetailCont.appintmentData.value.advancePaidAmount >
+                      0) ...[
                 8.height,
                 detailWidgetPrice(
                   leadingWidget: Row(
                     children: [
-                      Text(locale.value.advancePaidAmount, overflow: TextOverflow.ellipsis, maxLines: 2, style: secondaryTextStyle()),
+                      Text(locale.value.advancePaidAmount,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: secondaryTextStyle()),
                       Text(
                         ' (${appointmentDetailCont.appintmentData.value.advancePaymentAmount}%)',
-                        style: boldTextStyle(color: completedStatusColor, size: 12),
+                        style: boldTextStyle(
+                            color: completedStatusColor, size: 12),
                       ),
                     ],
                   ).flexible(),
                   textColor: completedStatusColor,
-                  value: appointmentDetailCont.appintmentData.value.advancePaidAmount,
+                  value: appointmentDetailCont
+                      .appintmentData.value.advancePaidAmount,
                 ),
               ],
 
-              if ((!appointmentDetailCont.appintmentData.value.status.toLowerCase().contains(StatusConst.cancel.toLowerCase())) &&
-                  appointmentDetailCont.appintmentData.value.remainingPayableAmount > 0) ...[
+              if ((!appointmentDetailCont.appintmentData.value.status
+                      .toLowerCase()
+                      .contains(StatusConst.cancel.toLowerCase())) &&
+                  appointmentDetailCont
+                          .appintmentData.value.remainingPayableAmount >
+                      0) ...[
                 10.height,
                 detailWidgetPrice(
                   title: locale.value.remainingPayableAmount,
                   isSemiBoldText: true,
                   textColor: pendingStatusColor,
-                  value: appointmentDetailCont.appintmentData.value.remainingPayableAmount,
+                  value: appointmentDetailCont
+                      .appintmentData.value.remainingPayableAmount,
                 ),
               ],
             ],
@@ -665,15 +889,22 @@ class AppointmentDetail extends StatelessWidget {
         ),
 
         /// Refundable Section — Canceled
-        if (appointmentDetailCont.appintmentData.value.status.toLowerCase().contains(StatusConst.cancel.toLowerCase()))
+        if (appointmentDetailCont.appintmentData.value.status
+            .toLowerCase()
+            .contains(StatusConst.cancel.toLowerCase()))
           Container(
             width: Get.width,
             padding: const EdgeInsets.all(16),
             decoration: boxDecorationDefault(color: completedStatusColor),
             child: detailWidgetPrice(
-              leadingWidget: Text(locale.value.refundableAmount, overflow: TextOverflow.ellipsis, maxLines: 2, style: primaryTextStyle(color: Colors.white)),
+              leadingWidget: Text(locale.value.refundableAmount,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  style: primaryTextStyle(color: Colors.white)),
               textColor: Colors.white,
-              value: appointmentDetailCont.appintmentData.value.advancePaidAmount > 0
+              value: appointmentDetailCont
+                          .appintmentData.value.advancePaidAmount >
+                      0
                   ? appointmentDetailCont.appintmentData.value.advancePaidAmount
                   : appointmentDetailCont.appintmentData.value.totalAmount,
               paddingBottom: 0,
@@ -692,9 +923,11 @@ class AppointmentDetail extends StatelessWidget {
           listAnimationType: ListAnimationType.None,
           spacing: 16,
           runSpacing: 16,
-          itemCount: appointmentDetailCont.appintmentData.value.medicalReport.length,
+          itemCount:
+              appointmentDetailCont.appintmentData.value.medicalReport.length,
           itemBuilder: (ctx, index) {
-            final AppointmentMedicalReport medicalReportData = appointmentDetailCont.appintmentData.value.medicalReport[index];
+            final AppointmentMedicalReport medicalReportData =
+                appointmentDetailCont.appintmentData.value.medicalReport[index];
             return GestureDetector(
               onTap: () {
                 viewFiles(medicalReportData.url);
@@ -768,9 +1001,12 @@ class AppointmentDetail extends StatelessWidget {
                     mainAxisSpacing: 12,
                     childAspectRatio: 0.8,
                   ),
-                  itemCount: appointmentDetailCont.appintmentData.value.medicalReport.length,
+                  itemCount: appointmentDetailCont
+                      .appintmentData.value.medicalReport.length,
                   itemBuilder: (context, index) {
-                    final AppointmentMedicalReport medicalReportData = appointmentDetailCont.appintmentData.value.medicalReport[index];
+                    final AppointmentMedicalReport medicalReportData =
+                        appointmentDetailCont
+                            .appintmentData.value.medicalReport[index];
                     return GestureDetector(
                       onTap: () {
                         viewFiles(medicalReportData.url);
@@ -800,14 +1036,19 @@ class AppointmentDetail extends StatelessWidget {
                                         radius: defaultRadius,
                                       )
                                     : CommonPdfPlaceHolder(
-                                        text: medicalReportData.url.split("/").last,
-                                        fileExt: medicalReportData.url.split("/").last,
+                                        text: medicalReportData.url
+                                            .split("/")
+                                            .last,
+                                        fileExt: medicalReportData.url
+                                            .split("/")
+                                            .last,
                                       ),
                               ),
                             ),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 6),
                               child: Text(
                                 medicalReportData.url.split("/").last,
                                 style: secondaryTextStyle(size: 10),
@@ -830,7 +1071,14 @@ class AppointmentDetail extends StatelessWidget {
     );
   }
 
-  Widget detailWidgetPrice({Widget? leadingWidget, Widget? trailingWidget, String? title, num? value, Color? textColor, bool isSemiBoldText = false, double? paddingBottom}) {
+  Widget detailWidgetPrice(
+      {Widget? leadingWidget,
+      Widget? trailingWidget,
+      String? title,
+      num? value,
+      Color? textColor,
+      bool isSemiBoldText = false,
+      double? paddingBottom}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

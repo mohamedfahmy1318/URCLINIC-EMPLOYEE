@@ -47,31 +47,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyArKI9CO5llksF76LC1Bgi4IblwnhURLOQ',
-    appId: '1:1033255788496:android:cb596c760e95123f6f63d5',
-    messagingSenderId: '1033255788496',
-    projectId: 'clinic-app-86bcf',
-    storageBucket: 'clinic-app-86bcf.firebasestorage.app',
+    apiKey: 'AIzaSyCqOPRcTd-MpP8LRVuvTAQ4QHKqNDvq2QQ',
+    appId: '1:584658171555:android:9e14dd273faf7eab9bf116',
+    messagingSenderId: '584658171555',
+    projectId: 'urclinic-72a3e',
+    storageBucket: 'urclinic-72a3e.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDKrOCqpxr9jtuX0QQLj1gLPzn2SVMCWbk',
-    appId: '1:1033255788496:ios:39f58f69624fe39c6f63d5',
-    messagingSenderId: '1033255788496',
-    projectId: 'clinic-app-86bcf',
-    storageBucket: 'clinic-app-86bcf.firebasestorage.app',
-    iosClientId: '1033255788496-k2p4lap9herrfl9cpu786q5bele0s0ei.apps.googleusercontent.com',
-    iosBundleId: 'com.wellness.vendor',
+    apiKey: 'AIzaSyCJOVCOFAvHYfdBLfWyZAZNX6tzHHxqRmY',
+    appId: '1:584658171555:ios:5c0c0d1e4814374b9bf116',
+    messagingSenderId: '584658171555',
+    projectId: 'urclinic-72a3e',
+    storageBucket: 'urclinic-72a3e.firebasestorage.app',
+    iosBundleId: 'com.urclinic.employee',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBhEAKCQiMqYuhof0tJiyIkAwELtxHCn5E',
-    appId: '1:1033255788496:web:f1e2468e3bb308b16f63d5',
-    messagingSenderId: '1033255788496',
-    projectId: 'clinic-app-86bcf',
-    authDomain: 'clinic-app-86bcf.firebaseapp.com',
-    storageBucket: 'clinic-app-86bcf.firebasestorage.app',
-    measurementId: 'G-0MR0CSHDST',
+    apiKey: 'AIzaSyDcL6cJMuKf8wyFtaB2PRGgFKj6GKEChjQ',
+    appId: '1:584658171555:web:9ef9b9e7a342ab0d9bf116',
+    messagingSenderId: '584658171555',
+    projectId: 'urclinic-72a3e',
+    authDomain: 'urclinic-72a3e.firebaseapp.com',
+    storageBucket: 'urclinic-72a3e.firebasestorage.app',
   );
 
 }

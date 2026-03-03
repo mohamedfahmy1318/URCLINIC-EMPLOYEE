@@ -11,7 +11,8 @@ class Constants {
   static const perPageItem = 20;
   static var labelTextSize = 16;
   static const mapLinkForIOS = 'http://maps.apple.com/?q=';
-  static var googleMapPrefix = 'https://www.google.com/maps/search/?api=1&query=';
+  static var googleMapPrefix =
+      'https://www.google.com/maps/search/?api=1&query=';
   static const DEFAULT_EMAIL = 'vendor@kivicare.com';
   static const DEFAULT_PASS = '12345678';
   static const appLogoSize = 120.0;
@@ -26,10 +27,13 @@ class DateFormatConst {
   static const MMMM_D_yyyy = "MMMM d, y"; // Use to show only in UI
   static const D_MMMM_yyyy = "d MMMM, y"; // Use to show only in UI
   static const D_MMM_yyyy = "d MMM, y"; // Use to show only in UI
-  static const MMMM_D_yyyy_At_HH_mm_a = "MMMM d, y @ hh:mm a"; // Use to show only in UI
-  static const EEEE_D_MMMM_At_HH_mm_a = "EEEE d MMMM @ hh:mm a"; // Use to show only in UI
+  static const MMMM_D_yyyy_At_HH_mm_a =
+      "MMMM d, y @ hh:mm a"; // Use to show only in UI
+  static const EEEE_D_MMMM_At_HH_mm_a =
+      "EEEE d MMMM @ hh:mm a"; // Use to show only in UI
   static const dd_MMM_y_HH_mm_a = "dd MMM y, hh:mm a"; // Use to show only in UI
-  static const dd_MMM_yyyy_At_HH_mm_a = "dd MMM, yyyy At hh:mm a"; // Use to show only in UI
+  static const dd_MMM_yyyy_At_HH_mm_a =
+      "dd MMM, yyyy At hh:mm a"; // Use to show only in UI
   static const yyyy_MM_dd_HH_mm = 'yyyy-MM-dd HH:mm';
   static const yyyy_MM_dd = 'yyyy-MM-dd';
   static const HH_mm12Hour = 'hh:mm a';
@@ -275,10 +279,10 @@ class EncounterDropdownTypes {
 
 //region Genders Consts
 RxList<CMNModel> get genders => [
-  CMNModel(id: 1, name: locale.value.male, slug: "male"),
-  CMNModel(id: 2, name:locale.value.female, slug: "female"),
-  CMNModel(id: 3, name: locale.value.other, slug: "intersex"),
-].obs;
+      CMNModel(id: 1, name: locale.value.male, slug: "male"),
+      CMNModel(id: 2, name: locale.value.female, slug: "female"),
+      CMNModel(id: 3, name: locale.value.other, slug: "intersex"),
+    ].obs;
 
 class EncounterStatus {
   static const ACTIVE = 'active';
@@ -322,14 +326,31 @@ String postStatus({required String status}) {
 //endregion
 
 //Dynamic Login Roles
-LoginRoleData vendorLoginRole = LoginRoleData(id: 1, userType: EmployeeKeyConst.vendor, roleName: 'Clinic Admin', icon: Assets.iconsIcVendor, email: "vendor@kivicare.com", password: "12345678");
-LoginRoleData pharmaLoginRole = LoginRoleData(id: 4, userType: EmployeeKeyConst.pharma, roleName: 'Pharma', icon: Assets.iconsIcVendor, email: "pharma@kivicare.com", password: "12345678");
+LoginRoleData vendorLoginRole = LoginRoleData(
+    id: 1,
+    userType: EmployeeKeyConst.vendor,
+    roleName: 'Clinic Admin',
+    icon: Assets.iconsIcVendor,
+    email: "vendor@kivicare.com",
+    password: "12345678");
+LoginRoleData pharmaLoginRole = LoginRoleData(
+    id: 4,
+    userType: EmployeeKeyConst.pharma,
+    roleName: 'Pharma',
+    icon: Assets.iconsIcVendor,
+    email: "pharma@kivicare.com",
+    password: "12345678");
 
 //region Login Roles
 RxList<LoginRoleData> loginRoles = [
   vendorLoginRole,
-  LoginRoleData(id: 2, userType: EmployeeKeyConst.doctor, roleName: 'Doctor', icon: Assets.iconsIcDoctor, email: "doctor@kivicare.com", password: "12345678"),
-  LoginRoleData(id: 3, userType: EmployeeKeyConst.receptionist, roleName: 'Receptionist', icon: Assets.iconsIcReceptionist, email: "receptionist@kivicare.com", password: "12345678"),
+  LoginRoleData(
+      id: 3,
+      userType: EmployeeKeyConst.receptionist,
+      roleName: 'Receptionist',
+      icon: Assets.iconsIcReceptionist,
+      email: "receptionist@kivicare.com",
+      password: "12345678"),
   pharmaLoginRole
 ].obs;
 //endregion
@@ -379,7 +400,6 @@ const SERVICE_PAYMENT_STATUS_ADVANCE_PAID = 'advanced_paid';
 class AutoUpdateConst {
   static String isAutoUpdateOn = 'isAutoUpdateOn';
 }
-
 
 //region Bed Status
 class BedStatus {
@@ -436,6 +456,5 @@ class BedManagementConst {
   static const perDay = 'per_day';
   static const perHour = 'per_hour';
   static const fixed = 'fixed';
-
 }
 //endregion

@@ -66,9 +66,15 @@ class PharmaApis {
     String clinicIdStr = clinicId > 0 ? "&clinic_id=$clinicId" : "";
     String pharmaIdStr = pharmaId > 0 ? "&pharma_id=$pharmaId" : "";
     String typeStr = type.trim().isNotEmpty ? '&type=$type' : '';
-    String formStr = searchMedicineForm.isNotEmpty ? '&form=${searchMedicineForm.join(",")}' : '';
-    String categoryStr = searchMedicineCategory.isNotEmpty ? '&category=${searchMedicineCategory.join(",")}' : '';
-    String supplierStr = searchMedicineSupplier.isNotEmpty ? '&supplier=${searchMedicineSupplier.join(",")}' : '';
+    String formStr = searchMedicineForm.isNotEmpty
+        ? '&form=${searchMedicineForm.join(",")}'
+        : '';
+    String categoryStr = searchMedicineCategory.isNotEmpty
+        ? '&category=${searchMedicineCategory.join(",")}'
+        : '';
+    String supplierStr = searchMedicineSupplier.isNotEmpty
+        ? '&supplier=${searchMedicineSupplier.join(",")}'
+        : '';
     String encounterStr = pharmaId > 0
         ? ''
         : encounterId > 0
@@ -103,12 +109,19 @@ class PharmaApis {
     Function(bool)? lastPageCallBack,
   }) async {
     String searchPrescription = search.isNotEmpty ? '&search=$search' : '';
-    String bookingStatusStr = bookingStatus.isNotEmpty ? '&status=${bookingStatus.join(",")}' : '';
-    String paymentStatusStr = paymentStatus.isNotEmpty ? '&payment_status=${paymentStatus.join(",")}' : '';
-    String doctorStr = doctorName.isNotEmpty ? '&doctor_name=${doctorName.join(",")}' : '';
-    String patientStr = patientName.isNotEmpty ? '&patient_name=${patientName.join(",")}' : '';
-    final res = PrescriptionListRes.fromJson(
-        await handleResponse(await buildHttpResponse("${APIEndPoints.getPrescriptionList}?per_page=$perPage&page=$page$searchPrescription$bookingStatusStr$paymentStatusStr$doctorStr$patientStr", method: HttpMethodType.GET)));
+    String bookingStatusStr =
+        bookingStatus.isNotEmpty ? '&status=${bookingStatus.join(",")}' : '';
+    String paymentStatusStr = paymentStatus.isNotEmpty
+        ? '&payment_status=${paymentStatus.join(",")}'
+        : '';
+    String doctorStr =
+        doctorName.isNotEmpty ? '&doctor_name=${doctorName.join(",")}' : '';
+    String patientStr =
+        patientName.isNotEmpty ? '&patient_name=${patientName.join(",")}' : '';
+    final res = PrescriptionListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getPrescriptionList}?per_page=$perPage&page=$page$searchPrescription$bookingStatusStr$paymentStatusStr$doctorStr$patientStr",
+            method: HttpMethodType.GET)));
     if (page == 1) prescriptionList.clear();
     prescriptionList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -124,7 +137,10 @@ class PharmaApis {
     Function(bool)? lastPageCallBack,
   }) async {
     String searchPrescription = search.isNotEmpty ? '&search=$search' : '';
-    final res = MedicineCategoryListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getMedicineCategoryList}?per_page=$perPage&page=$page$searchPrescription", method: HttpMethodType.GET)));
+    final res = MedicineCategoryListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getMedicineCategoryList}?per_page=$perPage&page=$page$searchPrescription",
+            method: HttpMethodType.GET)));
     if (page == 1) medCategoryList.clear();
     medCategoryList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -140,7 +156,10 @@ class PharmaApis {
     required List<MedicineHistoryElement> medHistoryList,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = StockHistoryResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getMedicineHistory}?per_page=$perPage&page=$page&medicine_id=$medId", method: HttpMethodType.GET)));
+    final res = StockHistoryResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getMedicineHistory}?per_page=$perPage&page=$page&medicine_id=$medId",
+            method: HttpMethodType.GET)));
     if (page == 1) medHistoryList.clear();
     medHistoryList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -156,7 +175,10 @@ class PharmaApis {
     Function(bool)? lastPageCallBack,
   }) async {
     String searchPrescription = search.isNotEmpty ? '&search=$search' : '';
-    final res = MedicineFormListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getMedicineFormList}?per_page=$perPage&page=$page$searchPrescription", method: HttpMethodType.GET)));
+    final res = MedicineFormListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getMedicineFormList}?per_page=$perPage&page=$page$searchPrescription",
+            method: HttpMethodType.GET)));
     if (page == 1) medicineForms.clear();
     medicineForms.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -172,7 +194,10 @@ class PharmaApis {
     Function(bool)? lastPageCallBack,
   }) async {
     String searchPrescription = search.isNotEmpty ? '&search=$search' : '';
-    final res = ManufacturerListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getManufacturerList}?per_page=$perPage&page=$page$searchPrescription", method: HttpMethodType.GET)));
+    final res = ManufacturerListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getManufacturerList}?per_page=$perPage&page=$page$searchPrescription",
+            method: HttpMethodType.GET)));
     if (page == 1) manufacturerList.clear();
     manufacturerList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -190,7 +215,10 @@ class PharmaApis {
   }) async {
     String searchPrescription = search.isNotEmpty ? "&search=$search" : '';
     String statusStr = status.isNotEmpty ? "&status=$status" : '';
-    final res = SupplierListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getSupplierList}?per_page=$perPage&page=$page$searchPrescription$statusStr", method: HttpMethodType.GET)));
+    final res = SupplierListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getSupplierList}?per_page=$perPage&page=$page$searchPrescription$statusStr",
+            method: HttpMethodType.GET)));
     if (page == 1) supplierList.clear();
     supplierList.addAll(res.data as Iterable<Supplier>);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -223,45 +251,69 @@ class PharmaApis {
   }
 
   static Future<Rx<PrescriptionDetail>> getPrescriptionDetail(int id) async {
-    final res = PrescriptionDetailRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getPrescriptionDetail}?id=$id", method: HttpMethodType.GET)));
+    final res = PrescriptionDetailRes.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.getPrescriptionDetail}?id=$id",
+            method: HttpMethodType.GET)));
     return res.data.obs;
   }
 
-  static Future<BaseResponseModel> saveMedicineToPrescription({required Map request, required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.addExtraMedicineToPresc}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> saveMedicineToPrescription(
+      {required Map request, required int id}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.addExtraMedicineToPresc}/$id",
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> prescriptionEditMedicine({required Map request, required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.prescriptionEditMedicine}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> prescriptionEditMedicine(
+      {required Map request, required int id}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.prescriptionEditMedicine}/$id",
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> prescriptionMedicineDelete({required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.prescriptionMedicineDelete}/$id", method: HttpMethodType.DELETE)));
+  static Future<BaseResponseModel> prescriptionMedicineDelete(
+      {required int id}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.prescriptionMedicineDelete}/$id",
+            method: HttpMethodType.DELETE)));
   }
 
-  static Future<BaseResponseModel> prescriptionUpdate({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.prescriptionUpdate, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> prescriptionUpdate(
+      {required Map request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.prescriptionUpdate,
+            request: request, method: HttpMethodType.POST)));
   }
 
   //Save Medicine to Stock
-  static Future<BaseResponseModel> saveMedicineToStock({required Map request, int? id}) async {
+  static Future<BaseResponseModel> saveMedicineToStock(
+      {required Map request, int? id}) async {
     String endpoint = APIEndPoints.storeMedicineToStock;
     if (id != null) {
       endpoint = "${APIEndPoints.medicineUpdate}/$id";
     }
-    var res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(endpoint, request: request, method: HttpMethodType.POST)));
+    var res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(endpoint,
+            request: request, method: HttpMethodType.POST)));
     return res;
   }
 
   //Add Medicine to Stock
-  static Future<BaseResponseModel> addMedicineStock({required Map request, int? id}) async {
-    var res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.addMedicineStock}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> addMedicineStock(
+      {required Map request, int? id}) async {
+    var res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.addMedicineStock}/$id",
+            request: request, method: HttpMethodType.POST)));
     return res;
   }
 
   //Save Manufacturer Detail
-  static Future<BaseResponseModel> saveManufacturer({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveManufacturer, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> saveManufacturer(
+      {required Map request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveManufacturer,
+            request: request, method: HttpMethodType.POST)));
   }
 
   //Add Edit Supplier
@@ -273,7 +325,8 @@ class PharmaApis {
     Function(dynamic)? onSuccess,
   }) async {
     if (isLoggedIn.value) {
-      MultipartRequest multiPartRequest = await getMultiPartRequest(APIEndPoints.addSupplier);
+      MultipartRequest multiPartRequest =
+          await getMultiPartRequest(APIEndPoints.addSupplier);
 
       if (isEdit && supplierId != null) {
         request['id'] = supplierId;
@@ -282,7 +335,8 @@ class PharmaApis {
       multiPartRequest.fields.addAll(await getMultipartFields(val: request));
 
       if (imageFile != null) {
-        multiPartRequest.files.add(await MultipartFile.fromPath('image', imageFile.path));
+        multiPartRequest.files
+            .add(await MultipartFile.fromPath('image', imageFile.path));
       }
 
       multiPartRequest.headers.addAll(buildHeaderTokens());
@@ -295,8 +349,10 @@ class PharmaApis {
         multiPartRequest,
         onSuccess: (data) async {
           log("Response: ${jsonDecode(data)}");
-          final baseResponseModel = BaseResponseModel.fromJson(jsonDecode(data));
-          if (baseResponseModel.message.isNotEmpty) toast(baseResponseModel.message, print: true);
+          final baseResponseModel =
+              BaseResponseModel.fromJson(jsonDecode(data));
+          if (baseResponseModel.message.isNotEmpty)
+            toast(baseResponseModel.message, print: true);
           onSuccess?.call(data);
         },
         onError: (error) {
@@ -321,7 +377,10 @@ class PharmaApis {
     Function(bool)? lastPageCallBack,
   }) async {
     String searchSupplierType = search.isNotEmpty ? '&search=$search' : '';
-    final res = SupplierTypeListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getSupplierTypes}?per_page=$perPage&page=$page$searchSupplierType", method: HttpMethodType.GET)));
+    final res = SupplierTypeListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getSupplierTypes}?per_page=$perPage&page=$page$searchSupplierType",
+            method: HttpMethodType.GET)));
     if (page == 1) supplierTypes.clear();
     supplierTypes.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -330,26 +389,38 @@ class PharmaApis {
 
   //Purchase Order
   static Future<BaseResponseModel> purchaseOrder({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.purchaseOrder, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.purchaseOrder,
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> editPurchaseOrder({required Map request, required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.editPurchaseOrder}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> editPurchaseOrder(
+      {required Map request, required int id}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.editPurchaseOrder}/$id",
+            request: request, method: HttpMethodType.POST)));
   }
 
 //Delete Medicine
   static Future<BaseResponseModel> deleteMedicine({required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.deleteMedicine}$id", method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.deleteMedicine}$id",
+            method: HttpMethodType.POST)));
   }
 
   //Delete purchase order
-  static Future<BaseResponseModel> deletePurchaseOrder({required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.deletePurchaseOrder}/$id", method: HttpMethodType.DELETE)));
+  static Future<BaseResponseModel> deletePurchaseOrder(
+      {required int id}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.deletePurchaseOrder}/$id",
+            method: HttpMethodType.DELETE)));
   }
 
   //delete supplier
   static Future<BaseResponseModel> deleteSupplier({required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.deleteSupplier}$id", method: HttpMethodType.DELETE)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.deleteSupplier}$id",
+            method: HttpMethodType.DELETE)));
   }
 
   ///doctor list for search
@@ -359,7 +430,9 @@ class PharmaApis {
     var perPage = Constants.perPageItem,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = DoctorListRes.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.getDoctorList, method: HttpMethodType.GET)));
+    final res = DoctorListRes.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.getDoctorList,
+            method: HttpMethodType.GET)));
     if (page == 1) doctorsList.clear();
     doctorsList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -373,23 +446,34 @@ class PharmaApis {
     var perPage = Constants.perPageItem,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = PatientListModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.getPatientList, method: HttpMethodType.GET)));
+    final res = PatientListModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.getPatientList,
+            method: HttpMethodType.GET)));
     if (page == 1) patientList.clear();
     patientList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
     return patientList.obs;
   }
 
-  static Future<BaseResponseModel> changeOrderStatus({required int id, Map<String, dynamic>? request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.changeOrderStatus}$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> changeOrderStatus(
+      {required int id, Map<String, dynamic>? request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.changeOrderStatus}$id",
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> changePrescriptionStatus({Map<String, dynamic>? request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.updatePrescriptionStatus, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> changePrescriptionStatus(
+      {Map<String, dynamic>? request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.updatePrescriptionStatus,
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> changePrescriptionPaymentStatus({Map<String, dynamic>? request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.updatePrescriptionPaymentStatus, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> changePrescriptionPaymentStatus(
+      {Map<String, dynamic>? request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.updatePrescriptionPaymentStatus,
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<RxList<Pharma>> getPharmaList({
@@ -411,7 +495,9 @@ class PharmaApis {
     );
 
     // 🛠 Extract the "data" list from the paginated response
-    List<Pharma> res = (response['data'] as List).map((json) => Pharma.fromJson(json)).toList();
+    List<Pharma> res = (response['data'] as List)
+        .map((json) => Pharma.fromJson(json))
+        .toList();
 
     if (page == 1) pharmaList.clear();
     pharmaList.addAll(res);
@@ -420,7 +506,9 @@ class PharmaApis {
   }
 
   static Future<CommissionListRes> getPharmaCommission() async {
-    return CommissionListRes.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.pharmaCommissionList, method: HttpMethodType.GET)));
+    return CommissionListRes.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.pharmaCommissionList,
+            method: HttpMethodType.GET)));
   }
 
   Future<dynamic> addEditPharma({
@@ -437,7 +525,9 @@ class PharmaApis {
 
     log("Request is ${request.toString()}");
 
-    final endpoint = isEdit ? "${APIEndPoints.updatePharma}/$pharmaId" : APIEndPoints.addPharma;
+    final endpoint = isEdit
+        ? "${APIEndPoints.updatePharma}/$pharmaId"
+        : APIEndPoints.addPharma;
     var multiPartRequest = await getMultiPartRequest(endpoint);
 
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));

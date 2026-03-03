@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:kivicare_clinic_admin/screens/bed_management/bed_type/model/bed_type_model.dart';
+import 'package:kivicare_clinic_admin/screens/doctor/doctor_session/model/doctor_session_model.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:kivicare_clinic_admin/screens/Encounter/add_encounter/model/encounter_resp_model.dart';
 import 'package:kivicare_clinic_admin/screens/service/model/service_list_model.dart';
@@ -33,11 +34,13 @@ import '../screens/appointment/model/review_res_model.dart';
 import '../screens/appointment/model/save_booking_res.dart';
 import '../screens/auth/model/login_response.dart';
 import '../screens/category/model/all_category_model.dart';
-import '../screens/bed_management/bed_type/model/bed_type_model.dart' show BedTypeElement, BedTypeListRes;
+import '../screens/bed_management/bed_type/model/bed_type_model.dart'
+    show BedTypeElement, BedTypeListRes;
 import '../screens/payout/model/payout_model.dart';
 import '../screens/clinic/add_clinic_form/model/specialization_resp.dart';
 import '../screens/clinic/model/clinics_res_model.dart';
-import '../screens/doctor/doctor_session/add_session/model/doctor_session_model.dart';
+import '../screens/doctor/doctor_session/add_session/model/doctor_session_model.dart'
+    hide DoctorSessionModel;
 import '../screens/doctor/model/doctor_list_res.dart';
 import '../screens/doctor/model/review_model.dart';
 import '../screens/pharma/medicine/model/medicine_resp_model.dart';
@@ -58,7 +61,9 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
   }) async {
     final String searchCat = search.isNotEmpty ? '&search=$search' : '';
-    final categoryListRes = CategoryListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getCategoryList}?per_page=$perPage&page=$page$searchCat")));
+    final categoryListRes = CategoryListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getCategoryList}?per_page=$perPage&page=$page$searchCat")));
     if (page == 1) categories.clear();
     categories.addAll(categoryListRes.data);
     lastPageCallBack?.call(categoryListRes.data.length != perPage);
@@ -79,14 +84,20 @@ class CoreServiceApis {
     String serviceId = '',
   }) async {
     final String isAllService = isAllSer > 0 ? '&services=$isAllSer' : '';
-    final String catId = categoryId != null && !categoryId.isNegative ? '&category_id=$categoryId' : '';
-    final String clinicid = clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
-    final String doctorid = doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
+    final String catId = categoryId != null && !categoryId.isNegative
+        ? '&category_id=$categoryId'
+        : '';
+    final String clinicid =
+        clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
+    final String doctorid =
+        doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
     final String searchService = search.isNotEmpty ? '&search=$search' : '';
-    final String serviceID = serviceId.isNotEmpty ? '&system_service_id=$serviceId' : '';
+    final String serviceID =
+        serviceId.isNotEmpty ? '&system_service_id=$serviceId' : '';
     final String newParams = params.isNotEmpty ? '&$params' : '';
-    final serviceListRes = ServiceListRes.fromJson(
-        await handleResponse(await buildHttpResponse("${APIEndPoints.getServices}?per_page=$perPage&page=$page$searchService$catId$clinicid$doctorid$newParams$serviceID$isAllService")));
+    final serviceListRes = ServiceListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getServices}?per_page=$perPage&page=$page$searchService$catId$clinicid$doctorid$newParams$serviceID$isAllService")));
     if (page == 1 || search.isNotEmpty) serviceList.clear();
     serviceList.addAll(serviceListRes.data);
     lastPageCallBack?.call(serviceListRes.data.length != perPage);
@@ -100,8 +111,12 @@ class CoreServiceApis {
     required List<EncounterElement> encounterList,
     Function(bool)? lastPageCallBack,
   }) async {
-    String clinicid = clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
-    final encounterListRes = EncounterListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getEncounterList}?per_page=$perPage&page=$page$clinicid", method: HttpMethodType.GET)));
+    String clinicid =
+        clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
+    final encounterListRes = EncounterListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getEncounterList}?per_page=$perPage&page=$page$clinicid",
+            method: HttpMethodType.GET)));
     if (page == 1) encounterList.clear();
     encounterList.addAll(encounterListRes.data);
     lastPageCallBack?.call(encounterListRes.data.length != perPage);
@@ -117,16 +132,24 @@ class CoreServiceApis {
     required List<BodyChartModel> bodyChartList, //To-do Change Models
     Function(bool)? lastPageCallBack,
   }) async {
-    String encounter = encounterId != null && !encounterId.isNegative ? '&encounter_id=$encounterId' : '';
-    final bodyChartDetails = BodyChartResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bodyChartDetails}?per_page=$perPage&page=$page$encounter", method: HttpMethodType.GET)));
+    String encounter = encounterId != null && !encounterId.isNegative
+        ? '&encounter_id=$encounterId'
+        : '';
+    final bodyChartDetails = BodyChartResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.bodyChartDetails}?per_page=$perPage&page=$page$encounter",
+            method: HttpMethodType.GET)));
     if (page == 1) bodyChartList.clear();
     bodyChartList.addAll(bodyChartDetails.data);
     lastPageCallBack?.call(bodyChartDetails.data.length != perPage);
     return bodyChartList.obs;
   }
 
-  static Future<BaseResponseModel> deleteBodyChart({required int chartId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.deleteBodychart}/$chartId', method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> deleteBodyChart(
+      {required int chartId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('${APIEndPoints.deleteBodychart}/$chartId',
+            method: HttpMethodType.POST)));
   }
 
   static Future<RxList<Doctor>> getDoctors({
@@ -137,17 +160,23 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
     int? clinicId,
   }) async {
-    final String clncId = clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
+    final String clncId =
+        clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
     final String searchDoc = search.isNotEmpty ? '&search=$search' : '';
-    final doctorListRes = DoctorListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getDoctors}?per_page=$perPage&page=$page$clncId$searchDoc")));
+    final doctorListRes = DoctorListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getDoctors}?per_page=$perPage&page=$page$clncId$searchDoc")));
     if (page == 1) doctors.clear();
     doctors.addAll(doctorListRes.data);
     lastPageCallBack?.call(doctorListRes.data.length != perPage);
     return doctors.obs;
   }
 
-  static Future<AppointmentEncounterDetailModel> getEncounterDetail({required int encounterId}) async {
-    return AppointmentEncounterDetailModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.encounterDashboardDetail}?encounter_id=$encounterId")));
+  static Future<AppointmentEncounterDetailModel> getEncounterDetail(
+      {required int encounterId}) async {
+    return AppointmentEncounterDetailModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.encounterDashboardDetail}?encounter_id=$encounterId")));
   }
 
   static Future<RxList<RequestElement>> getRequestList({
@@ -156,7 +185,9 @@ class CoreServiceApis {
     required List<RequestElement> requests,
     Function(bool)? lastPageCallBack,
   }) async {
-    final requestListRes = RequestListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getRequestList}?per_page=$perPage&page=$page")));
+    final requestListRes = RequestListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getRequestList}?per_page=$perPage&page=$page")));
     if (page == 1) requests.clear();
     requests.addAll(requestListRes.data);
     lastPageCallBack?.call(requestListRes.data.length != perPage);
@@ -169,11 +200,13 @@ class CoreServiceApis {
     List<File>? files,
     VoidCallback? onSuccess,
   }) async {
-    final multiPartRequest = await getMultiPartRequest(APIEndPoints.saveRequestService);
+    final multiPartRequest =
+        await getMultiPartRequest(APIEndPoints.saveRequestService);
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));
 
     if (files.validate().isNotEmpty) {
-      multiPartRequest.files.add(await http.MultipartFile.fromPath('file_url', files.validate().first.path.validate()));
+      multiPartRequest.files.add(await http.MultipartFile.fromPath(
+          'file_url', files.validate().first.path.validate()));
     }
 
     /*  if (files.validate().isNotEmpty) {
@@ -202,15 +235,21 @@ class CoreServiceApis {
     required List<ReceptionistData> receptionists,
     Function(bool)? lastPageCallBack,
   }) async {
-    final requestListRes = ReceptionistListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getReceptionistList}?per_page=$perPage&page=$page")));
+    final requestListRes = ReceptionistListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getReceptionistList}?per_page=$perPage&page=$page")));
     if (page == 1) receptionists.clear();
     receptionists.addAll(requestListRes.data);
     lastPageCallBack?.call(requestListRes.data.length != perPage);
     return receptionists.obs;
   }
 
-  static Future<BaseResponseModel> deleteReceptionist({required int receptionistId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.deleteReceptionist}/$receptionistId', method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> deleteReceptionist(
+      {required int receptionistId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            '${APIEndPoints.deleteReceptionist}/$receptionistId',
+            method: HttpMethodType.POST)));
   }
 
   static Future<void> saveReceptionist({
@@ -220,11 +259,14 @@ class CoreServiceApis {
     List<File>? files,
     VoidCallback? onSuccess,
   }) async {
-    final multiPartRequest = await getMultiPartRequest(isEdit ? "${APIEndPoints.updateReceptionist}/$id" : APIEndPoints.saveReceptionist);
+    final multiPartRequest = await getMultiPartRequest(isEdit
+        ? "${APIEndPoints.updateReceptionist}/$id"
+        : APIEndPoints.saveReceptionist);
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));
 
     if (files.validate().isNotEmpty) {
-      multiPartRequest.files.add(await http.MultipartFile.fromPath('file_url', files.validate().first.path.validate()));
+      multiPartRequest.files.add(await http.MultipartFile.fromPath(
+          'file_url', files.validate().first.path.validate()));
     }
 
     /*  if (files.validate().isNotEmpty) {
@@ -256,10 +298,13 @@ class CoreServiceApis {
     List<File>? files,
     VoidCallback? onSuccess,
   }) async {
-    final multiPartRequest = await getMultiPartRequest(isEdit ? "${APIEndPoints.updateBodychart}/$id" : APIEndPoints.saveBodychart);
+    final multiPartRequest = await getMultiPartRequest(isEdit
+        ? "${APIEndPoints.updateBodychart}/$id"
+        : APIEndPoints.saveBodychart);
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));
     if (files.validate().isNotEmpty) {
-      multiPartRequest.files.add(await http.MultipartFile.fromPath('file_url', files.validate().first.path.validate()));
+      multiPartRequest.files.add(await http.MultipartFile.fromPath(
+          'file_url', files.validate().first.path.validate()));
     }
 
     multiPartRequest.headers.addAll(buildHeaderTokens());
@@ -296,14 +341,24 @@ class CoreServiceApis {
   }) async {
     final String fDate = firstDate.isNotEmpty ? '&first_date=$firstDate' : '';
     final String lDate = lastDate.isNotEmpty ? '&last_date=$lastDate' : '';
-    final String pId = patientId != null && !patientId.isNegative ? '&user_id=$patientId' : '';
-    final String sId = serviceId != null && !serviceId.isNegative ? '&service_id=$serviceId' : '';
-    final String dId = doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
-    final String cId = clinicId != null && clinicId > 0 ? '&clinic_id=$clinicId' : '';
-    final String catId = categoryId != null && categoryId > 0 ? '&category_id=$categoryId' : '';
+    final String pId =
+        patientId != null && !patientId.isNegative ? '&user_id=$patientId' : '';
+    final String sId = serviceId != null && !serviceId.isNegative
+        ? '&service_id=$serviceId'
+        : '';
+    final String dId =
+        doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
+    final String cId =
+        clinicId != null && clinicId > 0 ? '&clinic_id=$clinicId' : '';
+    final String catId =
+        categoryId != null && categoryId > 0 ? '&category_id=$categoryId' : '';
     final String searchBooking = search.isNotEmpty ? '&search=$search' : '';
-    final String statusFilter = filterByStatus != null && filterByStatus.isNotEmpty ? '&status=$filterByStatus' : '';
-    final String paymentStatusFilter = paymentStatus.isNotEmpty ? '&payment_status=$paymentStatus' : '';
+    final String statusFilter =
+        filterByStatus != null && filterByStatus.isNotEmpty
+            ? '&status=$filterByStatus'
+            : '';
+    final String paymentStatusFilter =
+        paymentStatus.isNotEmpty ? '&payment_status=$paymentStatus' : '';
     final bookingRes = AppointmentListRes.fromJson(
       await handleResponse(
         await buildHttpResponse(
@@ -327,44 +382,70 @@ class CoreServiceApis {
     String notifyId = "",
     required AppointmentData appointMentDet,
   }) async {
-    final String appointment = appointmentId != null ? 'appointment_id=$appointmentId' : '';
-    final String notificationId = appointMentDet.notificationId.trim().isNotEmpty ? '&notification_id=${appointMentDet.notificationId}' : '';
-    final res = AppointmentDetailsResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getAppointmentDetail}?$appointment$notificationId")));
+    final String appointment =
+        appointmentId != null ? 'appointment_id=$appointmentId' : '';
+    final String notificationId =
+        appointMentDet.notificationId.trim().isNotEmpty
+            ? '&notification_id=${appointMentDet.notificationId}'
+            : '';
+    final res = AppointmentDetailsResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getAppointmentDetail}?$appointment$notificationId")));
     appointMentDet = res.data;
     return appointMentDet;
     // return AppointmentData.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getAppointmentDetail}?appointment_id=$appointmentId" )));
   }
 
   static Future<BaseResponseModel> updateBooking({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bookingUpdate, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.bookingUpdate,
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> updateStatus({required Map request, required int appointmentId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.updateStatus}/$appointmentId', request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> updateStatus(
+      {required Map request, required int appointmentId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('${APIEndPoints.updateStatus}/$appointmentId',
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> saveSession({required Map request, required int doctorId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.saveSession}/$doctorId", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> saveSession(
+      {required Map request, required int doctorId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.saveSession}/$doctorId",
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<BaseResponseModel> assignDoctor({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.assignDoctor, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.assignDoctor,
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> assignDoctorService({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.assignDoctorService, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> assignDoctorService(
+      {required Map request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.assignDoctorService,
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<BaseResponseModel> updateReview({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveRating, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveRating,
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<BaseResponseModel> deleteReview({required int id}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.deleteRating, request: {"id": id}, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.deleteRating,
+            request: {"id": id}, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> changeAppointmentStatus({required int id, required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.updateStatus}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> changeAppointmentStatus(
+      {required int id, required Map request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.updateStatus}/$id",
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<EmployeeReviewRes> getEmployeeReviews({
@@ -375,7 +456,9 @@ class CoreServiceApis {
   }) async {
     if (isLoggedIn.value) {
       final String employeeId = empId != null ? '&employee_id=$empId' : '';
-      final reviewRes = EmployeeReviewRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getRating}?per_page=$perPage&page=$page$employeeId")));
+      final reviewRes = EmployeeReviewRes.fromJson(await handleResponse(
+          await buildHttpResponse(
+              "${APIEndPoints.getRating}?per_page=$perPage&page=$page$employeeId")));
       lastPageCallBack?.call(reviewRes.reviewData.length != perPage);
       return reviewRes;
     } else {
@@ -387,8 +470,12 @@ class CoreServiceApis {
     int? encounterId,
     required BillingDetailModel billingDetails,
   }) async {
-    final String encounter = encounterId != null && !encounterId.isNegative ? '&encounter_id=$encounterId' : '';
-    final reviewRes = BillingDetailsResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.billingRecordDetail}?$encounter")));
+    final String encounter = encounterId != null && !encounterId.isNegative
+        ? '&encounter_id=$encounterId'
+        : '';
+    final reviewRes = BillingDetailsResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.billingRecordDetail}?$encounter")));
     billingDetails = reviewRes.data;
     return billingDetails;
   }
@@ -398,8 +485,11 @@ class CoreServiceApis {
     int? encounterId,
     required EncounterDetailModel encounterDetModel,
   }) async {
-    final String encounter = encounterId != null && !encounterId.isNegative ? 'encounter_id=$encounterId' : '';
-    final reviewRes = EncounterDetailResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.encounterDetail}?$encounter")));
+    final String encounter = encounterId != null && !encounterId.isNegative
+        ? 'encounter_id=$encounterId'
+        : '';
+    final reviewRes = EncounterDetailResp.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.encounterDetail}?$encounter")));
     encounterDetModel = reviewRes.data;
     return encounterDetModel;
   }
@@ -408,7 +498,9 @@ class CoreServiceApis {
   static Future<BaseResponseModel> saveInvoice({
     required Map<String, dynamic> request,
   }) async {
-    final res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveBillingDetails, request: request, method: HttpMethodType.POST)));
+    final res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveBillingDetails,
+            request: request, method: HttpMethodType.POST)));
     return res;
   }
 
@@ -416,7 +508,9 @@ class CoreServiceApis {
   static Future<BaseResponseModel> saveBillingItems({
     required Map<String, dynamic> request,
   }) async {
-    final res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveBillingItems, request: request, method: HttpMethodType.POST)));
+    final res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveBillingItems,
+            request: request, method: HttpMethodType.POST)));
     return res;
   }
 
@@ -424,7 +518,9 @@ class CoreServiceApis {
   static Future<BaseResponseModel> deleteBillingItems({
     required int id,
   }) async {
-    final res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.deleteBillingItems}/$id", method: HttpMethodType.POST)));
+    final res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.deleteBillingItems}/$id",
+            method: HttpMethodType.POST)));
     return res;
   }
 
@@ -434,9 +530,15 @@ class CoreServiceApis {
     int? serviceId,
     required ServiceDetails serviceDetails,
   }) async {
-    final String encounter = encounterId != null && !encounterId.isNegative ? 'encounter_id=$encounterId' : '';
-    final String service = serviceId != null && !serviceId.isNegative ? '&service_id=$serviceId' : '';
-    final reviewRes = ServiceDetailResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.serviceDetail}?$encounter$service")));
+    final String encounter = encounterId != null && !encounterId.isNegative
+        ? 'encounter_id=$encounterId'
+        : '';
+    final String service = serviceId != null && !serviceId.isNegative
+        ? '&service_id=$serviceId'
+        : '';
+    final reviewRes = ServiceDetailResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.serviceDetail}?$encounter$service")));
     serviceDetails = reviewRes.data;
     return serviceDetails;
   }
@@ -449,10 +551,14 @@ class CoreServiceApis {
     required List<DoctorSessionModel> doctorSession,
     Function(bool)? lastPageCallBack,
   }) async {
-    final String cId = clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
-    final doctorSes = DoctorSessionResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getDoctorSession}?page=$page&per_page=$perPage$cId")));
+    final String cId =
+        clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
+    final doctorSes = DoctorSessionResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getDoctorSession}?page=$page&per_page=$perPage$cId")));
     if (page == 1) doctorSession.clear();
-    doctorSession.addAll(doctorSes.data.validate());
+    doctorSession
+        .addAll(doctorSes.data.validate() as Iterable<DoctorSessionModel>);
     lastPageCallBack?.call(doctorSes.data.validate().length != perPage);
     return doctorSession.obs;
   }
@@ -466,7 +572,9 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
   }) async {
     final String searchSpec = search.trim().isNotEmpty ? '&search=$search' : '';
-    final res = SpecializationResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getSpecializationList}?per_page=$perPage&page=$page$searchSpec")));
+    final res = SpecializationResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getSpecializationList}?per_page=$perPage&page=$page$searchSpec")));
     if (page == 1) specializationList.clear();
     specializationList.addAll(res.data.validate());
     lastPageCallBack?.call(res.data.validate().length != perPage);
@@ -484,7 +592,8 @@ class CoreServiceApis {
   }) async {
     final String searchClinic = search.isNotEmpty ? '&search=$search' : '';
     final String service = serviceId != null ? '&service_id=$serviceId' : '';
-    final res = ClinicListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getClinics}?per_page=$perPage&page=$page$searchClinic$service")));
+    final res = ClinicListRes.fromJson(await handleResponse(await buildHttpResponse(
+        "${APIEndPoints.getClinics}?per_page=$perPage&page=$page$searchClinic$service")));
     if (page == 1) clinicList.clear();
     clinicList.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
@@ -504,9 +613,13 @@ class CoreServiceApis {
   }) async {
     final String searchPatient = search.isNotEmpty ? '&search=$search' : '';
     final String filterPatient = filter.isNotEmpty ? '&filter=$filter' : '';
-    final String dId = doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
-    final String cId = clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
-    final res = PatientListModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getPatientsList}?per_page=$perPage&page=$page$searchPatient$filterPatient$dId$cId")));
+    final String dId =
+        doctorId != null && !doctorId.isNegative ? '&doctor_id=$doctorId' : '';
+    final String cId =
+        clinicId != null && !clinicId.isNegative ? '&clinic_id=$clinicId' : '';
+    final res = PatientListModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getPatientsList}?per_page=$perPage&page=$page$searchPatient$filterPatient$dId$cId")));
     if (page == 1) patientsList.clear();
     patientsList.addAll(res.data.validate());
     lastPageCallBack?.call(res.data.validate().length != perPage);
@@ -520,7 +633,9 @@ class CoreServiceApis {
     required List<PayoutModel> payoutList,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = PayoutListModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getDoctorPayoutHistory}?per_page=$perPage&page=$page")));
+    final res = PayoutListModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getDoctorPayoutHistory}?per_page=$perPage&page=$page")));
     if (page == 1) payoutList.clear();
     payoutList.addAll(res.data.validate());
     lastPageCallBack?.call(res.data.validate().length != perPage);
@@ -529,20 +644,27 @@ class CoreServiceApis {
 
   //Get Doctor Details
   static Future<Rx<Doctor>> getDoctorDetail({required int doctorId}) async {
-    final clinicId = selectedAppClinic.value.id > 0 ? '&clinic_id=${selectedAppClinic.value.id}' : '';
-    final res = DoctorDetailRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.doctorDetails}?doctor_id=$doctorId$clinicId")));
+    final clinicId = selectedAppClinic.value.id > 0
+        ? '&clinic_id=${selectedAppClinic.value.id}'
+        : '';
+    final res = DoctorDetailRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.doctorDetails}?doctor_id=$doctorId$clinicId")));
     return res.data.obs;
   }
 
-  static Future<Rx<ReceptionistData>> getReceptionistDetail({required int receptionistId}) async {
-    final response = await handleResponse(await buildHttpResponse("${APIEndPoints.receptionistDetails}?receptionist_id=$receptionistId"));
+  static Future<Rx<ReceptionistData>> getReceptionistDetail(
+      {required int receptionistId}) async {
+    final response = await handleResponse(await buildHttpResponse(
+        "${APIEndPoints.receptionistDetails}?receptionist_id=$receptionistId"));
 
     // Check if response contains data field
     if (response is Map<String, dynamic> && response.containsKey("data")) {
       final receptionistData = ReceptionistData.fromJson(response["data"]);
       return receptionistData.obs;
     } else {
-      return ReceptionistData().obs; // Return default object if response is invalid
+      return ReceptionistData()
+          .obs; // Return default object if response is invalid
     }
   }
 
@@ -554,7 +676,9 @@ class CoreServiceApis {
     required List<ReviewModel> reviewList,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = ReviewListModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getRating}?per_page=$perPage&page=$page&doctor_id=$doctorId")));
+    final res = ReviewListModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getRating}?per_page=$perPage&page=$page&doctor_id=$doctorId")));
     if (page == 1) reviewList.clear();
     reviewList.addAll(res.data.validate());
     lastPageCallBack?.call(res.data.validate().length != perPage);
@@ -562,37 +686,53 @@ class CoreServiceApis {
   }
 
   //Save Encounter
-  static Future<Rx<EncounterResp>> saveEncounter({required Map request, required EncounterResp encounterResp}) async {
-    final res = AddEncounterResp.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveEncounter, request: request, method: HttpMethodType.POST)));
+  static Future<Rx<EncounterResp>> saveEncounter(
+      {required Map request, required EncounterResp encounterResp}) async {
+    final res = AddEncounterResp.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveEncounter,
+            request: request, method: HttpMethodType.POST)));
     encounterResp = res.data;
     return encounterResp.obs;
   }
 
   //Edit Encounter
-  static Future<Rx<EncounterResp>> editEncounter({required Map request, required int id, required EncounterResp encounterResp}) async {
-    final res = AddEncounterResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.editEncounter}/$id", request: request, method: HttpMethodType.POST)));
+  static Future<Rx<EncounterResp>> editEncounter(
+      {required Map request,
+      required int id,
+      required EncounterResp encounterResp}) async {
+    final res = AddEncounterResp.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.editEncounter}/$id",
+            request: request, method: HttpMethodType.POST)));
     encounterResp = res.data;
     return encounterResp.obs;
   }
 
   //Delete Encounter
-  static Future<Rx<BaseResponseModel>> deleteEncounter({required int id}) async {
-    final res = BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.deleteEncounter}/$id", method: HttpMethodType.POST)));
+  static Future<Rx<BaseResponseModel>> deleteEncounter(
+      {required int id}) async {
+    final res = BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.deleteEncounter}/$id",
+            method: HttpMethodType.POST)));
     return res.obs;
   }
 
   //Get Clinic List
   static Future<RxList<CMNElement>> getEncProblems({String search = ''}) async {
     final String searchProblems = search.isNotEmpty ? '&search=$search' : '';
-    final res = ProblemsListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getEncProblemObservations}?type=${EncounterDropdownTypes.encounterProblem}$searchProblems")));
+    final res = ProblemsListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getEncProblemObservations}?type=${EncounterDropdownTypes.encounterProblem}$searchProblems")));
     return res.data.obs;
   }
 
   //Get Clinic List
-  static Future<RxList<CMNElement>> getEncObservations({String search = ''}) async {
-    final String searchObservations = search.isNotEmpty ? '&search=$search' : '';
-    final res =
-        ProblemsListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getEncProblemObservations}?type=${EncounterDropdownTypes.encounterObservations}$searchObservations")));
+  static Future<RxList<CMNElement>> getEncObservations(
+      {String search = ''}) async {
+    final String searchObservations =
+        search.isNotEmpty ? '&search=$search' : '';
+    final res = ProblemsListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getEncProblemObservations}?type=${EncounterDropdownTypes.encounterObservations}$searchObservations")));
     return res.data.obs;
   }
 
@@ -604,15 +744,20 @@ class CoreServiceApis {
     required List<MedicalReport> medicalReports,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = MedicalReportsRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getMedicalReport}?per_page=$perPage&page=$page&encounter_id=$encounterId")));
+    final res = MedicalReportsRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getMedicalReport}?per_page=$perPage&page=$page&encounter_id=$encounterId")));
     if (page == 1) medicalReports.clear();
     medicalReports.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
     return medicalReports.obs;
   }
 
-  static Future<BaseResponseModel> deleteMedicalReports({required int reportId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.deleteMedicalReport}/$reportId')));
+  static Future<BaseResponseModel> deleteMedicalReports(
+      {required int reportId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            '${APIEndPoints.deleteMedicalReport}/$reportId')));
   }
 
   static Future<void> saveMedicalReport({
@@ -622,11 +767,14 @@ class CoreServiceApis {
     List<File>? files,
     VoidCallback? onSuccess,
   }) async {
-    final multiPartRequest = await getMultiPartRequest(isEdit ? "${APIEndPoints.updateMedicalReport}/$reportId" : APIEndPoints.saveMedicalReport);
+    final multiPartRequest = await getMultiPartRequest(isEdit
+        ? "${APIEndPoints.updateMedicalReport}/$reportId"
+        : APIEndPoints.saveMedicalReport);
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));
 
     if (files.validate().isNotEmpty) {
-      multiPartRequest.files.add(await http.MultipartFile.fromPath('file_url', files.validate().first.path.validate()));
+      multiPartRequest.files.add(await http.MultipartFile.fromPath(
+          'file_url', files.validate().first.path.validate()));
     }
 
     /*  if (files.validate().isNotEmpty) {
@@ -658,15 +806,20 @@ class CoreServiceApis {
     required List<MedicalReport> medicalReports,
     Function(bool)? lastPageCallBack,
   }) async {
-    final res = MedicalReportsRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getPrescription}?per_page=$perPage&page=$page&encounter_id=$encounterId")));
+    final res = MedicalReportsRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getPrescription}?per_page=$perPage&page=$page&encounter_id=$encounterId")));
     if (page == 1) medicalReports.clear();
     medicalReports.addAll(res.data);
     lastPageCallBack?.call(res.data.length != perPage);
     return medicalReports.obs;
   }
 
-  static Future<BaseResponseModel> deletePrescription({required int reportId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.deletePrescription}/$reportId')));
+  static Future<BaseResponseModel> deletePrescription(
+      {required int reportId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            '${APIEndPoints.deletePrescription}/$reportId')));
   }
 
   static Future<void> savePrescription({
@@ -676,11 +829,14 @@ class CoreServiceApis {
     List<File>? files,
     VoidCallback? onSuccess,
   }) async {
-    final multiPartRequest = await getMultiPartRequest(isEdit ? "${APIEndPoints.updatePrescription}/$reportId" : APIEndPoints.savePrescription);
+    final multiPartRequest = await getMultiPartRequest(isEdit
+        ? "${APIEndPoints.updatePrescription}/$reportId"
+        : APIEndPoints.savePrescription);
     multiPartRequest.fields.addAll(await getMultipartFields(val: request));
 
     if (files.validate().isNotEmpty) {
-      multiPartRequest.files.add(await http.MultipartFile.fromPath('file_url', files.validate().first.path.validate()));
+      multiPartRequest.files.add(await http.MultipartFile.fromPath(
+          'file_url', files.validate().first.path.validate()));
     }
 
     /*  if (files.validate().isNotEmpty) {
@@ -704,21 +860,31 @@ class CoreServiceApis {
     );
   }
 
-  static Future<BaseResponseModel> saveEncounterDashboard({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveEncounterDashboard, request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> saveEncounterDashboard(
+      {required Map request}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveEncounterDashboard,
+            request: request, method: HttpMethodType.POST)));
   }
 
-  static Future<BaseResponseModel> saveSOAP({required Map request, required int encounterId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.saveSOAP}/$encounterId", request: request, method: HttpMethodType.POST)));
+  static Future<BaseResponseModel> saveSOAP(
+      {required Map request, required int encounterId}) async {
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.saveSOAP}/$encounterId",
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<Rx<GetSOAPRes>> getSOAP(int encounterId) async {
-    final res = GetSOAPRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getSOAP}/$encounterId")));
+    final res = GetSOAPRes.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.getSOAP}/$encounterId")));
     return res.obs;
   }
 
-  static Future<Rx<EncounterDashboardDetail>> encounterDashboardDetail(int encounterId) async {
-    final res = EncounterDashboardRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.encounterDashboardDetail}?encounter_id=$encounterId")));
+  static Future<Rx<EncounterDashboardDetail>> encounterDashboardDetail(
+      int encounterId) async {
+    final res = EncounterDashboardRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.encounterDashboardDetail}?encounter_id=$encounterId")));
     return res.data.obs;
   }
 
@@ -731,25 +897,36 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
   }) async {
     final searchMedicine = search.isNotEmpty ? '&name=$search' : '';
-    final res = MedicineListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getMedicineList}?per_page=$perPage&page=$page$searchMedicine")));
+    final res = MedicineListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getMedicineList}?per_page=$perPage&page=$page$searchMedicine")));
     if (page == 1) medicineList.clear();
     medicineList.addAll(res.data.validate());
     lastPageCallBack?.call(res.data.validate().length != perPage);
     return medicineList.obs;
   }
 
-  static Future<Rx<EncounterInvoiceResp>> downloadEncounter(int encounterId) async {
-    final res = EncounterInvoiceResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.encounterInvoice}?id=$encounterId")));
+  static Future<Rx<EncounterInvoiceResp>> downloadEncounter(
+      int encounterId) async {
+    final res = EncounterInvoiceResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.encounterInvoice}?id=$encounterId")));
     return res.obs;
   }
 
-  static Future<Rx<AppointmentInvoiceResp>> appointmentInvoice(int appointmentId) async {
-    final res = AppointmentInvoiceResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.downloadInvoice}?id=$appointmentId")));
+  static Future<Rx<AppointmentInvoiceResp>> appointmentInvoice(
+      int appointmentId) async {
+    final res = AppointmentInvoiceResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.downloadInvoice}?id=$appointmentId")));
     return res.obs;
   }
 
-  static Future<Rx<EncounterInvoiceResp>> downloadPrescription(int encounterId) async {
-    final res = EncounterInvoiceResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.downloadPrescription}?id=$encounterId")));
+  static Future<Rx<EncounterInvoiceResp>> downloadPrescription(
+      int encounterId) async {
+    final res = EncounterInvoiceResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.downloadPrescription}?id=$encounterId")));
     return res.obs;
   }
 
@@ -760,8 +937,9 @@ class CoreServiceApis {
     required int doctorId,
     required int serviceId,
   }) async {
-    final timeSlotsRes =
-        TimeSlotsRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getTimeSlots}?appointment_date=$date&doctor_id=$doctorId&clinic_id=$clinicId&service_id=$serviceId")));
+    final timeSlotsRes = TimeSlotsRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getTimeSlots}?appointment_date=$date&doctor_id=$doctorId&clinic_id=$clinicId&service_id=$serviceId")));
     slots(timeSlotsRes.slots);
     return slots;
   }
@@ -808,7 +986,9 @@ class CoreServiceApis {
 
 //Payment
   static Future<BaseResponseModel> savePayment({required Map request}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.savePayment, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.savePayment,
+            request: request, method: HttpMethodType.POST)));
   }
 
   /// Fetch Other Patient List
@@ -834,7 +1014,9 @@ class CoreServiceApis {
 
   // Bed Management APIs
   static Future<List<BedTypeElement>> getBedTypes() async {
-    final bedTypeListRes = BedTypeListRes.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bedTypeList, method: HttpMethodType.GET)));
+    final bedTypeListRes = BedTypeListRes.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.bedTypeList,
+            method: HttpMethodType.GET)));
     return bedTypeListRes.data.validate();
   }
 
@@ -847,8 +1029,12 @@ class CoreServiceApis {
     String? status,
   }) async {
     String bedType = bedTypeId != null ? '&bed_type_id=$bedTypeId' : '';
-    String bedStatus = status != null && status.isNotEmpty ? '&status=$status' : '';
-    final bedListRes = BedListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$bedType$bedStatus", method: HttpMethodType.GET)));
+    String bedStatus =
+        status != null && status.isNotEmpty ? '&status=$status' : '';
+    final bedListRes = BedListRes.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$bedType$bedStatus",
+            method: HttpMethodType.GET)));
     if (page == 1) bedList.clear();
     bedList.addAll(bedListRes.data);
     lastPageCallBack?.call(bedListRes.data.length != perPage);
@@ -857,7 +1043,9 @@ class CoreServiceApis {
   }
 
   static Future<BaseResponseModel> deleteBed({required int bedId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId", method: HttpMethodType.DELETE)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId",
+            method: HttpMethodType.DELETE)));
   }
 
   static Future<BaseResponseModel> updateBedStatus({
@@ -866,7 +1054,10 @@ class CoreServiceApis {
   }) async {
     return BaseResponseModel.fromJson(
       await handleResponse(
-        await buildHttpResponse("${APIEndPoints.bedStatus}/bed/$bedId/toggle-maintenance", request: request, method: HttpMethodType.POST),
+        await buildHttpResponse(
+            "${APIEndPoints.bedStatus}/bed/$bedId/toggle-maintenance",
+            request: request,
+            method: HttpMethodType.POST),
       ),
     );
   }
@@ -874,14 +1065,18 @@ class CoreServiceApis {
   static Future<BaseResponseModel> addBed({
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bedMaster, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.bedMaster,
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<BaseResponseModel> updateBed({
     required int bedId,
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId", request: request, method: HttpMethodType.PUT)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId",
+            request: request, method: HttpMethodType.PUT)));
   }
 
   static Future<RxList<BedMasterModel>> getBedMasters({
@@ -892,53 +1087,74 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
   }) async {
     final search = searchBed.isNotEmpty ? '&search=$searchBed' : '';
-    final response = await handleResponse(await buildHttpResponse("${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$search", method: HttpMethodType.GET));
+    final response = await handleResponse(await buildHttpResponse(
+        "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$search",
+        method: HttpMethodType.GET));
     if (page == 1) bedMasterList.clear();
     if (response is List) {
-      bedMasterList.addAll(response.map((e) => BedMasterModel.fromJson(e)).toList());
+      bedMasterList
+          .addAll(response.map((e) => BedMasterModel.fromJson(e)).toList());
       lastPageCallBack?.call((response).length != perPage);
     } else if (response is Map && response['data'] is List) {
-      bedMasterList.addAll((response['data'] as List).map((e) => BedMasterModel.fromJson(e)).toList());
+      bedMasterList.addAll((response['data'] as List)
+          .map((e) => BedMasterModel.fromJson(e))
+          .toList());
       lastPageCallBack?.call((response['data'] as List).length != perPage);
     }
     return bedMasterList.obs;
   }
 
   static Future<BedMasterModel> getBedMasterById(int id) async {
-    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedMaster}/$id", method: HttpMethodType.GET)));
+    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse(
+        "${APIEndPoints.bedMaster}/$id",
+        method: HttpMethodType.GET)));
   }
 
   static Future<BaseResponseModel> deleteBedMaster(int id) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedMaster}/$id", method: HttpMethodType.DELETE)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.bedMaster}/$id",
+            method: HttpMethodType.DELETE)));
   }
 
   static Future<BaseResponseModel> addBedType({
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bedType, request: request, method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.bedType,
+            request: request, method: HttpMethodType.POST)));
   }
 
   static Future<BaseResponseModel> updateBedType({
     required int id,
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.bedType}/$id", request: request, method: HttpMethodType.PUT)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse("${APIEndPoints.bedType}/$id",
+            request: request, method: HttpMethodType.PUT)));
   }
 
   static Future<BedMasterModel> bedAllocationApi({
     required Map<String, dynamic> request,
   }) async {
-    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bedAllocation, request: request, method: HttpMethodType.POST)));
+    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse(
+        APIEndPoints.bedAllocation,
+        request: request,
+        method: HttpMethodType.POST)));
   }
 
-  static Future<Map<String, dynamic>> getBedStatusSummary({int clinicId = 0}) async {
+  static Future<Map<String, dynamic>> getBedStatusSummary(
+      {int clinicId = 0}) async {
     final String clinic = clinicId > 0 ? '?clinic_id=$clinicId' : '';
-    return await handleResponse(await buildHttpResponse('${APIEndPoints.bedStatus}$clinic', method: HttpMethodType.GET));
+    return await handleResponse(await buildHttpResponse(
+        '${APIEndPoints.bedStatus}$clinic',
+        method: HttpMethodType.GET));
   }
 
   static Future<List<BedMasterModel>> getLatestUpdatedBeds() async {
     // final String clinicId = loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? 'clinic_id=${selectedAppClinic.value.id}' : '';
-    final bedListRes = BedListRes.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.bedsAvailable, method: HttpMethodType.GET)));
+    final bedListRes = BedListRes.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.bedsAvailable,
+            method: HttpMethodType.GET)));
     return bedListRes.data.validate();
   }
 
@@ -978,4 +1194,3 @@ class CoreServiceApis {
     }
   }
 }
-

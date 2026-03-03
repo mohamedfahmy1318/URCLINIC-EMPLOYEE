@@ -81,7 +81,12 @@ class AppointmentsController extends GetxController {
           isLastPage(p0);
         },
       ),
-    ).then((value) {}).catchError((e) {
+    ).then((value) {
+      // If doctor, filter out pending appointments — only receptionist controls those
+      if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)) {
+        appointments.removeWhere((e) => e.status == StatusConst.pending);
+      }
+    }).catchError((e) {
       log('getAppointments E: $e');
     }).whenComplete(() => isLoading(false));
   }

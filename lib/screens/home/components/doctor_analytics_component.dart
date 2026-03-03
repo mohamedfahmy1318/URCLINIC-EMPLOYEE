@@ -6,7 +6,7 @@ import 'package:kivicare_clinic_admin/screens/patient/all_patient_list.dart';
 import 'package:kivicare_clinic_admin/utils/app_common.dart';
 import '../../../generated/assets.dart';
 import '../../../main.dart';
-import '../../../utils/price_widget.dart';
+
 import '../../dashboard/dashboard_controller.dart';
 import '../../service/all_service_list_screen.dart';
 import '../home_controller.dart';
@@ -27,7 +27,9 @@ class DoctorAnalyticComponent extends StatelessWidget {
           children: [
             AnalyticsCard(
               title: locale.value.totalAppointments,
-              countText: "${homeScreenCont.dashboardData.value.data.doctorTotalAppointments}".padLeft(2, "0"),
+              countText:
+                  "${homeScreenCont.dashboardData.value.data.doctorTotalAppointments}"
+                      .padLeft(2, "0"),
               icon: Assets.navigationIcCalenderOutlined,
               onTap: () {
                 changebottomIndex(1);
@@ -36,7 +38,9 @@ class DoctorAnalyticComponent extends StatelessWidget {
             16.width,
             AnalyticsCard(
               title: locale.value.totalServices,
-              countText: "${homeScreenCont.dashboardData.value.data.doctorTotalServiceCount}".padLeft(2, "0"),
+              countText:
+                  "${homeScreenCont.dashboardData.value.data.doctorTotalServiceCount}"
+                      .padLeft(2, "0"),
               icon: Assets.iconsIcTotalService,
               onTap: () {
                 Get.to(() => AllServicesScreen());
@@ -49,19 +53,16 @@ class DoctorAnalyticComponent extends StatelessWidget {
           children: [
             AnalyticsCard(
               title: locale.value.totalPatient,
-              countText: "${homeScreenCont.dashboardData.value.data.doctorTotalPatient}".padLeft(2, "0"),
+              countText:
+                  "${homeScreenCont.dashboardData.value.data.doctorTotalPatient}"
+                      .padLeft(2, "0"),
               icon: Assets.iconsIcPatients,
               onTap: () {
                 Get.to(() => AllPatientList());
               },
             ).expand(),
             16.width,
-            AnalyticsCard(
-              title: locale.value.totalEarning,
-              countText:
-                  "${leftCurrencyFormat()}${homeScreenCont.dashboardData.value.data.doctorTotalEarning.validate().toStringAsFixed(appCurrency.value.noOfDecimal).formatNumberWithComma(seperator: appCurrency.value.thousandSeparator)}${rightCurrencyFormat()}",
-              icon: Assets.iconsIcRevenue,
-            ).expand(),
+            const Spacer(),
           ],
         ),
       ],

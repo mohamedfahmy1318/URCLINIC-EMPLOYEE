@@ -1,79 +1,45 @@
 {
   "project_info": {
-    "project_number": "1033255788496",
-    "project_id": "clinic-app-86bcf",
-    "storage_bucket": "clinic-app-86bcf.firebasestorage.app"
+    "project_number": "584658171555",
+    "project_id": "urclinic-72a3e",
+    "storage_bucket": "urclinic-72a3e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1033255788496:android:3c933da2e604c0c36f63d5",
+        "mobilesdk_app_id": "1:584658171555:android:9e14dd273faf7eab9bf116",
         "android_client_info": {
-          "package_name": "com.wellness.customer"
+          "package_name": "com.urclinic.employee"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyArKI9CO5llksF76LC1Bgi4IblwnhURLOQ"
+          "current_key": "AIzaSyCqOPRcTd-MpP8LRVuvTAQ4QHKqNDvq2QQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1033255788496-d9buarf94cjb6jobj7q8muhova6ahjgt.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.wellness.customer"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1033255788496:android:cb596c760e95123f6f63d5",
+        "mobilesdk_app_id": "1:584658171555:android:8e30435e51b84b1a9bf116",
         "android_client_info": {
-          "package_name": "com.wellness.vendor"
+          "package_name": "com.urclinic.patient"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyArKI9CO5llksF76LC1Bgi4IblwnhURLOQ"
+          "current_key": "AIzaSyCqOPRcTd-MpP8LRVuvTAQ4QHKqNDvq2QQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1033255788496-4d28r4vmiiqm6iutvvj09mf43mo1sa8g.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1033255788496-d9buarf94cjb6jobj7q8muhova6ahjgt.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.wellness.customer"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

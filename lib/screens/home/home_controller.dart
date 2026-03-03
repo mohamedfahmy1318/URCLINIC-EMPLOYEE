@@ -122,6 +122,12 @@ class HomeController extends GetxController {
   }
 
   void handleDashboardRes(DashboardRes value) {
+    // If doctor, filter out pending appointments — only receptionist controls those
+    if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)) {
+      value.data.upcomingAppointment = value.data.upcomingAppointment
+          .where((e) => e.status != StatusConst.pending)
+          .toList();
+    }
     dashboardData(value);
     unreadNotificationCount(value.data.unReadCount);
     if (dashboardData.value.data.receptionistClinic.isNotEmpty) selectedAppClinic(dashboardData.value.data.receptionistClinic.first);

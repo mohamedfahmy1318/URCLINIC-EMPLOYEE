@@ -28,23 +28,21 @@ class ClinicApis {
   }) async {
     final String searchService = search.isNotEmpty ? '&search=$search' : '';
 
-    String endpoint =  APIEndPoints.getClinics;
+    String endpoint = APIEndPoints.getClinics;
     String extraParams = '';
-    if(isPharmaRegister){
+    if (isPharmaRegister) {
       extraParams = '&pharma_login=1';
     }
     if (isReceptionistRegister) {
       endpoint = APIEndPoints.getClinicListToRegister;
-      final int vendorId = loginUserData.value.id;
-      final String vendorParam = vendorId > 0 ? '&vendor_id=$vendorId' : '';
-      extraParams = '&receptionist_login=1$vendorParam';
     } else if (isDoctorRegister) {
       endpoint = APIEndPoints.getClinicListToRegister;
     }
 
     final res = ClinicListRes.fromJson(
       await handleResponse(
-        await buildHttpResponse("$endpoint?per_page=$perPage&page=$page$searchService$extraParams"),
+        await buildHttpResponse(
+            "$endpoint?per_page=$perPage&page=$page$searchService$extraParams"),
       ),
     );
 
@@ -56,8 +54,11 @@ class ClinicApis {
     return clinicList.obs;
   }
 
-  static Future<ClinicDetailModel> getClinicDetails({required int clinicId}) async {
-    return ClinicDetailModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.getClinicDetails}?clinic_id=$clinicId')));
+  static Future<ClinicDetailModel> getClinicDetails(
+      {required int clinicId}) async {
+    return ClinicDetailModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            '${APIEndPoints.getClinicDetails}?clinic_id=$clinicId')));
   }
 
   static Future<RxList<ClinicData>> getClinicListWithDoctor({
@@ -69,8 +70,10 @@ class ClinicApis {
     Function(bool)? lastPageCallBack,
   }) async {
     final String searchService = search.isNotEmpty ? '&search=$search' : '';
-    final String doctor = doctorId.toString().isNotEmpty ? '&doctor_id=$doctorId' : '';
-    final res = ClinicListRes.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getClinics}?per_page=$perPage&page=$page$doctor$searchService")));
+    final String doctor =
+        doctorId.toString().isNotEmpty ? '&doctor_id=$doctorId' : '';
+    final res = ClinicListRes.fromJson(await handleResponse(await buildHttpResponse(
+        "${APIEndPoints.getClinics}?per_page=$perPage&page=$page$doctor$searchService")));
 
     if (page == 1) clinicList.clear();
     clinicList.addAll(res.data.validate());
@@ -90,11 +93,14 @@ class ClinicApis {
     Function(dynamic)? onSuccess,
   }) async {
     if (isLoggedIn.value) {
-      final MultipartRequest multiPartRequest = await getMultiPartRequest(isEdit ? "${APIEndPoints.updateClinic}/$clinicId" : APIEndPoints.saveClinic);
+      final MultipartRequest multiPartRequest = await getMultiPartRequest(isEdit
+          ? "${APIEndPoints.updateClinic}/$clinicId"
+          : APIEndPoints.saveClinic);
       multiPartRequest.fields.addAll(await getMultipartFields(val: request));
       if (imageFile != null) {
         // multiPartRequest.files.addAll(await getMultipartImages2(files: files.validate(), name: 'feature_image'));
-        multiPartRequest.files.add(await MultipartFile.fromPath('file_url', imageFile.path));
+        multiPartRequest.files
+            .add(await MultipartFile.fromPath('file_url', imageFile.path));
       }
 
       multiPartRequest.headers.addAll(buildHeaderTokens());
@@ -114,7 +120,9 @@ class ClinicApis {
   }
 
   static Future<BaseResponseModel> deleteClinic({required int clinicId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(await buildHttpResponse('${APIEndPoints.deleteClinic}/$clinicId', method: HttpMethodType.POST)));
+    return BaseResponseModel.fromJson(await handleResponse(
+        await buildHttpResponse('${APIEndPoints.deleteClinic}/$clinicId',
+            method: HttpMethodType.POST)));
   }
 
   static Future<RxList<GalleryData>> getClinicGalleryList({
@@ -125,7 +133,9 @@ class ClinicApis {
     int clinicId = -1,
   }) async {
     final String clncId = clinicId != -1 ? '&clinic_id=$clinicId' : '';
-    final galleryListRes = ClinicGalleryModel.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.getClinicGallery}?per_page=$perPage&page=$page$clncId")));
+    final galleryListRes = ClinicGalleryModel.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.getClinicGallery}?per_page=$perPage&page=$page$clncId")));
     if (page == 1) galleryList.clear();
     galleryList.addAll(galleryListRes.data);
     lastPageCallBack?.call(galleryListRes.data.length != perPage);
@@ -139,11 +149,13 @@ class ClinicApis {
     Function(dynamic)? onSuccess,
   }) async {
     if (isLoggedIn.value) {
-      final MultipartRequest multiPartRequest = await getMultiPartRequest(APIEndPoints.saveClinicGallery);
+      final MultipartRequest multiPartRequest =
+          await getMultiPartRequest(APIEndPoints.saveClinicGallery);
       multiPartRequest.fields.addAll(await getMultipartFields(val: request));
       if (imageFile != null || imageFile!.isNotEmpty) {
         for (var i = 0; i < imageFile.length; i++) {
-          multiPartRequest.files.add(await MultipartFile.fromPath('gallery_images[$i]', imageFile[i].path));
+          multiPartRequest.files.add(await MultipartFile.fromPath(
+              'gallery_images[$i]', imageFile[i].path));
         }
       }
       multiPartRequest.headers.addAll(buildHeaderTokens());
@@ -171,7 +183,8 @@ class ClinicApis {
     Function(dynamic)? onSuccess,
   }) async {
     if (isLoggedIn.value) {
-      final MultipartRequest multiPartRequest = await getMultiPartRequest(APIEndPoints.saveClinicGallery);
+      final MultipartRequest multiPartRequest =
+          await getMultiPartRequest(APIEndPoints.saveClinicGallery);
       multiPartRequest.fields.addAll(await getMultipartFields(val: request));
       multiPartRequest.headers.addAll(buildHeaderTokens());
       await sendMultiPartRequest(
@@ -189,15 +202,23 @@ class ClinicApis {
   }
 
   //Clinic Session List
-  static Future<RxList<ClinicSessionModel>> getClinicSessionList({required int clinicId, required List<ClinicSessionModel> clinicSessionResp}) async {
-    final resp = ClinicSessionResp.fromJson(await handleResponse(await buildHttpResponse("${APIEndPoints.clinicSessionList}?clinic_id=$clinicId")));
+  static Future<RxList<ClinicSessionModel>> getClinicSessionList(
+      {required int clinicId,
+      required List<ClinicSessionModel> clinicSessionResp}) async {
+    final resp = ClinicSessionResp.fromJson(await handleResponse(
+        await buildHttpResponse(
+            "${APIEndPoints.clinicSessionList}?clinic_id=$clinicId")));
     clinicSessionResp.addAll(resp.data);
     return clinicSessionResp.obs;
   }
 
   //Save Clinic Session
-  static Future<RxList<ClinicSessionModel>> saveClinicSession({required Map request, required List<ClinicSessionModel> clinicSessionResp}) async {
-    final resp = ClinicSessionResp.fromJson(await handleResponse(await buildHttpResponse(APIEndPoints.saveClinicSession, request: request, method: HttpMethodType.POST)));
+  static Future<RxList<ClinicSessionModel>> saveClinicSession(
+      {required Map request,
+      required List<ClinicSessionModel> clinicSessionResp}) async {
+    final resp = ClinicSessionResp.fromJson(await handleResponse(
+        await buildHttpResponse(APIEndPoints.saveClinicSession,
+            request: request, method: HttpMethodType.POST)));
     toast(resp.message);
     clinicSessionResp.addAll(resp.data);
     return clinicSessionResp.obs;

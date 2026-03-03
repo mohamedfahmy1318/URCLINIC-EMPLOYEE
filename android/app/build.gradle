@@ -31,7 +31,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.wellness.vendor"
+    namespace "com.urclinic.employee"
     compileSdk = 36
     ndkVersion "29.0.13599879"
 
@@ -50,7 +50,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.wellness.vendor"
+        applicationId "com.urclinic.employee"
         minSdkVersion 25
         targetSdkVersion 36
         versionCode 25

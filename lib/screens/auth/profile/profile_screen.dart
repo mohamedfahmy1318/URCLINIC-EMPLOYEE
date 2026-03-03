@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kivicare_clinic_admin/screens/pharma/inventory/expired_medicine.dart';
-import 'package:kivicare_clinic_admin/screens/pharma/pharma_screen.dart';
-import 'package:kivicare_clinic_admin/screens/pharma/suppliers/supplier_screen.dart';
 import 'package:kivicare_clinic_admin/screens/bed_management/all_beds_screen.dart';
 import 'package:kivicare_clinic_admin/screens/bed_management/bed_type/receptionist_bed_type_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -59,11 +56,16 @@ class ProfileScreen extends StatelessWidget {
                     subInfo: loginUserData.value.email,
                     commission: profileController.commission,
                     onCameraTap: () {
-                      final EditUserProfileController editUserProfileController = EditUserProfileController(isProfilePhoto: true);
+                      final EditUserProfileController
+                          editUserProfileController =
+                          EditUserProfileController(isProfilePhoto: true);
                       editUserProfileController.showBottomSheet(context);
                     },
                   ).onTap(() {
-                    if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) && loginUserData.value.userRole.contains((EmployeeKeyConst.vendor))) {
+                    if (loginUserData.value.userRole
+                            .contains(EmployeeKeyConst.doctor) &&
+                        loginUserData.value.userRole
+                            .contains((EmployeeKeyConst.vendor))) {
                       final doctorData = Doctor(
                         id: loginUserData.value.id,
                         doctorId: loginUserData.value.id,
@@ -73,9 +75,11 @@ class ProfileScreen extends StatelessWidget {
                         profileImage: loginUserData.value.profileImage,
                         address: loginUserData.value.address,
                       );
-                      Get.to(() => AddDoctorForm(isFromEditProfile: true), arguments: doctorData);
+                      Get.to(() => AddDoctorForm(isFromEditProfile: true),
+                          arguments: doctorData);
                     } else {
-                      Get.to(() => EditUserProfileScreen(), duration: const Duration(milliseconds: 800));
+                      Get.to(() => EditUserProfileScreen(),
+                          duration: const Duration(milliseconds: 800));
                     }
                   }),
                 ),
@@ -85,7 +89,8 @@ class ProfileScreen extends StatelessWidget {
                   subTitle: locale.value.personalizeYourProfile,
                   splashColor: transparentColor,
                   onTap: () {
-                    if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)) {
+                    if (loginUserData.value.userRole
+                        .contains(EmployeeKeyConst.doctor)) {
                       final doctorData = Doctor(
                         id: loginUserData.value.id,
                         doctorId: loginUserData.value.id,
@@ -95,55 +100,22 @@ class ProfileScreen extends StatelessWidget {
                         profileImage: loginUserData.value.profileImage,
                         address: loginUserData.value.address,
                       );
-                      Get.to(() => AddDoctorForm(isFromEditProfile: true), arguments: doctorData);
+                      Get.to(() => AddDoctorForm(isFromEditProfile: true),
+                          arguments: doctorData);
                     } else {
-                      Get.to(() => EditUserProfileScreen(), duration: const Duration(milliseconds: 800));
+                      Get.to(() => EditUserProfileScreen(),
+                          duration: const Duration(milliseconds: 800));
                     }
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcEditprofileOutlined, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcEditprofileOutlined,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16),
-                SettingItemWidget(
-                  decoration: boxDecorationDefault(color: context.cardColor),
-                  title: locale.value.pharma,
-                  subTitle: locale.value.managePharma,
-                  splashColor: transparentColor,
-                  onTap: () {
-                    Get.to(() => PharmaScreen());
-                  },
-                  titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcMedicine, color: appColorPrimary).circularLightPrimaryBg(),
-                  trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) || loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
-                SettingItemWidget(
-                  decoration: boxDecorationDefault(color: context.cardColor),
-                  title: locale.value.suppliers,
-                  subTitle: locale.value.manageSupplier,
-                  splashColor: transparentColor,
-                  onTap: () {
-                    Get.to(() => SupplierScreen());
-                  },
-                  titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcHandsake, color: appColorPrimary).circularLightPrimaryBg(),
-                  trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.pharma) || loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
-                SettingItemWidget(
-                  decoration: boxDecorationDefault(color: context.cardColor),
-                  title: '${locale.value.expired} ${locale.value.medicines}',
-                  subTitle: '${locale.value.manage} ${locale.value.expired} ${locale.value.medicines}',
-                  splashColor: transparentColor,
-                  onTap: () {
-                    Get.to(() => ExpiredMedicine());
-                  },
-                  titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcTimeOutlined, color: appColorPrimary).circularLightPrimaryBg(),
-                  trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.pharma) || loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.clinics,
@@ -153,10 +125,14 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => ClinicListScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcClinic, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcClinic, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.vendor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.manageSessions,
@@ -173,10 +149,15 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcTimeOutlined, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcTimeOutlined,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.doctor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.doctors,
@@ -186,10 +167,16 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => DoctorsListScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcDoctor, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcDoctor, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                        .contains(EmployeeKeyConst.vendor) ||
+                    loginUserData.value.userRole
+                        .contains(EmployeeKeyConst.receptionist)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.bedType,
@@ -199,10 +186,15 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => ReceptionistBedTypeScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcBedType, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcBedType,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.vendor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.allBeds,
@@ -212,23 +204,33 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => AllBedScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcBed, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcBed, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(!loginUserData.value.userRole.contains(EmployeeKeyConst.pharma)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(!loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.pharma)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.requests,
-                  subTitle: locale.value.requestForServiceCategoryAndSpecialization,
+                  subTitle:
+                      locale.value.requestForServiceCategoryAndSpecialization,
                   splashColor: transparentColor,
                   onTap: () {
                     Get.to(() => RequestListScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcRequest, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcRequest,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.vendor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.receptionists,
@@ -238,10 +240,15 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => ReceptionistListScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcReceptionist, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcReceptionist,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.vendor)),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.encounters,
@@ -251,22 +258,32 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => AllEncountersScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcEncounter, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcEncounter,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16).visible(!loginUserData.value.userRole.contains(EmployeeKeyConst.pharma)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16).visible(!loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.pharma)),
                 SettingItemWidget(
                   title: locale.value.settings,
                   decoration: boxDecorationDefault(color: context.cardColor),
-                  subTitle: "${locale.value.changePassword},${locale.value.themeAndMore}",
+                  subTitle:
+                      "${locale.value.changePassword},${locale.value.themeAndMore}",
                   splashColor: transparentColor,
                   onTap: () {
                     Get.to(() => SettingScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcSetting, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcSetting,
+                          color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16),
                 SettingItemWidget(
                   title: locale.value.aboutApp,
@@ -277,11 +294,14 @@ class ProfileScreen extends StatelessWidget {
                     Get.to(() => const AboutScreen());
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcInfo, color: appColorPrimary).circularLightPrimaryBg(),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcInfo, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
                   trailing: trailing,
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16),
-                SettingItemWidget(
+                /*  SettingItemWidget(
                   title: locale.value.rateApp,
                   decoration: boxDecorationDefault(color: context.cardColor),
                   subTitle: locale.value.showSomeLoveShare,
@@ -290,9 +310,12 @@ class ProfileScreen extends StatelessWidget {
                     handleRate();
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcStar, color: appColorPrimary).circularLightPrimaryBg(),
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-                ).paddingTop(16),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcStar, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                ).paddingTop(16),*/
                 SettingItemWidget(
                   title: locale.value.logout,
                   decoration: boxDecorationDefault(color: context.cardColor),
@@ -312,11 +335,17 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                   titleTextStyle: boldTextStyle(size: 14),
-                  leading: commonLeadingWid(imgPath: Assets.iconsIcLogout, color: appColorPrimary).circularLightPrimaryBg(),
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+                  leading: commonLeadingWid(
+                          imgPath: Assets.iconsIcLogout, color: appColorPrimary)
+                      .circularLightPrimaryBg(),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16),
                 30.height,
-                VersionInfoWidget(prefixText: '${locale.value.version}  ', textStyle: primaryTextStyle(color: secondaryTextColor)).center(),
+                VersionInfoWidget(
+                        prefixText: '${locale.value.version}  ',
+                        textStyle: primaryTextStyle(color: secondaryTextColor))
+                    .center(),
                 32.height,
               ],
             ).paddingSymmetric(horizontal: 16),
@@ -326,7 +355,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget get trailing => const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: darkGray);
+  Widget get trailing =>
+      const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: darkGray);
 
   Widget commissionListWid(List<CommissionElement> list) {
     return ListView.separated(
@@ -335,7 +365,8 @@ class ProfileScreen extends StatelessWidget {
       itemBuilder: (context, index) {
         return Obx(
           () => SettingItemWidget(
-            title: "${list[index].title}  (${list[index].commissionValue} ${list[index].commissionType.toLowerCase().trim().contains(TaxType.PERCENT) ? "%" : appCurrency.value.currencySymbol})",
+            title:
+                "${list[index].title}  (${list[index].commissionValue} ${list[index].commissionType.toLowerCase().trim().contains(TaxType.PERCENT) ? "%" : appCurrency.value.currencySymbol})",
             titleTextStyle: primaryTextStyle(size: 14),
             /*leading: list[index].isSelected.value
                 ? const Icon(
@@ -351,8 +382,8 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       },
-      separatorBuilder: (context, index) => commonDivider.paddingSymmetric(vertical: 6),
+      separatorBuilder: (context, index) =>
+          commonDivider.paddingSymmetric(vertical: 6),
     );
   }
 }
-
