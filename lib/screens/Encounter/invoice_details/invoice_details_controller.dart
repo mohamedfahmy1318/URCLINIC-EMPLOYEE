@@ -25,12 +25,15 @@ class InvoiceDetailsController extends GetxController {
   Rx<num> serviceAmount = 0.obs;
   Rx<PaymentStatus> bedPaymentStatus = PaymentStatus.unpaid.obs;
 
-  Rx<Future<BillingDetailModel>> getInvoiceDetailFuture = Future(() => BillingDetailModel.fromJson({})).obs;
+  Rx<Future<BillingDetailModel>> getInvoiceDetailFuture =
+      Future(() => BillingDetailModel.fromJson({})).obs;
 
-  Rx<Future<BedMasterModel>> getBedDetailFuture = Future(() => BedMasterModel()).obs;
+  Rx<Future<BedMasterModel>> getBedDetailFuture =
+      Future(() => BedMasterModel()).obs;
   Rx<BillingDetailModel> invoiceData = BillingDetailModel.fromJson({}).obs;
   Rx<EncounterElement> encounter = EncounterElement().obs;
-  Rx<Future<RxList<ServiceElement>>> serviceListFuture = Future(() => RxList<ServiceElement>()).obs;
+  Rx<Future<RxList<ServiceElement>>> serviceListFuture =
+      Future(() => RxList<ServiceElement>()).obs;
   RxList<ServiceElement> serviceList = RxList();
 
   Rx<BedMasterModel> bedDetail = BedMasterModel().obs;
@@ -79,7 +82,6 @@ class InvoiceDetailsController extends GetxController {
     super.onReady();
   }
 
-
   ///Get Invoice Details
   Future<void> getInvoiceDetail({bool showLoader = false}) async {
     if (!showLoader) {
@@ -103,7 +105,7 @@ class InvoiceDetailsController extends GetxController {
         );
       }
       billingItemList(invoiceData.value.billingItems);
-      if(bedDetail.value.id <= 0){
+      if (bedDetail.value.id <= 0) {
         bedPaymentStatus(PaymentStatus.paid);
       }
       setFinalDiscountFormData();
@@ -130,11 +132,15 @@ class InvoiceDetailsController extends GetxController {
     if (showLoader) {
       isLoading(true);
     }
-    await CoreServiceApis.saveInvoice(request: saveBillingDet.toJson()).then((value) async {
+    await CoreServiceApis.saveInvoice(request: saveBillingDet.toJson())
+        .then((value) async {
       // if (invoiceData.value.paymentStatus == 1) isEditMode(false);
       refreshAppoitmentRelatedPages();
-      final BedStatusController bedStatusController = Get.find();
-      await bedStatusController.initializeData();
+      if (CoreServiceApis.isBedFeatureAvailable &&
+          Get.isRegistered<BedStatusController>()) {
+        final BedStatusController bedStatusController = Get.find();
+        await bedStatusController.initializeData();
+      }
       getInvoiceDetail(showLoader: true);
     }).catchError((e) {
       toast("$e");
@@ -150,7 +156,8 @@ class InvoiceDetailsController extends GetxController {
     }
 
     try {
-      final AppointmentDetailController appointment = Get.put(AppointmentDetailController());
+      final AppointmentDetailController appointment =
+          Get.put(AppointmentDetailController());
       appointment.init(showLoader: false);
     } catch (e) {
       log('AppointmentDetailController appointment = Get.put(AppointmentDetailController()) E: $e');
@@ -166,7 +173,8 @@ class InvoiceDetailsController extends GetxController {
   void setFinalDiscountFormData() {
     enableFinalDiscount(invoiceData.value.enableFinalBillingDiscount);
     finalDiscoutType(invoiceData.value.billingFinalDiscountType);
-    finalDiscoutValueCont.text = "${invoiceData.value.billingFinalDiscountValue}";
+    finalDiscoutValueCont.text =
+        "${invoiceData.value.billingFinalDiscountValue}";
   }
 
   void getClearBillingItem() {
@@ -175,7 +183,10 @@ class InvoiceDetailsController extends GetxController {
     priceCont.clear();
   }
 
-  Future<void> saveBillingItem({BillingItem? billingItem, required int index, bool showLoader = true}) async {
+  Future<void> saveBillingItem(
+      {BillingItem? billingItem,
+      required int index,
+      bool showLoader = true}) async {
     final quantity = quantityCont.text.toInt();
     final amount = serviceAmount.value.toDouble().toPrecision(2);
     final total = (quantity * amount).toPrecision(2);
@@ -192,8 +203,18 @@ class InvoiceDetailsController extends GetxController {
         discountType: selectService.value.discountType,
         discountValue: selectService.value.discountValue,
         discountAmount: selectService.value.discountAmount,
-        totalInclusiveTax: selectService.value.assignDoctor.isNotEmpty ? selectService.value.assignDoctor.firstWhere((e) => e.doctorId == invoiceData.value.doctorId).priceDetail.totalInclusiveTax : 0,
-        inclusiveTaxJson: selectService.value.assignDoctor.isNotEmpty ? selectService.value.assignDoctor.firstWhere((e) => e.doctorId == invoiceData.value.doctorId).priceDetail.inclusiveTaxJson : '',
+        totalInclusiveTax: selectService.value.assignDoctor.isNotEmpty
+            ? selectService.value.assignDoctor
+                .firstWhere((e) => e.doctorId == invoiceData.value.doctorId)
+                .priceDetail
+                .totalInclusiveTax
+            : 0,
+        inclusiveTaxJson: selectService.value.assignDoctor.isNotEmpty
+            ? selectService.value.assignDoctor
+                .firstWhere((e) => e.doctorId == invoiceData.value.doctorId)
+                .priceDetail
+                .inclusiveTaxJson
+            : '',
       );
     } else {
       billingItem.quantity = quantity;
@@ -205,10 +226,22 @@ class InvoiceDetailsController extends GetxController {
       billingItem.discountValue = selectService.value.discountValue;
       billingItem.discountAmount = selectService.value.discountAmount;
 
-      billingItem.totalInclusiveTax = selectService.value.assignDoctor.isNotEmpty ? selectService.value.assignDoctor.firstWhere((e) => e.doctorId == invoiceData.value.doctorId).priceDetail.totalInclusiveTax : billingItem.totalInclusiveTax;
+      billingItem.totalInclusiveTax =
+          selectService.value.assignDoctor.isNotEmpty
+              ? selectService.value.assignDoctor
+                  .firstWhere((e) => e.doctorId == invoiceData.value.doctorId)
+                  .priceDetail
+                  .totalInclusiveTax
+              : billingItem.totalInclusiveTax;
 
-      billingItem.inclusiveTaxJson = (selectService.value.assignDoctor.isNotEmpty && selectService.value.assignDoctor.any((e) => e.doctorId == invoiceData.value.doctorId))
-          ? selectService.value.assignDoctor.firstWhere((e) => e.doctorId == invoiceData.value.doctorId).priceDetail.inclusiveTaxJson
+      billingItem.inclusiveTaxJson = (selectService
+                  .value.assignDoctor.isNotEmpty &&
+              selectService.value.assignDoctor
+                  .any((e) => e.doctorId == invoiceData.value.doctorId))
+          ? selectService.value.assignDoctor
+              .firstWhere((e) => e.doctorId == invoiceData.value.doctorId)
+              .priceDetail
+              .inclusiveTaxJson
           : billingItem.inclusiveTaxJson.isNotEmpty
               ? billingItem.inclusiveTaxJson
               : tempInclusiveText.value;
@@ -216,8 +249,11 @@ class InvoiceDetailsController extends GetxController {
 
     isLoading(showLoader);
 
-    await CoreServiceApis.saveBillingItems(request: billingItem.toRequestJson()).then((value) {
-      toast(value.message.trim().isNotEmpty ? value.message : "Billing Record Saved");
+    await CoreServiceApis.saveBillingItems(request: billingItem.toRequestJson())
+        .then((value) {
+      toast(value.message.trim().isNotEmpty
+          ? value.message
+          : "Billing Record Saved");
       getInvoiceDetail(showLoader: true);
       refreshAppoitmentRelatedPages();
     }).catchError((e) {
@@ -225,7 +261,8 @@ class InvoiceDetailsController extends GetxController {
     }).whenComplete(() => isLoading(false));
   }
 
-  Future<void> handleDeleteBillingItemClick({required BuildContext context, required int id}) async {
+  Future<void> handleDeleteBillingItemClick(
+      {required BuildContext context, required int id}) async {
     showConfirmDialogCustom(
       context,
       primaryColor: appColorPrimary,
@@ -237,7 +274,9 @@ class InvoiceDetailsController extends GetxController {
         isLoading(true);
         CoreServiceApis.deleteBillingItems(id: id).then((value) {
           getInvoiceDetail(showLoader: true);
-          toast(value.message.trim().isEmpty ? locale.value.billingItemRemovedSuccessfully : value.message.trim());
+          toast(value.message.trim().isEmpty
+              ? locale.value.billingItemRemovedSuccessfully
+              : value.message.trim());
         }).catchError((e) {
           toast(e.toString());
         }).whenComplete(() => isLoading(false));
@@ -245,7 +284,8 @@ class InvoiceDetailsController extends GetxController {
     );
   }
 
-  Future<RxList<ServiceElement>> getAllServices({bool showloader = true, String params = '', int serviceID = 0}) async {
+  Future<RxList<ServiceElement>> getAllServices(
+      {bool showloader = true, String params = '', int serviceID = 0}) async {
     if (showloader) {
       isLoading(true);
     }

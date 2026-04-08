@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:kivicare_clinic_admin/components/cached_image_widget.dart';
 import 'package:kivicare_clinic_admin/generated/assets.dart';
 import 'package:kivicare_clinic_admin/screens/bed_management/add_edit_bed_screen.dart';
@@ -27,6 +28,18 @@ class AllBedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!CoreServiceApis.isBedFeatureAvailable) {
+      return AppScaffoldNew(
+        appBartitleText: locale.value.allBeds,
+        body: Center(
+          child: NoDataWidget(
+            title: locale.value.noDataFound,
+            imageWidget: const EmptyStateWidget(),
+          ).paddingSymmetric(horizontal: 24),
+        ),
+      );
+    }
+
     return AppScaffoldNew(
       isLoading: allBedController.isLoading,
       appBartitleText: locale.value.allBeds,
@@ -49,7 +62,8 @@ class AllBedScreen extends StatelessWidget {
               ),
             );
           },
-        ).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
+        ).visible(
+            loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)),
       ],
       body: Column(
         children: [
@@ -64,7 +78,8 @@ class AllBedScreen extends StatelessWidget {
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.zero,
                       hintText: locale.value.searchHint,
-                      prefixIcon: const Icon(Icons.search, color: appColorPrimary, size: 20),
+                      prefixIcon: const Icon(Icons.search,
+                          color: appColorPrimary, size: 20),
                       filled: true,
                       fillColor: context.cardColor,
                       border: OutlineInputBorder(
@@ -73,7 +88,8 @@ class AllBedScreen extends StatelessWidget {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: appColorPrimary, width: 1.5),
+                        borderSide: const BorderSide(
+                            color: appColorPrimary, width: 1.5),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -115,7 +131,9 @@ class AllBedScreen extends StatelessWidget {
             child: Obx(
               () => SnapHelperWidget<RxList<BedMasterModel>>(
                 future: allBedController.bedsFuture.value,
-                initialData: allBedController.bedMasterList.isNotEmpty ? allBedController.bedMasterList : RxList<BedMasterModel>(),
+                initialData: allBedController.bedMasterList.isNotEmpty
+                    ? allBedController.bedMasterList
+                    : RxList<BedMasterModel>(),
                 errorBuilder: (error) {
                   return NoDataWidget(
                     title: error.toString(),
@@ -139,11 +157,17 @@ class AllBedScreen extends StatelessWidget {
                       emptyWidget: NoDataWidget(
                         title: locale.value.noBedsFound,
                         imageWidget: const EmptyStateWidget(),
-                        subTitle: locale.value.thereAreCurrentlyNoAppointmentsAvailable,
-                      ).paddingSymmetric(horizontal: 24).paddingBottom(Get.height * 0.15).visible(!allBedController.isLoading.value),
+                        subTitle: locale
+                            .value.thereAreCurrentlyNoAppointmentsAvailable,
+                      )
+                          .paddingSymmetric(horizontal: 24)
+                          .paddingBottom(Get.height * 0.15)
+                          .visible(!allBedController.isLoading.value),
                       itemBuilder: (context, index) {
-                        final bed = allBedController.filteredBedMasterList[index];
-                        return _buildBedMasterCard(context, bed).paddingBottom(16);
+                        final bed =
+                            allBedController.filteredBedMasterList[index];
+                        return _buildBedMasterCard(context, bed)
+                            .paddingBottom(16);
                       },
                       onNextPage: () async {
                         if (!allBedController.isLastPage.value) {
@@ -222,13 +246,19 @@ class AllBedScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${locale.value.charges}: ',
-                            style: TextStyle(fontSize: 12, color: Get.isDarkMode ? UIColors.labelTextDark : UIColors.labelTextLight),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Get.isDarkMode
+                                    ? UIColors.labelTextDark
+                                    : UIColors.labelTextLight),
                           ),
                           PriceWidget(
                             price: bed.charges,
                             size: 14,
                             isBoldText: true,
-                            color: Get.isDarkMode ? UIColors.valueTextDark : UIColors.valueTextLight,
+                            color: Get.isDarkMode
+                                ? UIColors.valueTextDark
+                                : UIColors.valueTextLight,
                           ),
                         ],
                       ),
@@ -239,11 +269,20 @@ class AllBedScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${locale.value.capacity}: ',
-                            style: TextStyle(fontSize: 12, color: Get.isDarkMode ? UIColors.labelTextDark : UIColors.labelTextLight),
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Get.isDarkMode
+                                    ? UIColors.labelTextDark
+                                    : UIColors.labelTextLight),
                           ),
                           Text(
                             bed.capacity.validate().toString(),
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Get.isDarkMode ? UIColors.valueTextDark : UIColors.valueTextLight),
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Get.isDarkMode
+                                    ? UIColors.valueTextDark
+                                    : UIColors.valueTextLight),
                           ),
                         ],
                       ),
@@ -251,7 +290,8 @@ class AllBedScreen extends StatelessWidget {
                   ],
                 ),
                 12.height,
-                if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) ...[
+                if (loginUserData.value.userRole
+                    .contains(EmployeeKeyConst.vendor)) ...[
                   commonDivider,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -261,7 +301,9 @@ class AllBedScreen extends StatelessWidget {
                           url: Assets.iconsIcEditReview,
                           height: 18,
                           width: 18,
-                          color: Get.isDarkMode ? UIColors.iconDark : UIColors.iconLight,
+                          color: Get.isDarkMode
+                              ? UIColors.iconDark
+                              : UIColors.iconLight,
                         ),
                         padding: EdgeInsets.zero,
                         visualDensity: VisualDensity.compact,
@@ -272,7 +314,8 @@ class AllBedScreen extends StatelessWidget {
                               isEdit: true,
                               allBedController: allBedController,
                               controller: Get.put(
-                                AddEditBedController(initialBedData: bed), // Pass bed directly
+                                AddEditBedController(
+                                    initialBedData: bed), // Pass bed directly
                               ),
                             ),
                           );
@@ -283,7 +326,9 @@ class AllBedScreen extends StatelessWidget {
                           url: Assets.iconsIcDelete,
                           height: 18,
                           width: 18,
-                          color: Get.isDarkMode ? UIColors.iconDark : UIColors.iconLight,
+                          color: Get.isDarkMode
+                              ? UIColors.iconDark
+                              : UIColors.iconLight,
                         ),
                         padding: EdgeInsets.zero,
                         visualDensity: VisualDensity.compact,
@@ -306,11 +351,17 @@ class AllBedScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: UIColors.statusBadgeBackground,
-                  borderRadius: BorderRadius.only(topRight: Radius.circular(10), bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5)),
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomLeft: Radius.circular(5),
+                      bottomRight: Radius.circular(5)),
                 ),
                 child: Text(
                   locale.value.underMaintenance.capitalizeEachWord(),
-                  style: TextStyle(color: UIColors.statusBadgeText, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: UIColors.statusBadgeText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),

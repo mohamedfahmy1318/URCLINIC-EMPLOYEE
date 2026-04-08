@@ -29,24 +29,44 @@ class AllBedController extends GetxController {
   Rx<Future<RxList<BedMasterModel>>> bedsFuture =
       Future(() => RxList<BedMasterModel>()).obs;
 
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
+
   @override
   void onInit() {
     super.onInit();
-    getBedList(showloader: true);
-    getBedTypes();
+    if (isBedFeatureAvailable) {
+      getBedList(showloader: true);
+      getBedTypes();
+    }
     filterType(filterList[0]);
   }
 
   Future<void> getBedTypes() async {
+    if (!isBedFeatureAvailable) {
+      bedTypes.clear();
+      return;
+    }
+
     try {
       final types = await CoreServiceApis.getBedTypes();
       bedTypes.assignAll(types.map((type) => type.type.validate()).toList());
     } catch (e) {
-      toast(locale.value.somethingWentWrong);
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(locale.value.somethingWentWrong);
+      }
     }
   }
 
-  Future<void> getBedList({bool showloader = true, String searchBed = ''}) async {
+  Future<void> getBedList(
+      {bool showloader = true, String searchBed = ''}) async {
+    if (!isBedFeatureAvailable) {
+      bedMasterList.clear();
+      filteredBedMasterList.clear();
+      isLastPage.value = true;
+      isLoading(false);
+      return;
+    }
+
     if (showloader) {
       isLoading(true);
     }
@@ -69,7 +89,9 @@ class AllBedController extends GetxController {
         return beds;
       }),
     ).then((value) {}).catchError((e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     }).whenComplete(() {
       isLoading(false);
     });
@@ -82,7 +104,6 @@ class AllBedController extends GetxController {
         .toSet()
         .toList();
   }
-
 
   void filterBeds() {
     page(1);
@@ -130,6 +151,10 @@ class AllBedController extends GetxController {
   }
 
   Future<void> deleteBed(String id) async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     isLoading.value = true;
     try {
       final bedId = int.tryParse(id);
@@ -159,11 +184,13 @@ class AllBedController extends GetxController {
         toast('${locale.value.deleteBed} ${locale.value.successfully}');
         final BedStatusController bedStatusController = Get.find();
         await bedStatusController.initializeData();
-      } else {
+      } else if (response.message.isNotEmpty) {
         toast(response.message);
       }
     } catch (e) {
-      toast('${locale.value.somethingWentWrong}: ${e.toString()}');
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast('${locale.value.somethingWentWrong}: ${e.toString()}');
+      }
     } finally {
       isLoading.value = false;
     }

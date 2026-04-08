@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:kivicare_clinic_admin/screens/patient/all_patient_list.dart';
-import 'package:kivicare_clinic_admin/utils/app_common.dart';
 import '../../../generated/assets.dart';
 import '../../../main.dart';
 

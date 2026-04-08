@@ -15,6 +15,7 @@ import '../../../utils/app_common.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/local_storage.dart';
+import '../../../utils/secure_storage_helper.dart';
 import '../model/login_roles_model.dart';
 import '../services/social_logins.dart';
 
@@ -39,32 +40,49 @@ class SignInController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     if (appConfigs.value.isDummyCredential != 1) {
       emailCont.text = '';
       passwordCont.text = '';
       isRememberMe.value = false;
     }
 
-    isRememberMe.value = getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME) ?? false;
+    // Migrate old plaintext password once, then remove insecure value.
+    final legacyPassword =
+        getValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
+    if (legacyPassword is String && legacyPassword.isNotEmpty) {
+      await SecureStorageHelper.saveUserPassword(legacyPassword);
+      removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
+    }
+
+    isRememberMe.value =
+        getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME) ?? false;
     if (!appConfigs.value.isMultiVendor) {
-      loginRoles.removeWhere((item) => item.userType == EmployeeKeyConst.vendor);
+      loginRoles
+          .removeWhere((item) => item.userType == EmployeeKeyConst.vendor);
       if (getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME) ?? false) {
         removeValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME);
       }
-    } else if (loginRoles.indexWhere((item) => item.userType == EmployeeKeyConst.vendor) == -1) {
+    } else if (loginRoles
+            .indexWhere((item) => item.userType == EmployeeKeyConst.vendor) ==
+        -1) {
       loginRoles.add(vendorLoginRole);
     }
     if (!appConfigs.value.isPharma.getBoolInt()) {
-      loginRoles.removeWhere((item) => item.userType == EmployeeKeyConst.pharma);
-    } else if (loginRoles.indexWhere((item) => item.userType == EmployeeKeyConst.pharma) == -1) {
+      loginRoles
+          .removeWhere((item) => item.userType == EmployeeKeyConst.pharma);
+    } else if (loginRoles
+            .indexWhere((item) => item.userType == EmployeeKeyConst.pharma) ==
+        -1) {
       loginRoles.add(pharmaLoginRole);
     }
     if (Get.arguments is bool) {
       isNavigateToDashboard(Get.arguments == true);
     }
-    final userIsRemeberMe = getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME);
-    final userNameFromLocal = getValueFromLocal(SharedPreferenceConst.USER_NAME);
+    final userIsRemeberMe =
+        getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME);
+    final userNameFromLocal =
+        getValueFromLocal(SharedPreferenceConst.USER_NAME);
     if (userNameFromLocal is String) {
       userName(userNameFromLocal);
     }
@@ -73,12 +91,13 @@ class SignInController extends GetxController {
       if (userEmail is String) {
         emailCont.text = userEmail;
       }
-      final userPASSWORD = getValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
-      if (userPASSWORD is String) {
+      final userPASSWORD = await SecureStorageHelper.getUserPassword();
+      if (userPASSWORD.isNotEmpty) {
         passwordCont.text = userPASSWORD;
       }
     }
-    if ((!appConfigs.value.isMultiVendor) && (selectedLoginRole.value.userType == EmployeeKeyConst.vendor)) {
+    if ((!appConfigs.value.isMultiVendor) &&
+        (selectedLoginRole.value.userType == EmployeeKeyConst.vendor)) {
       emailCont.text = "";
       passwordCont.text = "";
       selectedLoginRole(LoginRoleData());
@@ -98,7 +117,7 @@ class SignInController extends GetxController {
       };
 
       await AuthServiceApis.loginUser(request: req).then((value) async {
-        handleLoginResponse(loginResponse: value);
+        await handleLoginResponse(loginResponse: value);
       }).catchError((e) {
         isLoading(false);
         toast(e.toString(), print: true);
@@ -124,8 +143,9 @@ class SignInController extends GetxController {
       log('signInWithGoogle REQUEST: $request');
 
       /// Social Login Api
-      await AuthServiceApis.loginUser(request: request, isSocialLogin: true).then((value) async {
-        handleLoginResponse(loginResponse: value, isSocialLogin: true);
+      await AuthServiceApis.loginUser(request: request, isSocialLogin: true)
+          .then((value) async {
+        await handleLoginResponse(loginResponse: value, isSocialLogin: true);
       }).catchError((e) {
         isLoading(false);
         toast(e.toString(), print: true);
@@ -152,8 +172,9 @@ class SignInController extends GetxController {
       log('signInWithGoogle REQUEST: $request');
 
       /// Social Login Api
-      await AuthServiceApis.loginUser(request: request, isSocialLogin: true).then((value) async {
-        handleLoginResponse(loginResponse: value, isSocialLogin: true);
+      await AuthServiceApis.loginUser(request: request, isSocialLogin: true)
+          .then((value) async {
+        await handleLoginResponse(loginResponse: value, isSocialLogin: true);
       }).catchError((e) {
         isLoading(false);
         toast(e.toString(), print: true);
@@ -164,26 +185,34 @@ class SignInController extends GetxController {
     });
   }
 
-  void handleLoginResponse({required UserResponse loginResponse, bool isSocialLogin = false}) {
+  Future<void> handleLoginResponse(
+      {required UserResponse loginResponse, bool isSocialLogin = false}) async {
     if (loginResponse.userData.userRole.contains(EmployeeKeyConst.vendor) ||
         loginResponse.userData.userRole.contains(EmployeeKeyConst.doctor) ||
-        loginResponse.userData.userRole.contains(EmployeeKeyConst.receptionist) ||
+        loginResponse.userData.userRole
+            .contains(EmployeeKeyConst.receptionist) ||
         loginResponse.userData.userRole.contains(EmployeeKeyConst.pharma)) {
       loginUserData(loginResponse.userData);
       loginUserData.value.isSocialLogin = isSocialLogin;
       loginUserData.value.userType = selectedLoginRole.value.userType;
       setValueToLocal(SharedPreferenceConst.USER_DATA, loginUserData.toJson());
-      setValueToLocal(SharedPreferenceConst.USER_PASSWORD, isSocialLogin ? "" : passwordCont.text.trim());
+      if (isSocialLogin) {
+        await SecureStorageHelper.clearUserPassword();
+      } else {
+        await SecureStorageHelper.saveUserPassword(passwordCont.text.trim());
+      }
+      removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
       isLoggedIn(true);
       setValueToLocal(SharedPreferenceConst.IS_LOGGED_IN, true);
       setValueToLocal(SharedPreferenceConst.IS_REMEMBER_ME, isRememberMe.value);
       if (loginResponse.userData.userRole.contains(EmployeeKeyConst.pharma)) {
         selectedAppClinic(loginResponse.userData.selectedClinic);
-       /* selectedAppCommission(loginResponse.userData.commission);
+        /* selectedAppCommission(loginResponse.userData.commission);
         log("commission length----${selectedAppCommission.length}");*/
         //setValueToLocal(SharedPreferenceConst.COMMISSION, loginResponse.userData.commission);
       }
-      if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) && selectedAppClinic.value.id.isNegative) {
+      if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) &&
+          selectedAppClinic.value.id.isNegative) {
         Get.to(
           () => ChooseClinicScreen(),
           arguments: ClinicCenterArgumentModel(
@@ -193,7 +222,8 @@ class SignInController extends GetxController {
           if (value is ClinicData) {
             selectedAppClinic(value);
             loginUserData.value.selectedClinic = value;
-            setValueToLocal(SharedPreferenceConst.USER_DATA, loginUserData.toJson());
+            setValueToLocal(
+                SharedPreferenceConst.USER_DATA, loginUserData.toJson());
             Get.offAll(
               () => DashboardScreen(),
               binding: BindingsBuilder(() {

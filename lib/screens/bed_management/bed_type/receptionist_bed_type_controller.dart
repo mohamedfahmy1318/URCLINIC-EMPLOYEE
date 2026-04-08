@@ -28,12 +28,17 @@ class ReceptionistBedTypeController extends GetxController {
 
   RxInt page = 1.obs;
   RxBool isLastPage = false.obs;
-  Rx<Future<RxList<BedTypeElement>>> bedTypesFuture = Future(() => RxList<BedTypeElement>()).obs;
+  Rx<Future<RxList<BedTypeElement>>> bedTypesFuture =
+      Future(() => RxList<BedTypeElement>()).obs;
+
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
 
   @override
   void onInit() {
     super.onInit();
-    getBedTypes(showloader: true);
+    if (isBedFeatureAvailable) {
+      getBedTypes(showloader: true);
+    }
     ever(searchRx, (String s) {
       filterBedTypes(s);
     });
@@ -48,6 +53,13 @@ class ReceptionistBedTypeController extends GetxController {
   }
 
   Future<void> getBedTypes({bool showloader = true}) async {
+    if (!isBedFeatureAvailable) {
+      bedTypes.clear();
+      filteredBedTypes.clear();
+      isLoading(false);
+      return;
+    }
+
     if (showloader) {
       bedTypesFuture(Future(() async {
         try {
@@ -64,7 +76,9 @@ class ReceptionistBedTypeController extends GetxController {
             ..addAll(types);
           return bedTypes;
         } catch (e) {
-          toast(e.toString());
+          if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+            toast(e.toString());
+          }
           rethrow;
         } finally {
           isLoading(false);
@@ -86,7 +100,9 @@ class ReceptionistBedTypeController extends GetxController {
           ..clear()
           ..addAll(types);
       } catch (e) {
-        toast(e.toString());
+        if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+          toast(e.toString());
+        }
       }
     }
   }
@@ -95,11 +111,17 @@ class ReceptionistBedTypeController extends GetxController {
     if (query.isEmpty) {
       filteredBedTypes.value = bedTypes.value;
     } else {
-      filteredBedTypes.value = bedTypes.where((bedType) => bedType.type.toLowerCase().contains(query.toLowerCase()) || bedType.description.toLowerCase().contains(query.toLowerCase())).toList();
+      filteredBedTypes.value = bedTypes
+          .where((bedType) =>
+              bedType.type.toLowerCase().contains(query.toLowerCase()) ||
+              bedType.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
   }
 
   Future<void> addBedType(Map<String, dynamic> bedType) async {
+    if (!isBedFeatureAvailable) return;
+
     if (isLoading.value) return;
     isLoading(true);
     try {
@@ -120,47 +142,66 @@ class ReceptionistBedTypeController extends GetxController {
         toast(error.toString());
       });
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
   }
 
   Future<void> updateBedType(Map<String, dynamic> bedType) async {
+    if (!isBedFeatureAvailable) return;
+
     if (isLoading.value) return;
     isLoading(true);
     try {
-      final response = await handleResponse(await buildHttpResponse('${APIEndPoints.bedType}/${bedType['id']}', request: {'type': bedType['type'], 'description': bedType['description'], '_method': 'PUT'}, method: HttpMethodType.POST));
+      final response = await handleResponse(await buildHttpResponse(
+          '${APIEndPoints.bedType}/${bedType['id']}',
+          request: {
+            'type': bedType['type'],
+            'description': bedType['description'],
+            '_method': 'PUT'
+          },
+          method: HttpMethodType.POST));
 
       if (response['status'] == true) {
         await getBedTypes();
         Get.back();
         toast(locale.value.bedTypeUpdatedSuccessfully);
-      } else {
+      } else if ((response['message'] ?? '').toString().isNotEmpty) {
         toast(response['message'] ?? locale.value.somethingWentWrong);
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
   }
 
   Future<void> deleteBedType(int id) async {
+    if (!isBedFeatureAvailable) return;
+
     isLoading(true);
     try {
-      final response = await handleResponse(await buildHttpResponse('${APIEndPoints.bedType}/$id', method: HttpMethodType.DELETE));
+      final response = await handleResponse(await buildHttpResponse(
+          '${APIEndPoints.bedType}/$id',
+          method: HttpMethodType.DELETE));
       if (response['status'] == true) {
         await getBedTypes();
         if (Get.isDialogOpen == true) {
           Get.back();
         }
         toast('${locale.value.deleteBedType} ${locale.value.successfully}');
-      } else {
+      } else if ((response['message'] ?? '').toString().isNotEmpty) {
         toast(response['message'] ?? locale.value.somethingWentWrong);
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -181,7 +222,8 @@ class ReceptionistBedTypeController extends GetxController {
     typeController.text = bedType.type;
     descriptionController.text = bedType.description;
 
-    Get.to(() => BedTypeFormScreen(bedTypeData: bedType.toJson()))?.then((result) {
+    Get.to(() => BedTypeFormScreen(bedTypeData: bedType.toJson()))
+        ?.then((result) {
       if (result == true) {
         getBedTypes();
       }

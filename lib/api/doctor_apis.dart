@@ -89,8 +89,9 @@ class DoctorApis {
       onSuccess: (data) async {
         log("Response: ${jsonDecode(data)}");
         final baseResponseModel = BaseResponseModel.fromJson(jsonDecode(data));
-        if (baseResponseModel.message.isNotEmpty)
+        if (baseResponseModel.message.isNotEmpty) {
           toast(baseResponseModel.message, print: true);
+        }
         onSuccess?.call(data);
       },
       onError: (error) {

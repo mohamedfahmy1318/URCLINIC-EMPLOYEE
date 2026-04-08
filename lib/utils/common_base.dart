@@ -1,6 +1,7 @@
 // ignore_for_file: body_might_complete_normally_catch_error
 
 import 'package:country_picker/country_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -60,9 +61,11 @@ Future<void> handleRate() async {
       commonLaunchUrl(
           appConfigs.value.clinicadminAppUrl.clinicadminAppAppStore.trim(),
           launchMode: LaunchMode.externalApplication);
-    } else {
+    } else if (APP_APPSTORE_URL.trim().isNotEmpty) {
       commonLaunchUrl(APP_APPSTORE_URL,
           launchMode: LaunchMode.externalApplication);
+    } else {
+      toast(locale.value.invalidUrl);
     }
   }
 }
@@ -149,9 +152,30 @@ Widget commonLeadingWid(
 
 Future<void> commonLaunchUrl(String address,
     {LaunchMode launchMode = LaunchMode.inAppWebView}) async {
-  await launchUrl(Uri.parse(address), mode: launchMode).catchError((e) {
+  final String normalizedAddress = address.trim();
+  if (normalizedAddress.isEmpty) {
     toast('${locale.value.invalidUrl}: $address');
-  });
+    return;
+  }
+
+  Uri? uri = Uri.tryParse(normalizedAddress);
+  if (uri != null && uri.scheme.isEmpty) {
+    uri = Uri.tryParse('https://$normalizedAddress');
+  }
+
+  if (uri == null || uri.scheme.isEmpty) {
+    toast('${locale.value.invalidUrl}: $address');
+    return;
+  }
+
+  try {
+    final bool didLaunch = await launchUrl(uri, mode: launchMode);
+    if (!didLaunch) {
+      toast('${locale.value.invalidUrl}: $address');
+    }
+  } catch (_) {
+    toast('${locale.value.invalidUrl}: $address');
+  }
 }
 
 void viewFiles(String url) {
@@ -161,14 +185,9 @@ void viewFiles(String url) {
 }
 
 void launchCall(String? url) {
-  if (url.validate().isNotEmpty) {
-    if (isIOS) {
-      commonLaunchUrl('tel://${url!}',
-          launchMode: LaunchMode.externalApplication);
-    } else {
-      commonLaunchUrl('tel:${url!}',
-          launchMode: LaunchMode.externalApplication);
-    }
+  final String phone = url.validate().trim();
+  if (phone.isNotEmpty) {
+    commonLaunchUrl('tel:$phone', launchMode: LaunchMode.externalApplication);
   }
 }
 
@@ -184,7 +203,10 @@ void launchMap(String? url) {
 
 void launchMail(String url) {
   if (url.validate().isNotEmpty) {
-    launchUrl(mailTo(to: [url]), mode: LaunchMode.externalApplication);
+    commonLaunchUrl(
+      mailTo(to: [url]).toString(),
+      launchMode: LaunchMode.externalApplication,
+    );
   }
 }
 
@@ -918,8 +940,9 @@ Future<void> doIfLoggedIn(VoidCallback callback) async {
 }
 
 void launchUrlCustomTab(String? url) {
-  if (url.validate().isNotEmpty) {
-    launchUrl(Uri.parse(url!));
+  final String targetUrl = url.validate().trim();
+  if (targetUrl.isNotEmpty) {
+    commonLaunchUrl(targetUrl);
   }
 }
 
@@ -989,11 +1012,24 @@ bool isOutsideBreakTimeList(List<BreakListModel> breakListModel,
 /// Routes name to directly navigate the route by its name
 
 class MyHttpOverrides extends HttpOverrides {
+  static const Set<String> _debugTrustedHosts = <String>{
+    'localhost',
+    '127.0.0.1',
+    '::1',
+    '10.0.2.2',
+  };
+
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+    final HttpClient client = super.createHttpClient(context);
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) {
+      if (kReleaseMode) return false;
+
+      final String normalizedHost = host.toLowerCase();
+      return _debugTrustedHosts.contains(normalizedHost);
+    };
+    return client;
   }
 }
 

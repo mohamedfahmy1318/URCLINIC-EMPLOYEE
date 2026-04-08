@@ -9,7 +9,6 @@ import '../../../utils/app_common.dart';
 import '../model/theme_mode_data_model.dart';
 import 'settings_controller.dart';
 import '../../../locale/app_localizations.dart';
-import '../../../locale/languages.dart';
 import '../../../main.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/local_storage.dart';

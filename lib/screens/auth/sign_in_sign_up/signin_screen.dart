@@ -63,7 +63,11 @@ class SignInScreen extends StatelessWidget {
                         filled: true,
                         hintText: locale.value.email,
                       ),
-                      suffix: commonLeadingWid(imgPath: Assets.iconsIcMail, color: secondaryTextColor, size: 12).paddingAll(16),
+                      suffix: commonLeadingWid(
+                              imgPath: Assets.iconsIcMail,
+                              color: secondaryTextColor,
+                              size: 12)
+                          .paddingAll(16),
                     ),
                     16.height,
                     Text(locale.value.password, style: primaryTextStyle()),
@@ -82,8 +86,16 @@ class SignInScreen extends StatelessWidget {
                         filled: true,
                         hintText: locale.value.password,
                       ),
-                      suffixPasswordVisibleWidget: commonLeadingWid(imgPath: Assets.iconsIcEye, color: appColorPrimary, size: 12).paddingAll(14),
-                      suffixPasswordInvisibleWidget: commonLeadingWid(imgPath: Assets.iconsIcEyeSlash, color: appColorPrimary, size: 12).paddingAll(14),
+                      suffixPasswordVisibleWidget: commonLeadingWid(
+                              imgPath: Assets.iconsIcEye,
+                              color: appColorPrimary,
+                              size: 12)
+                          .paddingAll(14),
+                      suffixPasswordInvisibleWidget: commonLeadingWid(
+                              imgPath: Assets.iconsIcEyeSlash,
+                              color: appColorPrimary,
+                              size: 12)
+                          .paddingAll(14),
                     ),
                     8.height,
                     Row(
@@ -101,8 +113,10 @@ class SignInScreen extends StatelessWidget {
                             onChanged: (val) async {
                               signInController.toggleSwitch();
                             },
-                            checkboxShape: RoundedRectangleBorder(borderRadius: radius(0)),
-                            side: const BorderSide(color: secondaryTextColor, width: 1.5),
+                            checkboxShape:
+                                RoundedRectangleBorder(borderRadius: radius(0)),
+                            side: const BorderSide(
+                                color: secondaryTextColor, width: 1.5),
                             title: Text(
                               locale.value.rememberMe,
                               style: secondaryTextStyle(color: darkGrayGeneral),
@@ -130,7 +144,7 @@ class SignInScreen extends StatelessWidget {
                 ),
               ).paddingSymmetric(horizontal: 16),
               SizedBox(height: Get.height * 0.03),
-              if (appConfigs.value.isDummyCredential == 1)
+              if (shouldShowDemoCredentials)
                 TextButton(
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
@@ -140,7 +154,7 @@ class SignInScreen extends StatelessWidget {
                       context,
                       isLoading: signInController.isLoading,
                       onChange: (p0) {
-                        if (appConfigs.value.isDummyCredential == 1) {
+                        if (shouldShowDemoCredentials) {
                           signInController.emailCont.text = p0.email;
                           signInController.passwordCont.text = p0.password;
 
@@ -163,7 +177,7 @@ class SignInScreen extends StatelessWidget {
                       decorationColor: appColorPrimary,
                     ),
                   ).paddingSymmetric(horizontal: 8),
-              ).paddingBottom(16).visible(isIqonicProduct && appConfigs.value.isDummyCredential == 1),
+                ).paddingBottom(16).visible(shouldShowDemoCredentials),
               Column(
                 children: [
                   Row(
@@ -172,10 +186,12 @@ class SignInScreen extends StatelessWidget {
                         height: 54,
                         text: locale.value.signIn,
                         color: appColorSecondary,
-                        shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
+                        shapeBorder: RoundedRectangleBorder(
+                            borderRadius: radius(defaultAppButtonRadius / 2)),
                         textStyle: appButtonTextStyleWhite,
                         onTap: () {
-                          if (signInController.signInformKey.currentState!.validate()) {
+                          if (signInController.signInformKey.currentState!
+                              .validate()) {
                             signInController.signInformKey.currentState!.save();
                             signInController.saveForm();
                           }
@@ -187,7 +203,8 @@ class SignInScreen extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(locale.value.notAMember, style: secondaryTextStyle()),
+                      Text(locale.value.notAMember,
+                          style: secondaryTextStyle()),
                       4.width,
                       InkWell(
                         onTap: () {
@@ -223,7 +240,9 @@ class SignInScreen extends StatelessWidget {
                         child: Obx(
                           () => RoleComponent(
                             loginUserRole: e,
-                            isSelected: signInController.selectedLoginRole.value.id == e.id,
+                            isSelected:
+                                signInController.selectedLoginRole.value.id ==
+                                    e.id,
                           ),
                         ),
                       ),
@@ -248,13 +267,17 @@ class RoleComponent extends StatelessWidget {
   final LoginRoleData loginUserRole;
   final bool isSelected;
 
-  const RoleComponent({super.key, required this.loginUserRole, this.isSelected = false});
+  const RoleComponent(
+      {super.key, required this.loginUserRole, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      decoration: boxDecorationDefault(color: isSelected ? appColorPrimary : context.cardColor, shape: BoxShape.rectangle, borderRadius: radius(100)),
+      decoration: boxDecorationDefault(
+          color: isSelected ? appColorPrimary : context.cardColor,
+          shape: BoxShape.rectangle,
+          borderRadius: radius(100)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -267,7 +290,8 @@ class RoleComponent extends StatelessWidget {
           8.width,
           Text(
             loginUserRole.roleName,
-            style: boldTextStyle(size: 14, color: isSelected ? white : textSecondaryColorGlobal),
+            style: boldTextStyle(
+                size: 14, color: isSelected ? white : textSecondaryColorGlobal),
           ),
         ],
       ),
@@ -275,13 +299,17 @@ class RoleComponent extends StatelessWidget {
   }
 }
 
-void chooseEmployeeType(BuildContext context, {RxBool? isLoading, required Function(LoginRoleData) onChange, bool isFromDemoAccountTap = false}) {
+void chooseEmployeeType(BuildContext context,
+    {RxBool? isLoading,
+    required Function(LoginRoleData) onChange,
+    bool isFromDemoAccountTap = false}) {
   Get.bottomSheet(
     Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
       decoration: boxDecorationDefault(
         color: context.cardColor,
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(35), topRight: Radius.circular(35)),
+        borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(35), topRight: Radius.circular(35)),
       ),
       child: ListView.separated(
         itemCount: loginRoles.length,
@@ -290,14 +318,20 @@ void chooseEmployeeType(BuildContext context, {RxBool? isLoading, required Funct
           return SettingItemWidget(
             title: loginRoles[index].roleName,
             titleTextStyle: primaryTextStyle(size: 14),
-            leading: CachedImageWidget(url: loginRoles[index].icon, color: appColorPrimary, height: 22, fit: BoxFit.fitHeight, width: 22),
+            leading: CachedImageWidget(
+                url: loginRoles[index].icon,
+                color: appColorPrimary,
+                height: 22,
+                fit: BoxFit.fitHeight,
+                width: 22),
             onTap: () {
               onChange(loginRoles[index]);
               Get.back();
             },
           );
         },
-        separatorBuilder: (context, index) => commonDivider.paddingSymmetric(vertical: 6),
+        separatorBuilder: (context, index) =>
+            commonDivider.paddingSymmetric(vertical: 6),
       ),
     ),
   );

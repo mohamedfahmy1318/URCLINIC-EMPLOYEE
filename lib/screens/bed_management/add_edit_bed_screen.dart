@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:kivicare_clinic_admin/components/app_scaffold.dart';
 import 'package:kivicare_clinic_admin/utils/colors.dart';
@@ -20,10 +21,22 @@ class AddEditBedScreen extends StatelessWidget {
   final AllBedController allBedController;
   final bool isEdit;
 
-  const AddEditBedScreen({super.key, required this.controller, this.isEdit = false, required this.allBedController});
+  const AddEditBedScreen(
+      {super.key,
+      required this.controller,
+      this.isEdit = false,
+      required this.allBedController});
 
   @override
   Widget build(BuildContext context) {
+    if (!CoreServiceApis.isBedFeatureAvailable) {
+      return AppScaffoldNew(
+        appBartitleText: (isEdit) ? locale.value.editBed : locale.value.addBed,
+        body: Center(
+            child: Text(locale.value.noDataFound, style: secondaryTextStyle())),
+      );
+    }
+
     return AppScaffoldNew(
       appBarVerticalSize: Get.height * 0.12,
       appBartitleText: (isEdit) ? locale.value.editBed : locale.value.addBed,
@@ -40,7 +53,8 @@ class AddEditBedScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) ...[
+                          if (loginUserData.value.userRole
+                              .contains(EmployeeKeyConst.vendor)) ...[
                             AppTextField(
                               textStyle: primaryTextStyle(size: 12),
                               controller: controller.clinicCont,
@@ -53,7 +67,8 @@ class AddEditBedScreen extends StatelessWidget {
                                 await showModalBottomSheet(
                                   context: getContext,
                                   shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20)),
                                   ),
                                   isScrollControlled: true,
                                   builder: (context) {
@@ -65,40 +80,58 @@ class AddEditBedScreen extends StatelessWidget {
                                           return const LoaderWidget();
                                         }
                                         return BottomSelectionSheet(
-                                          searchTextCont: controller.clinicSearchCont,
+                                          searchTextCont:
+                                              controller.clinicSearchCont,
                                           title: locale.value.selectClinic,
-                                          hintText: locale.value.searchClinicHere,
+                                          hintText:
+                                              locale.value.searchClinicHere,
                                           hasError: false,
-                                          isEmpty: controller.clinicList.isEmpty,
+                                          isEmpty:
+                                              controller.clinicList.isEmpty,
                                           errorText: '',
                                           isLoading: controller.isLoading,
                                           searchApiCall: (p0) {},
                                           onRetry: controller.getClinicList,
                                           listWidget: AnimatedListView(
                                             shrinkWrap: true,
-                                            itemCount: controller.clinicList.length,
+                                            itemCount:
+                                                controller.clinicList.length,
                                             padding: EdgeInsets.zero,
-                                            physics: const AlwaysScrollableScrollPhysics(),
-                                            listAnimationType: ListAnimationType.Slide,
+                                            physics:
+                                                const AlwaysScrollableScrollPhysics(),
+                                            listAnimationType:
+                                                ListAnimationType.Slide,
                                             itemBuilder: (ctx, index) {
-                                              final clinic = controller.clinicList[index];
+                                              final clinic =
+                                                  controller.clinicList[index];
                                               return GestureDetector(
                                                 onTap: () {
-                                                  controller.selectedClinic(clinic.id);
-                                                  controller.clinicCont.text = clinic.name.validate();
+                                                  controller.selectedClinic(
+                                                      clinic.id);
+                                                  controller.clinicCont.text =
+                                                      clinic.name.validate();
                                                   Get.back();
                                                 },
                                                 child: Container(
-                                                  padding: const EdgeInsets.all(12),
-                                                  margin: const EdgeInsets.only(bottom: 12),
-                                                  decoration: boxDecorationDefault(
-                                                    borderRadius: BorderRadius.circular(6),
-                                                    color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                  padding:
+                                                      const EdgeInsets.all(12),
+                                                  margin: const EdgeInsets.only(
+                                                      bottom: 12),
+                                                  decoration:
+                                                      boxDecorationDefault(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                    color: context.isDarkMode
+                                                        ? appScreenBackgroundDark
+                                                        : appScreenBackground,
                                                   ),
                                                   child: Text(
                                                     clinic.name,
                                                     style: primaryTextStyle(
-                                                      color: context.isDarkMode ? null : darkGrayTextColor,
+                                                      color: context.isDarkMode
+                                                          ? null
+                                                          : darkGrayTextColor,
                                                     ),
                                                   ),
                                                 ),
@@ -164,7 +197,8 @@ class AddEditBedScreen extends StatelessWidget {
                               await showModalBottomSheet(
                                 context: context,
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
                                 ),
                                 isScrollControlled: true,
                                 builder: (BuildContext context) {
@@ -173,7 +207,8 @@ class AddEditBedScreen extends StatelessWidget {
                                     child: Obx(
                                       () => BottomSelectionSheet(
                                         title: locale.value.selectBedTypeTitle,
-                                        hintText: locale.value.searchBedTypeHintText,
+                                        hintText:
+                                            locale.value.searchBedTypeHintText,
                                         hasError: false,
                                         isEmpty: controller.bedTypes.isEmpty,
                                         errorText: '',
@@ -186,30 +221,57 @@ class AddEditBedScreen extends StatelessWidget {
                                           shrinkWrap: true,
                                           itemCount: controller.bedTypes.length,
                                           padding: EdgeInsets.zero,
-                                          physics: const AlwaysScrollableScrollPhysics(),
-                                          listAnimationType: ListAnimationType.Slide,
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          listAnimationType:
+                                              ListAnimationType.Slide,
                                           itemBuilder: (ctx, index) {
                                             return GestureDetector(
                                               onTap: () {
                                                 hideKeyboard(context);
-                                                controller.selectedBedType = controller.bedTypes[index];
-                                                controller.bedTypeCont.text = controller.bedTypes[index].type.validate();
+                                                controller.selectedBedType =
+                                                    controller.bedTypes[index];
+                                                controller.bedTypeCont.text =
+                                                    controller
+                                                        .bedTypes[index].type
+                                                        .validate();
                                                 Get.back();
                                               },
                                               child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                margin: const EdgeInsets.only(bottom: 12),
-                                                decoration: boxDecorationDefault(
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                padding:
+                                                    const EdgeInsets.all(12),
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 12),
+                                                decoration:
+                                                    boxDecorationDefault(
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  color: context.isDarkMode
+                                                      ? appScreenBackgroundDark
+                                                      : appScreenBackground,
                                                 ),
                                                 child: Row(
                                                   children: [
                                                     Text(
-                                                      controller.bedTypes[index].type.validate(),
-                                                      style: primaryTextStyle(color: context.isDarkMode ? null : darkGrayTextColor),
+                                                      controller
+                                                          .bedTypes[index].type
+                                                          .validate(),
+                                                      style: primaryTextStyle(
+                                                          color: context
+                                                                  .isDarkMode
+                                                              ? null
+                                                              : darkGrayTextColor),
                                                     ).expand(),
-                                                    if (controller.selectedBedType?.type == controller.bedTypes[index].type) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                    if (controller
+                                                            .selectedBedType
+                                                            ?.type ==
+                                                        controller
+                                                            .bedTypes[index]
+                                                            .type)
+                                                      Icon(Icons.check_circle,
+                                                          color:
+                                                              appColorPrimary,
+                                                          size: 20),
                                                   ],
                                                 ),
                                               ),
@@ -227,7 +289,10 @@ class AddEditBedScreen extends StatelessWidget {
                               fillColor: context.cardColor,
                               hintText: locale.value.bedTypeLabel,
                               filled: true,
-                              suffixIcon: Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                              suffixIcon: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: dividerColor,
+                                  size: 22),
                               borderRadius: 10,
                             ),
                             validator: (value) {
@@ -244,7 +309,8 @@ class AddEditBedScreen extends StatelessWidget {
                             focus: controller.chargesFocus,
                             nextFocus: controller.capacityFocus,
                             textFieldType: TextFieldType.NUMBER,
-                            keyboardType: TextInputType.numberWithOptions(decimal: true),
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
                             decoration: inputDecoration(
                               context,
                               hintText: locale.value.chargesLabel,
@@ -253,8 +319,12 @@ class AddEditBedScreen extends StatelessWidget {
                               borderRadius: 10,
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) return locale.value.pleaseEnterBedCharges;
-                              if (double.tryParse(value) == null) return locale.value.pleaseEnterValidAmount;
+                              if (value == null || value.isEmpty) {
+                                return locale.value.pleaseEnterBedCharges;
+                              }
+                              if (double.tryParse(value) == null) {
+                                return locale.value.pleaseEnterValidAmount;
+                              }
                               return null;
                             },
                           ),
@@ -274,8 +344,12 @@ class AddEditBedScreen extends StatelessWidget {
                               borderRadius: 10,
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) return locale.value.pleaseEnterCapacity;
-                              if (int.tryParse(value) == null) return locale.value.pleaseEnterValidNumber;
+                              if (value == null || value.isEmpty) {
+                                return locale.value.pleaseEnterCapacity;
+                              }
+                              if (int.tryParse(value) == null) {
+                                return locale.value.pleaseEnterValidNumber;
+                              }
                               return null;
                             },
                           ),
@@ -290,14 +364,16 @@ class AddEditBedScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(locale.value.underMaintenanceLabel, style: secondaryTextStyle()),
+                                Text(locale.value.underMaintenanceLabel,
+                                    style: secondaryTextStyle()),
                                 Obx(
                                   () => Transform.scale(
                                     scale: 0.7,
                                     alignment: Alignment.centerRight,
                                     child: Switch(
                                       value: controller.underMaintenance,
-                                      onChanged: (val) => controller.underMaintenance = val,
+                                      onChanged: (val) =>
+                                          controller.underMaintenance = val,
                                       activeTrackColor: appColorSecondary,
                                       activeColor: Colors.white,
                                     ),
@@ -333,7 +409,10 @@ class AddEditBedScreen extends StatelessWidget {
                                     '${controller.descriptionCharCount}/250',
                                     style: secondaryTextStyle(
                                       size: 12,
-                                      color: controller.descriptionCharCount > 240 ? Colors.orange : null,
+                                      color:
+                                          controller.descriptionCharCount > 240
+                                              ? Colors.orange
+                                              : null,
                                     ),
                                   ),
                                 ),

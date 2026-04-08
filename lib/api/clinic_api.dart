@@ -152,7 +152,7 @@ class ClinicApis {
       final MultipartRequest multiPartRequest =
           await getMultiPartRequest(APIEndPoints.saveClinicGallery);
       multiPartRequest.fields.addAll(await getMultipartFields(val: request));
-      if (imageFile != null || imageFile!.isNotEmpty) {
+      if (imageFile != null && imageFile.isNotEmpty) {
         for (var i = 0; i < imageFile.length; i++) {
           multiPartRequest.files.add(await MultipartFile.fromPath(
               'gallery_images[$i]', imageFile[i].path));

@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:get/get.dart';
 import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'bed_type/model/bed_type_model.dart';
 import 'dart:async';
 
+import 'bed_type/model/bed_type_model.dart';
 import 'model/bed_master_model.dart';
 
 class BedStatusController extends GetxController {
@@ -25,14 +23,24 @@ class BedStatusController extends GetxController {
 
   RxInt selectedIndex = 0.obs;
 
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
+
   @override
   void onInit() {
     super.onInit();
-    refreshAllData();
+    if (isBedFeatureAvailable) {
+      refreshAllData();
+    } else {
+      _resetBedData();
+    }
   }
 
   void init() {
-    refreshAllData();
+    if (isBedFeatureAvailable) {
+      refreshAllData();
+    } else {
+      _resetBedData();
+    }
   }
 
   @override
@@ -44,27 +52,38 @@ class BedStatusController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    refreshBedStatusSummary();
-    refreshAllData();
+    if (isBedFeatureAvailable && bedList.isEmpty && !isLoading.value) {
+      refreshAllData();
+    }
   }
 
   Future<void> initializeData() async {
+    if (!isBedFeatureAvailable) {
+      _resetBedData();
+      return;
+    }
+
     isLoading(true);
     try {
       await fetchBedTypes();
       await fetchBedStatusSummary();
       await fetchBeds();
       if (filteredBedList.isNotEmpty && selectedBed.value == null) {
-        selectedBed.value = filteredBedList.firstWhereOrNull((bed) => bed.status);
+        selectedBed.value =
+            filteredBedList.firstWhereOrNull((bed) => bed.status);
       }
     } catch (e) {
-      toast(e.toString());
+      if (_shouldIgnoreBedError(e)) {
+        _resetBedData();
+      } else {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
   }
 
-  void updateBedCounts(Map<String, dynamic> summary) {
+  void updateBedCounts() {
     int available = 0;
     int occupied = 0;
     int maintenance = 0;
@@ -86,37 +105,66 @@ class BedStatusController extends GetxController {
   }
 
   Future<void> fetchBedStatusSummary() async {
+    if (!isBedFeatureAvailable) {
+      totalBeds.value = 0;
+      availableBeds.value = 0;
+      occupiedBeds.value = 0;
+      maintenanceBeds.value = 0;
+      return;
+    }
+
     try {
-      isLoading(true);
       final summary = await CoreServiceApis.getBedStatusSummary();
-      if (summary['status'] == true) {
-        final Map<String, dynamic> statistics = summary['data']['statistics'] ?? {};
+      if (summary['status'] == true && summary['data'] is Map) {
+        final Map<String, dynamic> statistics =
+            summary['data']['statistics'] ?? {};
         totalBeds.value = statistics['total'] ?? 0;
         availableBeds.value = statistics['available'] ?? 0;
         occupiedBeds.value = statistics['occupied'] ?? 0;
         maintenanceBeds.value = statistics['maintenance'] ?? 0;
       } else {
-        toast(e.toString());
+        updateBedCounts();
       }
     } catch (e) {
-      toast(e.toString());
-    } finally {
-      isLoading(false);
+      if (_shouldIgnoreBedError(e)) {
+        _resetBedData();
+      } else {
+        toast(e.toString());
+      }
     }
   }
 
   Future<void> refreshBedStatusSummary() async {
+    if (!isBedFeatureAvailable) {
+      _resetBedData();
+      return;
+    }
+
     try {
-      final summary = await CoreServiceApis.getBedStatusSummary();
-      updateBedCounts(summary);
+      await fetchBedStatusSummary();
     } catch (e) {
-      toast(e.toString());
+      if (_shouldIgnoreBedError(e)) {
+        _resetBedData();
+      } else {
+        toast(e.toString());
+      }
     }
   }
 
   Future<void> fetchBedTypes() async {
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      selectedBedType.value = null;
+      return;
+    }
+
     try {
       final types = await CoreServiceApis.getBedTypes();
+      if (!isBedFeatureAvailable) {
+        bedTypeList.clear();
+        selectedBedType.value = null;
+        return;
+      }
 
       // Add "All" manually
       final allCategory = BedTypeElement(id: -1, type: 'All');
@@ -125,11 +173,23 @@ class BedStatusController extends GetxController {
       // Set default selection to "All"
       selectedBedType.value = allCategory;
     } catch (e) {
-      toast(e.toString());
+      if (_shouldIgnoreBedError(e)) {
+        bedTypeList.clear();
+        selectedBedType.value = null;
+      } else {
+        toast(e.toString());
+      }
     }
   }
 
   Future<void> fetchBeds() async {
+    if (!isBedFeatureAvailable) {
+      bedList.clear();
+      filteredBedList.clear();
+      selectedBed.value = null;
+      return;
+    }
+
     try {
       await CoreServiceApis.getBedList(
         bedList: bedList,
@@ -140,10 +200,17 @@ class BedStatusController extends GetxController {
       );
       filterBeds();
       if (selectedBed.value == null && filteredBedList.isNotEmpty) {
-        selectedBed.value = filteredBedList.firstWhereOrNull((bed) => bed.status == true);
+        selectedBed.value =
+            filteredBedList.firstWhereOrNull((bed) => bed.status == true);
       }
     } catch (e) {
-      toast(e.toString());
+      if (_shouldIgnoreBedError(e)) {
+        bedList.clear();
+        filteredBedList.clear();
+        selectedBed.value = null;
+      } else {
+        toast(e.toString());
+      }
     }
   }
 
@@ -151,12 +218,15 @@ class BedStatusController extends GetxController {
     List<BedMasterModel> tempList = bedList;
 
     if (selectedBedType.value != null && selectedBedType.value!.id != -1) {
-      tempList = tempList.where((bed) => bed.bedTypeName.toLowerCase().trim() == selectedBedType.value!.type.toLowerCase().trim()).toList();
+      tempList = tempList
+          .where((bed) =>
+              bed.bedTypeName.toLowerCase().trim() ==
+              selectedBedType.value!.type.toLowerCase().trim())
+          .toList();
     }
 
     filteredBedList.assignAll(tempList);
   }
-
 
   Future<void> selectBedType(BedTypeElement? bedType) async {
     if (selectedBedType.value?.id == bedType?.id) {
@@ -174,14 +244,19 @@ class BedStatusController extends GetxController {
 
   void selectBed(BedMasterModel? bed) {
     selectedBed(bed);
-    final index = filteredBedList.indexWhere((element) => element.id == bed?.id);
+    final index =
+        filteredBedList.indexWhere((element) => element.id == bed?.id);
     if (index != -1) {
       selectedIndex(index);
     }
   }
 
-
   Future<void> refreshAllData() async {
+    if (!isBedFeatureAvailable) {
+      _resetBedData();
+      return;
+    }
+
     isLoading(true);
     try {
       await Future.wait<void>([
@@ -190,13 +265,22 @@ class BedStatusController extends GetxController {
         fetchBeds(),
       ]);
     } catch (e) {
-      toast(e.toString());
+      if (_shouldIgnoreBedError(e)) {
+        _resetBedData();
+      } else {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
   }
 
-  Future<void> updateBedStatus(int bedId, String status, {String? maintenanceNotes}) async {
+  Future<void> updateBedStatus(int bedId, String status,
+      {String? maintenanceNotes}) async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     try {
       final response = await CoreServiceApis.updateBedStatus(
         bedId: bedId,
@@ -209,19 +293,45 @@ class BedStatusController extends GetxController {
       if (response.status == true) {
         toast('Bed status updated successfully');
         await refreshAllData();
-      } else {
+      } else if (response.message.isNotEmpty) {
         toast(response.message);
       }
     } catch (e) {
-      toast(e.toString());
+      if (!_shouldIgnoreBedError(e)) {
+        toast(e.toString());
+      }
     }
   }
 
   void forceRefreshBedCounts() {
-    refreshBedStatusSummary();
+    if (isBedFeatureAvailable) {
+      refreshBedStatusSummary();
+    }
   }
 
   void forceRefreshAllData() {
-    refreshAllData();
+    if (isBedFeatureAvailable) {
+      refreshAllData();
+    }
+  }
+
+  bool _shouldIgnoreBedError(Object error) {
+    return CoreServiceApis.isBedFeatureUnavailableError(error) ||
+        !CoreServiceApis.isBedFeatureAvailable;
+  }
+
+  void _resetBedData() {
+    bedList.clear();
+    bedTypeList.clear();
+    filteredBedList.clear();
+    selectedBedType.value = null;
+    selectedBedStatus.value = '';
+    selectedBed.value = null;
+    selectedIndex.value = 0;
+    totalBeds.value = 0;
+    availableBeds.value = 0;
+    occupiedBeds.value = 0;
+    unavailableBeds.value = 0;
+    maintenanceBeds.value = 0;
   }
 }

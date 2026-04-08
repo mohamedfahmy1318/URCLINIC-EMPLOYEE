@@ -70,7 +70,8 @@ class AddEditBedController extends GetxController {
 
   set isSaving(bool value) => _isSaving.value = value;
 
-  Rx<Future<RxList<ClinicData>>> getClinics = Future(() => RxList<ClinicData>()).obs;
+  Rx<Future<RxList<ClinicData>>> getClinics =
+      Future(() => RxList<ClinicData>()).obs;
   RxList<ClinicData> clinicList = RxList();
   RxInt selectedClinic = 0.obs;
   RxInt clinicPage = 1.obs;
@@ -78,16 +79,22 @@ class AddEditBedController extends GetxController {
 
   AddEditBedController({this.initialBedData});
 
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
+
   @override
   void onInit() {
     super.onInit();
-    _loadInitialData();
+    if (isBedFeatureAvailable) {
+      _loadInitialData();
+    }
     if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) {
       getClinicList();
     }
   }
 
   Future<void> _loadInitialData() async {
+    if (!isBedFeatureAvailable) return;
+
     isLoading(true);
     await fetchBedTypes();
 
@@ -95,7 +102,8 @@ class AddEditBedController extends GetxController {
       bedNameCont.text = initialBedData!.bed.validate();
       if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) {
         await getClinicList();
-        final clinic = clinicList.firstWhereOrNull((c) => c.id.toString() == initialBedData!.clinicId.toString());
+        final clinic = clinicList.firstWhereOrNull(
+            (c) => c.id.toString() == initialBedData!.clinicId.toString());
         selectedClinic(clinic!.id);
         clinicCont.text = clinic.name;
       }
@@ -107,7 +115,8 @@ class AddEditBedController extends GetxController {
 
       final matchedType = bedTypes.firstWhereOrNull((element) {
         final typeName = initialBedData!.bedTypeName.validate();
-        return element.type.trim().toLowerCase() == typeName.trim().toLowerCase();
+        return element.type.trim().toLowerCase() ==
+            typeName.trim().toLowerCase();
       });
 
       if (matchedType != null) {
@@ -119,15 +128,26 @@ class AddEditBedController extends GetxController {
   }
 
   Future<void> fetchBedTypes() async {
+    if (!isBedFeatureAvailable) {
+      _bedTypes.clear();
+      return;
+    }
+
     try {
       final fetchedTypes = await CoreServiceApis.getBedTypes();
       _bedTypes.assignAll(fetchedTypes); // this sets bedTypes observable
     } catch (e) {
-      toast(locale.value.somethingWentWrong);
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(locale.value.somethingWentWrong);
+      }
     }
   }
 
   Future<void> saveBed({bool isEdit = false}) async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     isLoading(true);
     if (!formKey.currentState!.validate()) {
       isLoading(false);
@@ -146,7 +166,10 @@ class AddEditBedController extends GetxController {
       'description': descriptionCont.text,
       'status': status ? 1 : 0,
       'is_under_maintenance': underMaintenance,
-      'clinic_id': loginUserData.value.userRole.contains(EmployeeKeyConst.vendor) ? selectedClinic.value : selectedAppClinic.value.id,
+      'clinic_id':
+          loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)
+              ? selectedClinic.value
+              : selectedAppClinic.value.id,
       'clinic_admin_id': loginUserData.value.id.validate().toString(),
     };
     try {
@@ -160,16 +183,22 @@ class AddEditBedController extends GetxController {
         );
       }
       if (response.status == true) {
-        toast(isEdit ? locale.value.bedEditedSuccessfully : locale.value.bedSavedSuccessfully);
+        toast(isEdit
+            ? locale.value.bedEditedSuccessfully
+            : locale.value.bedSavedSuccessfully);
         Get.back(result: true);
-      } else {
+      } else if (response.message.isNotEmpty) {
         toast(response.message);
       }
 
-      final BedStatusController bedStatusController = Get.find();
-      await bedStatusController.initializeData();
+      if (Get.isRegistered<BedStatusController>()) {
+        final BedStatusController bedStatusController = Get.find();
+        await bedStatusController.initializeData();
+      }
     } catch (e) {
-      toast(locale.value.somethingWentWrong);
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(locale.value.somethingWentWrong);
+      }
     }
     isLoading(false);
   }

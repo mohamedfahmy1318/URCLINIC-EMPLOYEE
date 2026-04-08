@@ -14,6 +14,7 @@ import '../../../utils/app_common.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/local_storage.dart';
+import '../../../utils/secure_storage_helper.dart';
 import '../../auth/model/common_model.dart';
 import '../../../api/doctor_apis.dart';
 import '../../clinic/add_clinic_form/addresses_apis.dart';
@@ -166,11 +167,13 @@ class AddDoctorController extends GetxController {
       isEdit(true);
       await getDoctorDetail();
       if (doctorData.value.doctorId == loginUserData.value.id) {
-        final userPASSWORD = getValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
-        if (userPASSWORD is String) {
+        final userPASSWORD = await SecureStorageHelper.getUserPassword();
+        if (userPASSWORD.isNotEmpty) {
           passwordCont.text = userPASSWORD;
           confirmPasswordCont.text = userPASSWORD;
         }
+
+        removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
       }
     } else {
       init();
@@ -182,7 +185,8 @@ class AddDoctorController extends GetxController {
 
   Future<void> getDoctorDetail() async {
     isLoading(true);
-    await CoreServiceApis.getDoctorDetail(doctorId: doctorData.value.doctorId).then((res) {
+    await CoreServiceApis.getDoctorDetail(doctorId: doctorData.value.doctorId)
+        .then((res) {
       doctorData(res.value);
       qualifications(
         res.value.qualifications
@@ -218,7 +222,9 @@ class AddDoctorController extends GetxController {
     aboutSelfCont.text = doctor.value.aboutSelf;
     experienceCont.text = doctor.value.experience;
     expertCont.text = doctor.value.expert;
-    selectedGender(genders.firstWhere((element) => element.slug == doctor.value.gender.toLowerCase(), orElse: () => CMNModel(id: 3, name: "Other", slug: "other")));
+    selectedGender(genders.firstWhere(
+        (element) => element.slug == doctor.value.gender.toLowerCase(),
+        orElse: () => CMNModel(id: 3, name: "Other", slug: "other")));
     addressCont.text = doctor.value.address;
     signatureCont.value.text = doctor.value.signature;
     try {
@@ -228,7 +234,8 @@ class AddDoctorController extends GetxController {
     } catch (e) {
       try {
         if (doctor.value.signature.isNotEmpty) {
-          signatureUint8List(base64.decode(signatureCont.value.text.split(',').last));
+          signatureUint8List(
+              base64.decode(signatureCont.value.text.split(',').last));
         }
       } catch (e) {
         log('re try signatureUint8List Err: $e');
@@ -251,10 +258,12 @@ class AddDoctorController extends GetxController {
           pickedPhoneCode(CountryParser.parsePhoneCode(phoneCode));
         } catch (parseError) {
           final countries = CountryService().getAll();
-          final matchingCountries = countries.where((c) => c.phoneCode == phoneCode).toList();
+          final matchingCountries =
+              countries.where((c) => c.phoneCode == phoneCode).toList();
 
           if (matchingCountries.isNotEmpty) {
-            matchingCountries.sort((a, b) => a.name.length.compareTo(b.name.length));
+            matchingCountries
+                .sort((a, b) => a.name.length.compareTo(b.name.length));
             pickedPhoneCode(matchingCountries.first);
           } else {
             log("No country found for phone code: $phoneCode");
@@ -265,7 +274,9 @@ class AddDoctorController extends GetxController {
       }
     } catch (e) {
       pickedPhoneCode(Country.from(json: defaultCountry.toJson()));
-      phoneCont.text = doctor.value.mobile.replaceAll("+${pickedPhoneCode.value.phoneCode}", "").trim();
+      phoneCont.text = doctor.value.mobile
+          .replaceAll("+${pickedPhoneCode.value.phoneCode}", "")
+          .trim();
       log('CountryParser.parsePhoneCode Err: $e');
     }
     status(doctor.value.status.getBoolInt());
@@ -279,7 +290,8 @@ class AddDoctorController extends GetxController {
     selectClinics(clinicList: selClinicList);
     final List<ServiceElement> selectsServices = [];
     for (final element in doctorData.value.services) {
-      selectsServices.add(ServiceElement(id: element.serviceId, name: element.name, status: false.obs));
+      selectsServices.add(ServiceElement(
+          id: element.serviceId, name: element.name, status: false.obs));
     }
     selectServices(serviceList: selectsServices);
   }
@@ -299,7 +311,8 @@ class AddDoctorController extends GetxController {
   Future<void> getCountry({String searchTxt = ''}) async {
     isLoading(true);
 
-    await UserAddressesApis.getCountryList(searchTxt: searchTxt).then((value) async {
+    await UserAddressesApis.getCountryList(searchTxt: searchTxt)
+        .then((value) async {
       countryList.clear();
       countryList(value);
 
@@ -317,10 +330,13 @@ class AddDoctorController extends GetxController {
     }).whenComplete(() => isLoading(false));
   }
 
-  Future<void> getStates({required int countryId, String searchTxt = ''}) async {
+  Future<void> getStates(
+      {required int countryId, String searchTxt = ''}) async {
     isLoading(true);
 
-    await UserAddressesApis.getStateList(countryId: countryId, searchTxt: searchTxt).then((value) async {
+    await UserAddressesApis.getStateList(
+            countryId: countryId, searchTxt: searchTxt)
+        .then((value) async {
       stateList.clear();
       stateList(value);
       for (final e in value) {
@@ -340,7 +356,8 @@ class AddDoctorController extends GetxController {
   Future<void> getCity({required int stateId, String searchTxt = ''}) async {
     isLoading(true);
 
-    await UserAddressesApis.getCityList(stateId: stateId, searchTxt: searchTxt).then((value) async {
+    await UserAddressesApis.getCityList(stateId: stateId, searchTxt: searchTxt)
+        .then((value) async {
       cityList.clear();
       cityList(value);
       for (final e in value) {
@@ -375,7 +392,8 @@ class AddDoctorController extends GetxController {
     await DoctorApis.getCommission().then((value) {
       isLoading(false);
       if (isInit && isEdit.value && doctorData.value.commissions.isNotEmpty) {
-        final commissionIds = doctorData.value.commissions.map((e) => e.commissionId);
+        final commissionIds =
+            doctorData.value.commissions.map((e) => e.commissionId);
         for (final item in value.data) {
           if (commissionIds.contains(item.id)) {
             item.isSelected(true);
@@ -384,7 +402,9 @@ class AddDoctorController extends GetxController {
       } else if (isInit && commissionList.length == 1) {
         commissionList.first.isSelected(true);
       } else {
-        final commissionMap = {for (final item in commissionList) item.id: item.isSelected.value};
+        final commissionMap = {
+          for (final item in commissionList) item.id: item.isSelected.value
+        };
         for (final item in value.data) {
           if (commissionMap.containsKey(item.id)) {
             item.isSelected(commissionMap[item.id]);
@@ -392,7 +412,8 @@ class AddDoctorController extends GetxController {
         }
       }
       commissionList(value.data);
-      if (commissionList.isNotEmpty && !commissionList.any((item) => item.isSelected.value)) {
+      if (commissionList.isNotEmpty &&
+          !commissionList.any((item) => item.isSelected.value)) {
         commissionList.first.isSelected(true);
       }
       setCommissionContValue(commissionList: commissionList);
@@ -406,9 +427,14 @@ class AddDoctorController extends GetxController {
     });
   }
 
-  void setCommissionContValue({required List<CommissionElement> commissionList}) {
+  void setCommissionContValue(
+      {required List<CommissionElement> commissionList}) {
     commissionIds(commissionList.map((e) => e.id).toList());
-    commissionCont.text = commissionList.where((e) => e.isSelected.value).map((e) => "${e.title} (${e.commissionValue} ${e.commissionType.toLowerCase().trim().contains(TaxType.PERCENT) ? "%" : appCurrency.value.currencyName})").join(",");
+    commissionCont.text = commissionList
+        .where((e) => e.isSelected.value)
+        .map((e) =>
+            "${e.title} (${e.commissionValue} ${e.commissionType.toLowerCase().trim().contains(TaxType.PERCENT) ? "%" : appCurrency.value.currencyName})")
+        .join(",");
   }
 
   void selectClinics({required List<ClinicData> clinicList}) {
@@ -417,7 +443,8 @@ class AddDoctorController extends GetxController {
     selectedClinicList(clinicList);
     for (var i = 0; i < clinicList.length; i++) {
       if (clinicList[i].name.trim().isNotEmpty) {
-        clinicCenterCont.text = "${clinicCenterCont.text}${clinicList[i].name}${clinicList.length - 1 == i ? "" : ", "}";
+        clinicCenterCont.text =
+            "${clinicCenterCont.text}${clinicList[i].name}${clinicList.length - 1 == i ? "" : ", "}";
       }
       clinicIds(clinicList.map((e) => e.id).toList());
     }
@@ -429,7 +456,8 @@ class AddDoctorController extends GetxController {
     selectedServiceList(serviceList);
     for (var i = 0; i < serviceList.length; i++) {
       if (serviceList[i].name.trim().isNotEmpty) {
-        servicesCont.text = "${servicesCont.text}${serviceList[i].name}${serviceList.length - 1 == i ? "" : ", "}";
+        servicesCont.text =
+            "${servicesCont.text}${serviceList[i].name}${serviceList.length - 1 == i ? "" : ", "}";
       }
       serviceIds(serviceList.map((e) => e.id).toList().validate());
     }
@@ -440,7 +468,8 @@ class AddDoctorController extends GetxController {
     required RxList<CommissionElement> commissionFilterList,
     required RxList<CommissionElement> commissionSList,
   }) {
-    commissionFilterList.value = List.from(commissionSList.where((element) => element.title.toLowerCase().contains(searchtext.toLowerCase())));
+    commissionFilterList.value = List.from(commissionSList.where((element) =>
+        element.title.toLowerCase().contains(searchtext.toLowerCase())));
     for (var i = 0; i < commissionFilterList.length; i++) {
       log('SEARCHEDNAMES : ${commissionFilterList[i].toJson()}');
     }
@@ -454,7 +483,9 @@ class AddDoctorController extends GetxController {
       commissionSList: commissionList,
     );
   }
-  bool get isShowFullList => commissionFilterList.isEmpty && searchCont.text.trim().isEmpty;
+
+  bool get isShowFullList =>
+      commissionFilterList.isEmpty && searchCont.text.trim().isEmpty;
   Future<void> addDoctor() async {
     isLoading(true);
     hideKeyBoardWithoutContext();
@@ -496,13 +527,15 @@ class AddDoctorController extends GetxController {
     ).then((resp) {
       // log("Add  $resp");
       if (isEdit.value && doctorData.value.doctorId == loginUserData.value.id) {
-        CoreServiceApis.getDoctorDetail(doctorId: doctorData.value.doctorId).then((res) {
+        CoreServiceApis.getDoctorDetail(doctorId: doctorData.value.doctorId)
+            .then((res) {
           doctorData(res.value);
           loginUserData.value.profileImage = doctorData.value.profileImage;
           loginUserData.value.email = doctorData.value.email;
           loginUserData.value.firstName = doctorData.value.firstName;
           loginUserData.value.lastName = doctorData.value.lastName;
-          setValueToLocal(SharedPreferenceConst.USER_DATA, loginUserData.toJson());
+          setValueToLocal(
+              SharedPreferenceConst.USER_DATA, loginUserData.toJson());
           loginUserData.refresh();
         }).catchError((e) {
           log("getDoctorDetails error $e");
@@ -615,7 +648,9 @@ class AddDoctorController extends GetxController {
               children: [
                 Row(
                   children: [
-                    Text(locale.value.addYourSignature, style: boldTextStyle(size: 14)).expand(),
+                    Text(locale.value.addYourSignature,
+                            style: boldTextStyle(size: 14))
+                        .expand(),
                     appCloseIconButton(
                       context,
                       onPressed: () {
@@ -626,14 +661,18 @@ class AddDoctorController extends GetxController {
                   ],
                 ),
                 2.height,
-                Text(locale.value.verifyWithEaseYourDigitalMark, style: primaryTextStyle(size: 12, color: dividerColor)),
+                Text(locale.value.verifyWithEaseYourDigitalMark,
+                    style: primaryTextStyle(size: 12, color: dividerColor)),
                 12.height,
                 Stack(
                   children: [
                     Container(
                       decoration: boxDecorationDefault(
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: isDarkMode.value ? borderColorDark : borderColor),
+                        border: Border.all(
+                            color: isDarkMode.value
+                                ? borderColorDark
+                                : borderColor),
                         color: isDarkMode.value ? borderColorDark : borderColor,
                       ),
                       child: Signature(
@@ -641,7 +680,8 @@ class AddDoctorController extends GetxController {
                         controller: signaturePadCont,
                         height: 180,
                         width: double.infinity,
-                        backgroundColor: isDarkMode.value ? borderColorDark : borderColor,
+                        backgroundColor:
+                            isDarkMode.value ? borderColorDark : borderColor,
                       ),
                     ),
                     Positioned(
@@ -661,7 +701,8 @@ class AddDoctorController extends GetxController {
                               topRight: Radius.circular(6),
                             ),
                           ),
-                          child: Text(locale.value.clear, style: primaryTextStyle(size: 14, color: white)),
+                          child: Text(locale.value.clear,
+                              style: primaryTextStyle(size: 14, color: white)),
                         ),
                       ),
                     ),
@@ -673,13 +714,16 @@ class AddDoctorController extends GetxController {
                   text: locale.value.save,
                   color: appColorSecondary,
                   textStyle: appButtonTextStyleWhite,
-                  shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
+                  shapeBorder: RoundedRectangleBorder(
+                      borderRadius: radius(defaultAppButtonRadius / 2)),
                   onTap: () async {
                     if (signaturePadCont.isNotEmpty) {
-                      final signValue = await signaturePadCont.toPngBytes(height: 1000, width: 1000);
+                      final signValue = await signaturePadCont.toPngBytes(
+                          height: 1000, width: 1000);
                       if (signValue != null) {
                         signatureUint8List(signValue);
-                        signatureCont.value.text = base64Encode(signatureUint8List.value as List<int>);
+                        signatureCont.value.text =
+                            base64Encode(signatureUint8List.value as List<int>);
                       }
                       Get.back();
                     } else {

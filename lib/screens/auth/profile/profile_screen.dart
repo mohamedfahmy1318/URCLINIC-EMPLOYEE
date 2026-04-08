@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:kivicare_clinic_admin/screens/bed_management/all_beds_screen.dart';
 import 'package:kivicare_clinic_admin/screens/bed_management/bed_type/receptionist_bed_type_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -132,7 +133,8 @@ class ProfileScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16).visible(loginUserData.value.userRole
-                    .contains(EmployeeKeyConst.vendor)),
+                        .contains(EmployeeKeyConst.vendor) &&
+                    CoreServiceApis.isBedFeatureAvailable),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.manageSessions,
@@ -211,7 +213,8 @@ class ProfileScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
                 ).paddingTop(16).visible(!loginUserData.value.userRole
-                    .contains(EmployeeKeyConst.pharma)),
+                        .contains(EmployeeKeyConst.pharma) &&
+                    CoreServiceApis.isBedFeatureAvailable),
                 SettingItemWidget(
                   decoration: boxDecorationDefault(color: context.cardColor),
                   title: locale.value.requests,

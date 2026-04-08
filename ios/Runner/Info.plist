@@ -31,18 +31,20 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsUsageDescription</key>
+	<string>URCLINIC Employee needs calendar access so you can add appointment events to your calendar when you choose to do so.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>URCLINIC Employee requires access to the Camera to upload your profile photo.</string>
+	<string>URCLINIC needs camera access so you can take and upload profile pictures and medical document photos directly within the app.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>URCLINIC Employee uses Face ID to securely access encrypted credentials stored on your device when available.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
+	<string>URCLINIC Employee uses location to help fill clinic and address details on maps during your workflows. The app only uses location for these features.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
+	<string>URCLINIC Employee uses your location only while you are using the app to help fill clinic and address details on maps. Your location is not used in the background.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>URCLINIC needs permission to save edited images and generated files to your photo library when requested by you.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>URCLINIC Employee requires access to the photo library to upload your profile photo.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>URCLINIC Employee requires address permission access to get the current location of the user instead of typing address manually.</string>
+	<string>URCLINIC needs photo library access so you can select and upload existing profile pictures and medical document images from your device.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

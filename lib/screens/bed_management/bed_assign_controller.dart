@@ -21,6 +21,8 @@ import 'model/bed_master_model.dart';
 class BedAssignController extends GetxController {
   bool _shouldPersist = true;
 
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
+
   final formKey = GlobalKey<FormState>();
 
   FocusNode clinicFocus = FocusNode();
@@ -86,7 +88,8 @@ class BedAssignController extends GetxController {
   RxList<EncounterElement> encounterList = <EncounterElement>[].obs;
   RxList<ClinicData> clinicList = RxList();
   RxInt selectedClinic = 0.obs;
-  Rx<Future<RxList<ClinicData>>> getClinics = Future(() => RxList<ClinicData>()).obs;
+  Rx<Future<RxList<ClinicData>>> getClinics =
+      Future(() => RxList<ClinicData>()).obs;
 
   RxInt patientPage = 1.obs;
   RxInt clinicPage = 1.obs;
@@ -100,6 +103,9 @@ class BedAssignController extends GetxController {
     descriptionController.addListener(() {
       descriptionCharCount.value = descriptionController.text.length;
     });
+    if (!isBedFeatureAvailable) {
+      return;
+    }
     if (!isPatientSelectionEnabled.value) {
       initializeData();
     }
@@ -121,7 +127,9 @@ class BedAssignController extends GetxController {
         }
 
         if (args.containsKey('patientId') && args.containsKey('patientName')) {
-          final patientId = args['patientId'] is int ? args['patientId'] : int.tryParse(args['patientId']?.toString() ?? '');
+          final patientId = args['patientId'] is int
+              ? args['patientId']
+              : int.tryParse(args['patientId']?.toString() ?? '');
           if (patientId != null) {
             final patientName = args['patientName'];
             final patient = PatientModel(id: patientId, fullName: patientName);
@@ -134,7 +142,9 @@ class BedAssignController extends GetxController {
         }
 
         if (args.containsKey('encounterId')) {
-          final encounterId = args['encounterId'] is int ? args['encounterId'] : int.tryParse(args['encounterId']?.toString() ?? '');
+          final encounterId = args['encounterId'] is int
+              ? args['encounterId']
+              : int.tryParse(args['encounterId']?.toString() ?? '');
           if (encounterId != null) {
             selectedEncounterId.value = encounterId;
             encounterController.text = "Encounter #$encounterId";
@@ -158,8 +168,13 @@ class BedAssignController extends GetxController {
           }
         }
 
-        admissionDateController.text = args['assignDate'] != null ? DateTime.parse(args['assignDate'].toString()).formatDateYYYYmmdd() : '';
-        dischargeDateController.text = args['dischargeDate'] != null ? DateTime.parse(args['dischargeDate'].toString()).formatDateYYYYmmdd() : '';
+        admissionDateController.text = args['assignDate'] != null
+            ? DateTime.parse(args['assignDate'].toString()).formatDateYYYYmmdd()
+            : '';
+        dischargeDateController.text = args['dischargeDate'] != null
+            ? DateTime.parse(args['dischargeDate'].toString())
+                .formatDateYYYYmmdd()
+            : '';
         descriptionController.text = args['description'] ?? '';
         temperatureController.text = args['temperature'] ?? '';
         symptomsController.text = args['symptoms'] ?? '';
@@ -180,7 +195,8 @@ class BedAssignController extends GetxController {
         selectedEncounterId.value = args['encounter_id'];
         encounterController.text = "Encounter #${args['encounter_id']}";
         isEncounterSelectionEnabled.value = false;
-      } else if (args.containsKey('patientId') && args.containsKey('patientName')) {
+      } else if (args.containsKey('patientId') &&
+          args.containsKey('patientName')) {
         shouldPreserveData = true;
         final patient = PatientModel(
           id: args['patientId'],
@@ -211,14 +227,22 @@ class BedAssignController extends GetxController {
       clearAllFormFields();
     }
 
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      bedList.clear();
+      return;
+    }
+
     await fetchBedTypes();
     if (bedTypeController.text.isNotEmpty) {
-      final matchedBedType = bedTypeList.firstWhereOrNull((e) => e.type == bedTypeController.text);
+      final matchedBedType =
+          bedTypeList.firstWhereOrNull((e) => e.type == bedTypeController.text);
       if (matchedBedType != null) {
         selectedBedType.value = matchedBedType;
         bedTypeController.text = matchedBedType.type;
         await fetchRooms();
-        final roomMatch = bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
+        final roomMatch =
+            bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
         if (roomMatch != null) {
           selectedBed.value = roomMatch;
           bedController.text = roomMatch.bedTypeId;
@@ -291,6 +315,12 @@ class BedAssignController extends GetxController {
   }
 
   Future<void> initializeData() async {
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      bedList.clear();
+      return;
+    }
+
     isLoading(true);
     try {
       await parseArguments();
@@ -300,7 +330,10 @@ class BedAssignController extends GetxController {
         if (args.containsKey('patientId') && args.containsKey('patientName')) {
           final int patientId = args['patientId'];
           final String patientName = args['patientName'];
-          final patient = PatientModel(id: patientId, firstName: patientName.split(' ').first, lastName: patientName.split(' ').last);
+          final patient = PatientModel(
+              id: patientId,
+              firstName: patientName.split(' ').first,
+              lastName: patientName.split(' ').last);
           selectedPatientFromEncounter(patient);
           selectedPatient(patient);
           patientController.text = patientName;
@@ -325,7 +358,8 @@ class BedAssignController extends GetxController {
       await fetchBedTypes();
       if (bedTypeController.text.isNotEmpty) {
         final bedTypeName = bedTypeController.text;
-        final matchedBedType = bedTypeList.firstWhereOrNull((e) => e.type == bedTypeName);
+        final matchedBedType =
+            bedTypeList.firstWhereOrNull((e) => e.type == bedTypeName);
 
         if (matchedBedType != null) {
           selectedBedType.value = matchedBedType;
@@ -333,7 +367,8 @@ class BedAssignController extends GetxController {
           selectedBed.value.bedTypeId = matchedBedType.type;
 
           await fetchRooms();
-          final roomMatch = bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
+          final roomMatch =
+              bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
           if (roomMatch != null) {
             selectedBed.value = roomMatch;
             bedController.text = roomMatch.bed ?? '';
@@ -344,13 +379,15 @@ class BedAssignController extends GetxController {
           bedList.clear();
         }
       } else if (selectedBedType.value != null) {
-        final match = bedTypeList.firstWhereOrNull((e) => e.id == selectedBedType.value!.id);
+        final match = bedTypeList
+            .firstWhereOrNull((e) => e.id == selectedBedType.value!.id);
         if (match != null) {
           selectedBedType.value = match;
           bedTypeController.text = match.type;
         }
         await fetchRooms();
-        final roomMatch = bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
+        final roomMatch =
+            bedList.firstWhereOrNull((r) => r.id == selectedBed.value.id);
         if (roomMatch != null) {
           selectedBed.value = roomMatch;
           bedController.text = roomMatch.bed ?? '';
@@ -359,7 +396,9 @@ class BedAssignController extends GetxController {
         bedList.clear();
       }
     } catch (e) {
-      throw (e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        throw (e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -374,7 +413,9 @@ class BedAssignController extends GetxController {
         patientsList: patientList,
         page: patientPage.value,
         search: searchPatientQuery.value,
-        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? selectedAppClinic.value.id : null,
+        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+            ? selectedAppClinic.value.id
+            : null,
         lastPageCallBack: (p0) {
           isPatientLastPage(p0);
         },
@@ -388,20 +429,28 @@ class BedAssignController extends GetxController {
   }
 
   Future<void> fetchBedTypes() async {
-    try {
-      final response = await buildHttpResponse(APIEndPoints.bedTypeList, method: HttpMethodType.GET);
-      final result = await handleResponse(response);
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      return;
+    }
 
-      if (result != null) {
-        bedTypeList.value = BedTypeListRes.fromJson(result).data;
-        bedTypeList.refresh();
-      }
+    try {
+      final types = await CoreServiceApis.getBedTypes();
+      bedTypeList.assignAll(types);
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     }
   }
 
   Future<void> fetchRooms() async {
+    if (!isBedFeatureAvailable) {
+      bedList.clear();
+      bedList.refresh();
+      return;
+    }
+
     try {
       if (selectedBedType.value == null || selectedBedType.value!.id == 0) {
         toast(locale.value.pleaseSelectBedType);
@@ -411,23 +460,33 @@ class BedAssignController extends GetxController {
       }
       isLoading(true);
 
-      final String clinicId = loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? "clinic_id=${selectedAppClinic.value.id}" : '';
-      final response = await buildHttpResponse(
-        '${APIEndPoints.bedMasterList}?bed_type_id=${selectedBedType.value!.id}$clinicId',
+      final int? clinicId =
+          loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+              ? selectedAppClinic.value.id
+              : null;
+
+      final bedsRx = await CoreServiceApis.getBedList(
+        bedList: <BedMasterModel>[],
+        page: 1,
+        perPage: 50,
+        bedTypeId: selectedBedType.value!.id,
+        clinicId: clinicId,
       );
 
-      final result = await handleResponse(response);
-
-      if (result != null && result['data'] != null && result['data'] is List) {
-        bedList.value = (result['data'] as List)
-            .map((e) => BedAllocationModel.fromJson(e as Map<String, dynamic>))
-            .where((bed) => bed.bedTypeName == selectedBedType.value?.type && bed.bedStatus == 'available' && (bed.isUnderMaintenance == null || bed.isUnderMaintenance == false))
-            .toList();
-      } else {
-        bedList.clear();
-      }
+      bedList.value = bedsRx
+          .map(
+            (bed) => BedAllocationModel.fromJson(bed.toJson()),
+          )
+          .where((bed) =>
+              bed.bedTypeName == selectedBedType.value?.type &&
+              bed.bedStatus == 'available' &&
+              (bed.isUnderMaintenance == null ||
+                  bed.isUnderMaintenance == false))
+          .toList();
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -443,7 +502,9 @@ class BedAssignController extends GetxController {
       final result = await handleResponse(response);
       if (result != null) {
         var allEncounters = EncounterListRes.fromJson(result).data;
-        encounterList.value = allEncounters.where((encounter) => encounter.userId == patientId).toList();
+        encounterList.value = allEncounters
+            .where((encounter) => encounter.userId == patientId)
+            .toList();
       }
     } catch (e) {
       toast(e.toString());
@@ -494,7 +555,8 @@ class BedAssignController extends GetxController {
 
     if (admissionDateController.text.isNotEmpty) {
       try {
-        initialDate = DateFormat('dd-MM-yyyy').parse(admissionDateController.text);
+        initialDate =
+            DateFormat('dd-MM-yyyy').parse(admissionDateController.text);
       } catch (e) {
         initialDate = DateTime.now();
       }
@@ -531,18 +593,26 @@ class BedAssignController extends GetxController {
   }
 
   Future<int?> getBedIdFromBedName(String bedName) async {
+    if (!isBedFeatureAvailable) return null;
+
     try {
       int? bedId = await CoreServiceApis.getBedIdByName(bedName);
 
       bedId ??= await CoreServiceApis.getBedIdByNameFromBedList(bedName);
       return bedId;
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     }
     return null;
   }
 
   Future bedAllocation() async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     isLoading(true);
     try {
       isLoading(true);
@@ -562,7 +632,10 @@ class BedAssignController extends GetxController {
       }
 
       Map<String, dynamic> request = {
-        'clinic_id': loginUserData.value.userRole.contains(EmployeeKeyConst.vendor) ? selectedClinic.value : selectedAppClinic.value.id,
+        'clinic_id':
+            loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)
+                ? selectedClinic.value
+                : selectedAppClinic.value.id,
         'encounter_id': selectedEncounterId.value.toString(),
         'clinic_admin_id': loginUserData.value.id.toString(),
         'bed_type_id': selectedBedType.value!.id.toString(),
@@ -572,10 +645,16 @@ class BedAssignController extends GetxController {
         'description': descriptionController.text,
         'weight': weightController.text.isEmpty ? "" : weightController.text,
         'height': heightController.text.isEmpty ? "" : heightController.text,
-        'blood_pressure': bloodPressureController.text.isEmpty ? "" : bloodPressureController.text,
-        'heart_rate': heartRateController.text.isEmpty ? "" : heartRateController.text,
-        'blood_group': bloodGroupController.text.isEmpty ? "" : bloodGroupController.text,
-        'temperature': temperatureController.text.isEmpty ? "" : temperatureController.text,
+        'blood_pressure': bloodPressureController.text.isEmpty
+            ? ""
+            : bloodPressureController.text,
+        'heart_rate':
+            heartRateController.text.isEmpty ? "" : heartRateController.text,
+        'blood_group':
+            bloodGroupController.text.isEmpty ? "" : bloodGroupController.text,
+        'temperature': temperatureController.text.isEmpty
+            ? ""
+            : temperatureController.text,
         'symptoms': symptomsController.text,
         'notes': notesController.text,
         'patient_encounter_id': selectedEncounterId.value.toString(),
@@ -583,13 +662,17 @@ class BedAssignController extends GetxController {
       };
       await CoreServiceApis.bedAllocationApi(request: request);
       toast(locale.value.bedAssignedSuccessfully);
-      final BedStatusController bedStatusController = Get.find();
-      await bedStatusController.initializeData();
+      if (Get.isRegistered<BedStatusController>()) {
+        final BedStatusController bedStatusController = Get.find();
+        await bedStatusController.initializeData();
+      }
       isLoading(false);
       Get.back();
     } catch (e) {
       isLoading(false);
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -599,7 +682,10 @@ class BedAssignController extends GetxController {
     if (query.isEmpty) {
       fetchPatients();
     } else {
-      patientList.value = patientList.where((patient) => patient.fullName.toLowerCase().contains(query.toLowerCase())).toList();
+      patientList.value = patientList
+          .where((patient) =>
+              patient.fullName.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
   }
 
@@ -607,19 +693,36 @@ class BedAssignController extends GetxController {
     if (query.isEmpty) {
       fetchEncounters(selectedPatient.value!.id);
     } else {
-      encounterList.value = encounterList.where((encounter) => encounter.userName.toLowerCase().contains(query.toLowerCase())).toList();
+      encounterList.value = encounterList
+          .where((encounter) =>
+              encounter.userName.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
   }
 
   void searchBedTypes(String query) {
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      return;
+    }
+
     if (query.isEmpty) {
       fetchBedTypes();
     } else {
-      bedTypeList.value = bedTypeList.where((bedType) => bedType.type.toLowerCase().contains(query.toLowerCase())).toList();
+      bedTypeList.value = bedTypeList
+          .where((bedType) =>
+              bedType.type.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
   }
 
   Future<void> refreshData() async {
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      bedList.clear();
+      return;
+    }
+
     if (isLoading.value) return;
 
     isLoading(true);
@@ -632,7 +735,9 @@ class BedAssignController extends GetxController {
         await fetchRooms();
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -676,6 +781,12 @@ class BedAssignController extends GetxController {
   }
 
   Future<void> onScreenVisible() async {
+    if (!isBedFeatureAvailable) {
+      bedTypeList.clear();
+      bedList.clear();
+      return;
+    }
+
     if (isLoading.value) {
       return;
     }
@@ -687,7 +798,9 @@ class BedAssignController extends GetxController {
         bedList.clear();
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     }
   }
 
@@ -697,6 +810,10 @@ class BedAssignController extends GetxController {
   }
 
   Future<void> fetchAndPrefillBedAllocation(int id) async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     try {
       isLoading(true);
       final response = await buildHttpResponse(
@@ -721,11 +838,15 @@ class BedAssignController extends GetxController {
         temperatureController.text = data['temperature']?.toString() ?? '';
         symptomsController.text = data['symptoms'] ?? '';
         notesController.text = data['notes'] ?? '';
-        encounterController.text = data['encounterId'] != null ? 'Encounter #${data['encounterId']}' : '';
+        encounterController.text = data['encounterId'] != null
+            ? 'Encounter #${data['encounterId']}'
+            : '';
         selectedEncounterId.value = data['encounterId'] ?? -1;
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
@@ -761,6 +882,8 @@ class BedAssignController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    initializeData();
+    if (isBedFeatureAvailable) {
+      initializeData();
+    }
   }
 }

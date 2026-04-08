@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:kivicare_clinic_admin/utils/colors.dart';
 import 'package:kivicare_clinic_admin/utils/common_base.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -20,7 +21,16 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     ReceptionistBedTypeController receptionistBedTypeController = Get.put(ReceptionistBedTypeController());
+    if (!CoreServiceApis.isBedFeatureAvailable) {
+      return AppScaffoldNew(
+        appBartitleText: locale.value.manageBedTypes,
+        body: Center(
+            child: Text(locale.value.noDataFound, style: secondaryTextStyle())),
+      );
+    }
+
+    ReceptionistBedTypeController receptionistBedTypeController =
+        Get.put(ReceptionistBedTypeController());
 
     return AppScaffoldNew(
       appBartitleText: locale.value.manageBedTypes,
@@ -48,7 +58,8 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     SearchBedTypeWidget(
@@ -66,7 +77,9 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
               Expanded(
                 child: SnapHelperWidget(
                   future: receptionistBedTypeController.bedTypesFuture.value,
-                  initialData: receptionistBedTypeController.bedTypes.isNotEmpty ? receptionistBedTypeController.bedTypes : null,
+                  initialData: receptionistBedTypeController.bedTypes.isNotEmpty
+                      ? receptionistBedTypeController.bedTypes
+                      : null,
                   errorBuilder: (error) {
                     return NoDataWidget(
                       title: error,
@@ -83,18 +96,28 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                     return Obx(
                       () => AnimatedListView(
                         shrinkWrap: true,
-                        itemCount: receptionistBedTypeController.filteredBedTypes.length,
+                        itemCount: receptionistBedTypeController
+                            .filteredBedTypes.length,
                         listAnimationType: ListAnimationType.None,
-                        padding: EdgeInsets.symmetric(horizontal: isWideLayout ? 20 : 16, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: isWideLayout ? 20 : 16, vertical: 8),
                         physics: const AlwaysScrollableScrollPhysics(),
                         emptyWidget: NoDataWidget(
                           title: locale.value.noBedTypesFound,
                           imageWidget: const EmptyStateWidget(),
-                          subTitle: locale.value.thereAreCurrentlyNoAppointmentsAvailable,
-                        ).paddingSymmetric(horizontal: 24).paddingBottom(Get.height * 0.15).visible(!receptionistBedTypeController.isLoading.value),
+                          subTitle: locale
+                              .value.thereAreCurrentlyNoAppointmentsAvailable,
+                        )
+                            .paddingSymmetric(horizontal: 24)
+                            .paddingBottom(Get.height * 0.15)
+                            .visible(
+                                !receptionistBedTypeController.isLoading.value),
                         itemBuilder: (context, index) {
-                          final bedType = receptionistBedTypeController.filteredBedTypes[index];
-                          return _buildBedTypeCard(context, bedType, isWideLayout, receptionistBedTypeController).paddingBottom(16);
+                          final bedType = receptionistBedTypeController
+                              .filteredBedTypes[index];
+                          return _buildBedTypeCard(context, bedType,
+                                  isWideLayout, receptionistBedTypeController)
+                              .paddingBottom(16);
                         },
                         onNextPage: () async {
                           if (!receptionistBedTypeController.isLastPage.value) {
@@ -102,7 +125,8 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                           }
                         },
                         onSwipeRefresh: () async {
-                          return await receptionistBedTypeController.onRefresh();
+                          return await receptionistBedTypeController
+                              .onRefresh();
                         },
                       ),
                     );
@@ -116,7 +140,8 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBedTypeCard(BuildContext context, BedTypeElement bedType, bool isWideLayout, ReceptionistBedTypeController controller) {
+  Widget _buildBedTypeCard(BuildContext context, BedTypeElement bedType,
+      bool isWideLayout, ReceptionistBedTypeController controller) {
     final isExpanded = false.obs;
     return Container(
       decoration: boxDecorationDefault(
@@ -136,11 +161,20 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                   child: Text.rich(
                     TextSpan(
                       text: locale.value.bedTypeLabel,
-                      style: secondaryTextStyle(size: 12, color: Get.isDarkMode ? UIColors.labelTextDark : UIColors.labelTextLight),
+                      style: secondaryTextStyle(
+                          size: 12,
+                          color: Get.isDarkMode
+                              ? UIColors.labelTextDark
+                              : UIColors.labelTextLight),
                       children: [
                         TextSpan(
                           text: bedType.type,
-                          style: boldTextStyle(size: 12, color: Get.isDarkMode ? UIColors.valueTextDark : UIColors.valueTextLight, weight: FontWeight.w700),
+                          style: boldTextStyle(
+                              size: 12,
+                              color: Get.isDarkMode
+                                  ? UIColors.valueTextDark
+                                  : UIColors.valueTextLight,
+                              weight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -161,7 +195,9 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                           url: Assets.iconsIcEditReview,
                           height: 18,
                           width: 18,
-                          color: Get.isDarkMode ? UIColors.iconDark : UIColors.iconLight,
+                          color: Get.isDarkMode
+                              ? UIColors.iconDark
+                              : UIColors.iconLight,
                         ),
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
@@ -177,7 +213,9 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                         url: Assets.iconsIcDelete,
                         height: 18,
                         width: 18,
-                        color: Get.isDarkMode ? UIColors.iconDark : UIColors.iconLight,
+                        color: Get.isDarkMode
+                            ? UIColors.iconDark
+                            : UIColors.iconLight,
                       ),
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
@@ -185,12 +223,16 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                         showConfirmDialogCustom(
                           context,
                           primaryColor: context.primaryColor,
-                          title: locale.value.areYouSureYouWantToDeleteThisBedType,
+                          title:
+                              locale.value.areYouSureYouWantToDeleteThisBedType,
                           positiveText: locale.value.yes,
                           negativeText: locale.value.cancel,
                           onAccept: (ctx) async {
                             controller.isLoading(true);
-                            await controller.deleteBedType(bedType.id).then((value) {}).catchError((error) {
+                            await controller
+                                .deleteBedType(bedType.id)
+                                .then((value) {})
+                                .catchError((error) {
                               toast(error.toString());
                             }).whenComplete(() => controller.isLoading(false));
                           },
@@ -206,10 +248,14 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
             9.height,
             // Bed type description
             Obx(() {
-              final text = bedType.description.isNotEmpty ? bedType.description : locale.value.noDescriptionAvailable;
+              final text = bedType.description.isNotEmpty
+                  ? bedType.description
+                  : locale.value.noDescriptionAvailable;
               final style = TextStyle(
                 fontSize: 11,
-                color: Get.isDarkMode ? UIColors.labelTextDark : UIColors.labelTextLight,
+                color: Get.isDarkMode
+                    ? UIColors.labelTextDark
+                    : UIColors.labelTextLight,
                 fontWeight: FontWeight.w400,
                 height: 1.45,
               );
@@ -218,7 +264,10 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                 text: TextSpan(text: text, style: style),
                 maxLines: 2,
                 textDirection: TextDirection.ltr,
-              )..layout(maxWidth: MediaQuery.of(context).size.width - (isWideLayout ? 40 : 32) - 32);
+              )..layout(
+                  maxWidth: MediaQuery.of(context).size.width -
+                      (isWideLayout ? 40 : 32) -
+                      32);
 
               final isTextOverflowing = textPainter.didExceedMaxLines;
 
@@ -237,8 +286,11 @@ class ReceptionistBedTypeScreen extends StatelessWidget {
                         isExpanded.value = !isExpanded.value;
                       },
                       child: Text(
-                        isExpanded.value ? locale.value.readLess : locale.value.readMore,
-                        style: primaryTextStyle(size: 12, color: appColorPrimary),
+                        isExpanded.value
+                            ? locale.value.readLess
+                            : locale.value.readMore,
+                        style:
+                            primaryTextStyle(size: 12, color: appColorPrimary),
                       ).paddingTop(4),
                     )
                 ],

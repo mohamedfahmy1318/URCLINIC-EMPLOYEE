@@ -1,10 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:kivicare_clinic_admin/screens/doctor/doctor_session/add_session/model/doctor_session_model.dart';
 
-import '../../../utils/app_common.dart';
-import '../../../utils/constants.dart';
 import '../model/doctor_list_res.dart';
 
 class DoctorSessionController extends GetxController {

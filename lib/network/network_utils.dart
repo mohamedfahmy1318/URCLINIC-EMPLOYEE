@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_string_interpolations
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
@@ -16,7 +17,54 @@ import '../utils/api_end_points.dart';
 import '../utils/app_common.dart';
 import '../utils/common_base.dart';
 import '../utils/constants.dart';
-import '../utils/local_storage.dart';
+import '../utils/secure_storage_helper.dart';
+
+bool _isAuthLogoutInProgress = false;
+Completer<void>? _tokenRefreshCompleter;
+
+bool get _canRefreshToken => isLoggedIn.value && !_isAuthLogoutInProgress;
+
+Future<void> _triggerLogoutAndBlockRetries() async {
+  if (_isAuthLogoutInProgress || !isLoggedIn.value) return;
+
+  _isAuthLogoutInProgress = true;
+  try {
+    await ProfileController().handleLogout();
+  } catch (e) {
+    log('Logout flow error: $e');
+  } finally {
+    _isAuthLogoutInProgress = false;
+  }
+}
+
+Future<bool> _ensureFreshToken() async {
+  if (!_canRefreshToken) return false;
+
+  if (_tokenRefreshCompleter != null) {
+    await _tokenRefreshCompleter!.future;
+    return _canRefreshToken;
+  }
+
+  _tokenRefreshCompleter = Completer<void>();
+  bool refreshed = false;
+
+  try {
+    refreshed = await reGenerateToken();
+  } catch (e) {
+    log('Token regeneration exception: $e');
+    refreshed = false;
+  } finally {
+    _tokenRefreshCompleter?.complete();
+    _tokenRefreshCompleter = null;
+  }
+
+  if (!refreshed) {
+    await _triggerLogoutAndBlockRetries();
+    return false;
+  }
+
+  return true;
+}
 
 Map<String, String> buildHeaderTokens({
   Map? extraKeys,
@@ -39,17 +87,26 @@ Map<String, String> buildHeaderTokens({
   if (endPoint == APIEndPoints.register) {
     header.putIfAbsent(HttpHeaders.acceptHeader, () => 'application/json');
   }
-  header.putIfAbsent(HttpHeaders.contentTypeHeader, () => 'application/json; charset=utf-8');
+  header.putIfAbsent(
+      HttpHeaders.contentTypeHeader, () => 'application/json; charset=utf-8');
 
-  if (isLoggedIn.value && extraKeys.containsKey('isFlutterWave') && extraKeys['isFlutterWave']) {
-    header.putIfAbsent(HttpHeaders.authorizationHeader, () => "Bearer ${extraKeys!['flutterWaveSecretKey']}");
-  } else if (isLoggedIn.value && extraKeys.containsKey('isAirtelMoney') && extraKeys['isAirtelMoney']) {
-    header.putIfAbsent(HttpHeaders.contentTypeHeader, () => 'application/json; charset=utf-8');
-    header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${extraKeys!['access_token']}');
+  if (isLoggedIn.value &&
+      extraKeys.containsKey('isFlutterWave') &&
+      extraKeys['isFlutterWave']) {
+    header.putIfAbsent(HttpHeaders.authorizationHeader,
+        () => "Bearer ${extraKeys!['flutterWaveSecretKey']}");
+  } else if (isLoggedIn.value &&
+      extraKeys.containsKey('isAirtelMoney') &&
+      extraKeys['isAirtelMoney']) {
+    header.putIfAbsent(
+        HttpHeaders.contentTypeHeader, () => 'application/json; charset=utf-8');
+    header.putIfAbsent(HttpHeaders.authorizationHeader,
+        () => 'Bearer ${extraKeys!['access_token']}');
     header.putIfAbsent('X-Country', () => '${extraKeys!['X-Country']}');
     header.putIfAbsent('X-Currency', () => '${extraKeys!['X-Currency']}');
   } else if (isLoggedIn.value) {
-    header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${loginUserData.value.apiToken}');
+    header.putIfAbsent(HttpHeaders.authorizationHeader,
+        () => 'Bearer ${loginUserData.value.apiToken}');
   }
 
   // log(jsonEncode(header));
@@ -69,6 +126,7 @@ Future<Response> buildHttpResponse(
   HttpMethodType method = HttpMethodType.GET,
   Map? request,
   Map? extraKeys,
+  int retryCount = 0,
 }) async {
   final headers = buildHeaderTokens(extraKeys: extraKeys, endPoint: endPoint);
   final Uri url = buildBaseUrl(endPoint);
@@ -80,7 +138,8 @@ Future<Response> buildHttpResponse(
   try {
     if (method == HttpMethodType.POST) {
       log('Request: ${jsonEncode(request)}');
-      response = await http.post(url, body: jsonEncode(request), headers: headers);
+      response =
+          await http.post(url, body: jsonEncode(request), headers: headers);
     } else if (method == HttpMethodType.DELETE) {
       response = await delete(url, headers: headers);
     } else if (method == HttpMethodType.PUT) {
@@ -103,50 +162,84 @@ Future<Response> buildHttpResponse(
     log('Response status code: ${response.statusCode}');
     log('Response body: ${response.body.trim()}');
 
-    if (isLoggedIn.value && response.statusCode == 401 && !endPoint.startsWith('http')) {
-      log('Token expired, regenerating...');
-      return await reGenerateToken().then((value) async {
-        return buildHttpResponse(endPoint, method: method, request: request, extraKeys: extraKeys);
-      }).catchError((e) async {
-        if (!await isNetworkAvailable()) {
-          throw errorInternetNotAvailable;
-        } else {
-          log('URL value  1 (${method.name}): $url :: $errorSomethingWentWrong');
+    if (response.statusCode == 401 && !endPoint.startsWith('http')) {
+      if (!isLoggedIn.value || _isAuthLogoutInProgress) {
+        throw locale.value.forbidden;
+      }
 
-          throw errorSomethingWentWrong;
-        }
-      });
-    } else {
-      return response;
+      if (retryCount >= 1) {
+        await _triggerLogoutAndBlockRetries();
+        throw locale.value.forbidden;
+      }
+
+      log('Token expired, attempting regeneration...');
+      final bool canRetry = await _ensureFreshToken();
+      if (!canRetry) {
+        throw locale.value.forbidden;
+      }
+
+      return buildHttpResponse(
+        endPoint,
+        method: method,
+        request: request,
+        extraKeys: extraKeys,
+        retryCount: retryCount + 1,
+      );
     }
+
+    return response;
   } on Exception catch (e) {
     log('Error in buildHttpResponse: $e');
     throw errorInternetNotAvailable;
   }
 }
 
-Future<void> reGenerateToken() async {
+Future<bool> reGenerateToken() async {
+  if (!_canRefreshToken) return false;
+
   log('Regenerating Token');
-  final userPASSWORD = getValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
+  final userPASSWORD = await SecureStorageHelper.getUserPassword();
 
   final Map req = {
     UserKeys.email: loginUserData.value.email,
-    UserKeys.userType: loginUserData.value.userRole.isNotEmpty ? loginUserData.value.userRole.first : loginUserData.value.userType,
+    UserKeys.userType: loginUserData.value.userRole.isNotEmpty
+        ? loginUserData.value.userRole.first
+        : loginUserData.value.userType,
   };
   if (loginUserData.value.isSocialLogin) {
     log('LOGINUSERDATA.VALUE.ISSOCIALLOGIN: ${loginUserData.value.isSocialLogin}');
     req[UserKeys.loginType] = loginUserData.value.loginType;
   } else {
+    if (userPASSWORD.isEmpty) {
+      log('Token regeneration skipped: secure password not available.');
+      return false;
+    }
     req[UserKeys.password] = userPASSWORD;
   }
-  return AuthServiceApis.loginUser(request: req, isSocialLogin: loginUserData.value.isSocialLogin).then((value) async {
-    loginUserData.value.apiToken = value.userData.apiToken;
-  }).catchError((e) {
-    ProfileController().handleLogout();
-  });
+
+  try {
+    final value = await AuthServiceApis.loginUser(
+      request: req,
+      isSocialLogin: loginUserData.value.isSocialLogin,
+    );
+    final String token = value.userData.apiToken.validate();
+    if (token.isEmpty) {
+      log('Token regeneration failed: empty token returned.');
+      return false;
+    }
+
+    loginUserData.value.apiToken = token;
+    return true;
+  } catch (e) {
+    log('Token regeneration failed: $e');
+    return false;
+  }
 }
 
-Future handleResponse(Response response, {HttpResponseType httpResponseType = HttpResponseType.JSON, bool? avoidTokenError, bool? isFlutterWave}) async {
+Future handleResponse(Response response,
+    {HttpResponseType httpResponseType = HttpResponseType.JSON,
+    bool? avoidTokenError,
+    bool? isFlutterWave}) async {
   if (!await isNetworkAvailable()) {
     log('No network available');
     throw errorInternetNotAvailable;
@@ -195,7 +288,7 @@ Future handleResponse(Response response, {HttpResponseType httpResponseType = Ht
         log('Response does not contain status field');
         return body;
       }
-        } else {
+    } else {
       log('Response is not valid JSON');
       log('URL value  4  :: $errorSomethingWentWrong');
 
@@ -251,7 +344,8 @@ Future handleResponse(Response response, {HttpResponseType httpResponseType = Ht
 }
 
 //region CommonFunctions
-Future<Map<String, String>> getMultipartFields({required Map<String, dynamic> val}) async {
+Future<Map<String, String>> getMultipartFields(
+    {required Map<String, dynamic> val}) async {
   final Map<String, String> data = {};
 
   val.forEach((key, value) {
@@ -261,14 +355,21 @@ Future<Map<String, String>> getMultipartFields({required Map<String, dynamic> va
   return data;
 }
 
-Future<MultipartRequest> getMultiPartRequest(String endPoint, {String? baseUrl}) async {
+Future<MultipartRequest> getMultiPartRequest(String endPoint,
+    {String? baseUrl}) async {
   final String url = baseUrl ?? buildBaseUrl(endPoint).toString();
   // log(url);
   return MultipartRequest('POST', Uri.parse(url));
 }
 
-Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(dynamic)? onSuccess, Function(dynamic)? onError}) async {
-  final http.Response response = await http.Response.fromStream(await multiPartRequest.send());
+Future<void> sendMultiPartRequest(
+  MultipartRequest multiPartRequest, {
+  Function(dynamic)? onSuccess,
+  Function(dynamic)? onError,
+  int retryCount = 0,
+}) async {
+  final http.Response response =
+      await http.Response.fromStream(await multiPartRequest.send());
   apiPrint(
     url: multiPartRequest.url.toString(),
     headers: jsonEncode(multiPartRequest.headers),
@@ -282,7 +383,7 @@ Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(d
   // log(response.body.trim());
   if (response.statusCode.isSuccessful()) {
     onSuccess?.call(response.body.trim());
-  }  else if (response.statusCode == 422) {
+  } else if (response.statusCode == 422) {
     // ✅ Validation error (like duplicate email)
     final errorJson = jsonDecode(response.body);
     final errorMsg = errorJson['message'] ??
@@ -294,20 +395,37 @@ Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(d
     onError?.call(errorMsg); // Pass message back to the caller
   } else {
     if (isLoggedIn.value && response.statusCode == 401) {
-      return reGenerateToken().then((value) async {
-        try {
-          final http.Response response = await http.Response.fromStream(await multiPartRequest.send());
-          if (response.statusCode.isSuccessful()) {
-            onSuccess?.call(response.body.trim());
-          } else {
-            onError?.call(response.reasonPhrase);
+      if (_isAuthLogoutInProgress) {
+        onError?.call(locale.value.forbidden);
+        return;
+      }
+
+      if (retryCount >= 1) {
+        await _triggerLogoutAndBlockRetries();
+        onError?.call(locale.value.forbidden);
+        return;
+      }
+
+      final bool canRetry = await _ensureFreshToken();
+      if (!canRetry) {
+        onError?.call(locale.value.forbidden);
+        return;
+      }
+
+      try {
+        final http.Response retryResponse =
+            await http.Response.fromStream(await multiPartRequest.send());
+        if (retryResponse.statusCode.isSuccessful()) {
+          onSuccess?.call(retryResponse.body.trim());
+        } else {
+          if (retryResponse.statusCode == 401 && !_isAuthLogoutInProgress) {
+            await _triggerLogoutAndBlockRetries();
           }
-        } catch (e) {
-          onError?.call(response.reasonPhrase);
+          onError?.call(retryResponse.reasonPhrase);
         }
-      }).catchError((e) {
+      } catch (e) {
         onError?.call(response.reasonPhrase);
-      });
+      }
     } else {
       AuthServiceApis.clearData(isFromDeleteAcc: true);
       doIfLoggedIn(() {});
@@ -316,25 +434,29 @@ Future<void> sendMultiPartRequest(MultipartRequest multiPartRequest, {Function(d
   }
 }
 
-Future<List<MultipartFile>> getMultipartImages({required List<PlatformFile> files, required String name}) async {
+Future<List<MultipartFile>> getMultipartImages(
+    {required List<PlatformFile> files, required String name}) async {
   final List<MultipartFile> multiPartRequest = [];
 
   await Future.forEach<PlatformFile>(files, (element) async {
     final int i = files.indexOf(element);
 
-    multiPartRequest.add(await MultipartFile.fromPath('$name[$i]', element.path.validate()));
+    multiPartRequest.add(
+        await MultipartFile.fromPath('$name[$i]', element.path.validate()));
   });
 
   return multiPartRequest;
 }
 
-Future<List<MultipartFile>> getMultipartImages2({required List<XFile> files, required String name}) async {
+Future<List<MultipartFile>> getMultipartImages2(
+    {required List<XFile> files, required String name}) async {
   final List<MultipartFile> multiPartRequest = [];
 
   await Future.forEach<XFile>(files, (element) async {
     final int i = files.indexOf(element);
 
-    multiPartRequest.add(await MultipartFile.fromPath('$name[$i]', element.path.validate()));
+    multiPartRequest.add(
+        await MultipartFile.fromPath('$name[$i]', element.path.validate()));
     log('MultipartFile: $name[$i]');
   });
 
@@ -366,7 +488,8 @@ void apiPrint({
   bool fullLog = false,
 }) {
   if (fullLog) {
-    dev.log("┌───────────────────────────────────────────────────────────────────────────────────────────────────────");
+    dev.log(
+        "┌───────────────────────────────────────────────────────────────────────────────────────────────────────");
     dev.log("\u001b[93m Url: \u001B[39m $url");
     dev.log("\u001b[93m endPoint: \u001B[39m \u001B[1m$endPoint\u001B[22m");
     dev.log("\u001b[93m header: \u001B[39m \u001b[96m$headers\u001B[39m");
@@ -376,7 +499,8 @@ void apiPrint({
     dev.log(statusCode.isSuccessful() ? "\u001b[32m" : "\u001b[31m");
     dev.log('Response ($methodtype) $statusCode: $responseBody');
     dev.log("\u001B[0m");
-    dev.log("└───────────────────────────────────────────────────────────────────────────────────────────────────────");
+    dev.log(
+        "└───────────────────────────────────────────────────────────────────────────────────────────────────────");
   } else {
     log("┌───────────────────────────────────────────────────────────────────────────────────────────────────────");
     log("\u001b[93m Url: \u001B[39m $url");
@@ -402,7 +526,12 @@ String formatJson(String jsonStr) {
     return jsonStr;
   }
 }
-String getEndPoint({required String endPoint, int? perPages, int? page, List<String>? params}) {
+
+String getEndPoint(
+    {required String endPoint,
+    int? perPages,
+    int? page,
+    List<String>? params}) {
   String perPage = "?per_page=${perPages ?? 10}";
   String pages = "&page=$page";
 

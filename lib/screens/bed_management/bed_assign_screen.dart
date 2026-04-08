@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:kivicare_clinic_admin/components/cached_image_widget.dart';
 import 'package:kivicare_clinic_admin/generated/assets.dart';
 import 'package:kivicare_clinic_admin/main.dart';
@@ -22,13 +23,22 @@ class BedAssignScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!CoreServiceApis.isBedFeatureAvailable) {
+      return AppScaffoldNew(
+        appBartitleText: locale.value.bedAssign,
+        body: Center(
+            child: Text(locale.value.noDataFound, style: secondaryTextStyle())),
+      );
+    }
+
     final BedAssignController controller = Get.put(BedAssignController());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.setPersistence(true);
       controller.onScreenVisible();
     });
 
-    InputDecoration commonInputDecoration({String? labelText, Widget? suffixIcon}) {
+    InputDecoration commonInputDecoration(
+        {String? labelText, Widget? suffixIcon}) {
       return inputDecoration(
         context,
         hintText: labelText,
@@ -39,7 +49,9 @@ class BedAssignScreen extends StatelessWidget {
     }
 
     return AppScaffoldNew(
-      appBartitleText: controller.isEditMode.value ? locale.value.editBedAssignment : locale.value.bedAssign,
+      appBartitleText: controller.isEditMode.value
+          ? locale.value.editBedAssignment
+          : locale.value.bedAssign,
       isLoading: controller.isLoading,
       isBlurBackgroundinLoader: true,
       appBarVerticalSize: Get.height * 0.12,
@@ -69,7 +81,8 @@ class BedAssignScreen extends StatelessWidget {
                               locale.value.patientInfo,
                               style: boldTextStyle(size: 18),
                             ),
-                            if (loginUserData.value.userRole.contains(EmployeeKeyConst.vendor)) ...[
+                            if (loginUserData.value.userRole
+                                .contains(EmployeeKeyConst.vendor)) ...[
                               16.height,
                               AppTextField(
                                 textStyle: primaryTextStyle(size: 12),
@@ -79,14 +92,15 @@ class BedAssignScreen extends StatelessWidget {
                                 nextFocus: controller.patientFocus,
                                 textFieldType: TextFieldType.NAME,
                                 onTap: () async {
-                                  if(isFromBedDetails){
+                                  if (isFromBedDetails) {
                                     return;
                                   }
                                   hideKeyboard(context);
                                   await showModalBottomSheet(
                                     context: getContext,
                                     shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
                                     ),
                                     isScrollControlled: true,
                                     builder: (context) {
@@ -94,44 +108,66 @@ class BedAssignScreen extends StatelessWidget {
                                       return SizedBox(
                                         height: Get.height * 0.7,
                                         child: Obx(() {
-                                          if (controller.isClinicLoading.value) {
+                                          if (controller
+                                              .isClinicLoading.value) {
                                             return const LoaderWidget();
                                           }
                                           return BottomSelectionSheet(
-                                            searchTextCont: controller.clinicSearchCont,
+                                            searchTextCont:
+                                                controller.clinicSearchCont,
                                             title: locale.value.selectClinic,
-                                            hintText: locale.value.searchClinicHere,
+                                            hintText:
+                                                locale.value.searchClinicHere,
                                             hasError: false,
-                                            isEmpty: controller.clinicList.isEmpty,
+                                            isEmpty:
+                                                controller.clinicList.isEmpty,
                                             errorText: '',
                                             isLoading: controller.isLoading,
                                             searchApiCall: (p0) {},
                                             onRetry: controller.getClinicList,
                                             listWidget: AnimatedListView(
                                               shrinkWrap: true,
-                                              itemCount: controller.clinicList.length,
+                                              itemCount:
+                                                  controller.clinicList.length,
                                               padding: EdgeInsets.zero,
-                                              physics: const AlwaysScrollableScrollPhysics(),
-                                              listAnimationType: ListAnimationType.Slide,
+                                              physics:
+                                                  const AlwaysScrollableScrollPhysics(),
+                                              listAnimationType:
+                                                  ListAnimationType.Slide,
                                               itemBuilder: (ctx, index) {
-                                                final clinic = controller.clinicList[index];
+                                                final clinic = controller
+                                                    .clinicList[index];
                                                 return GestureDetector(
                                                   onTap: () {
-                                                    controller.selectedClinic(clinic.id);
-                                                    controller.clinicCont.text = clinic.name.validate();
+                                                    controller.selectedClinic(
+                                                        clinic.id);
+                                                    controller.clinicCont.text =
+                                                        clinic.name.validate();
                                                     Get.back();
                                                   },
                                                   child: Container(
-                                                    padding: const EdgeInsets.all(12),
-                                                    margin: const EdgeInsets.only(bottom: 12),
-                                                    decoration: boxDecorationDefault(
-                                                      borderRadius: BorderRadius.circular(6),
-                                                      color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            12),
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            bottom: 12),
+                                                    decoration:
+                                                        boxDecorationDefault(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      color: context.isDarkMode
+                                                          ? appScreenBackgroundDark
+                                                          : appScreenBackground,
                                                     ),
                                                     child: Text(
                                                       clinic.name,
                                                       style: primaryTextStyle(
-                                                        color: context.isDarkMode ? null : darkGrayTextColor,
+                                                        color: context
+                                                                .isDarkMode
+                                                            ? null
+                                                            : darkGrayTextColor,
                                                       ),
                                                     ),
                                                   ),
@@ -150,7 +186,13 @@ class BedAssignScreen extends StatelessWidget {
                                   fillColor: context.cardColor,
                                   filled: true,
                                   borderRadius: 10,
-                                  suffixIcon: !controller.isClinicSelectionEnabled.value ? null : const Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                                  suffixIcon:
+                                      !controller.isClinicSelectionEnabled.value
+                                          ? null
+                                          : const Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                              color: dividerColor,
+                                              size: 22),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -163,7 +205,8 @@ class BedAssignScreen extends StatelessWidget {
                             16.height,
                             Obx(
                               () {
-                                final patientName = controller.selectedPatient.value?.fullName;
+                                final patientName =
+                                    controller.selectedPatient.value?.fullName;
                                 return AppTextField(
                                   key: ValueKey(patientName),
                                   textStyle: primaryTextStyle(size: 12),
@@ -175,10 +218,21 @@ class BedAssignScreen extends StatelessWidget {
                                   onTap: controller.isEditMode.value
                                       ? null
                                       : () async {
-                                          if (controller.isPatientSelectionEnabled.value) {
-                                            if (controller.selectedPatientFromEncounter.value != null) {
-                                              controller.patientList.value = [controller.selectedPatientFromEncounter.value!];
-                                              controller.selectPatient(controller.selectedPatientFromEncounter.value!);
+                                          if (controller
+                                              .isPatientSelectionEnabled
+                                              .value) {
+                                            if (controller
+                                                    .selectedPatientFromEncounter
+                                                    .value !=
+                                                null) {
+                                              controller.patientList.value = [
+                                                controller
+                                                    .selectedPatientFromEncounter
+                                                    .value!
+                                              ];
+                                              controller.selectPatient(controller
+                                                  .selectedPatientFromEncounter
+                                                  .value!);
                                             } else {
                                               await controller.fetchPatients();
                                               serviceCommonBottomSheet(
@@ -186,58 +240,114 @@ class BedAssignScreen extends StatelessWidget {
                                                 context,
                                                 child: Obx(
                                                   () => BottomSelectionSheet(
-                                                    title: locale.value.choosePatient,
-                                                    hintText: locale.value.searchForPatient,
+                                                    title: locale
+                                                        .value.choosePatient,
+                                                    hintText: locale
+                                                        .value.searchForPatient,
                                                     hasError: false,
-                                                    isEmpty: controller.patientList.isEmpty,
+                                                    isEmpty: controller
+                                                        .patientList.isEmpty,
                                                     errorText: '',
                                                     isLoading: false.obs,
                                                     searchApiCall: (p0) {
-                                                      controller.searchPatient(p0);
+                                                      controller
+                                                          .searchPatient(p0);
                                                     },
                                                     onRetry: () {
                                                       controller.patientPage(1);
-                                                      controller.fetchPatients();
+                                                      controller
+                                                          .fetchPatients();
                                                     },
-                                                    listWidget: AnimatedListView(
+                                                    listWidget:
+                                                        AnimatedListView(
                                                       shrinkWrap: true,
-                                                      itemCount: controller.patientList.length,
+                                                      itemCount: controller
+                                                          .patientList.length,
                                                       padding: EdgeInsets.zero,
-                                                      physics: const AlwaysScrollableScrollPhysics(),
-                                                      listAnimationType: ListAnimationType.Slide,
-                                                      itemBuilder: (ctx, index) {
+                                                      physics:
+                                                          const AlwaysScrollableScrollPhysics(),
+                                                      listAnimationType:
+                                                          ListAnimationType
+                                                              .Slide,
+                                                      itemBuilder:
+                                                          (ctx, index) {
                                                         return GestureDetector(
                                                           onTap: () {
-                                                            hideKeyboard(context);
-                                                            controller.selectPatient(controller.patientList[index]);
+                                                            hideKeyboard(
+                                                                context);
+                                                            controller
+                                                                .selectPatient(
+                                                                    controller
+                                                                            .patientList[
+                                                                        index]);
                                                             Get.back();
                                                           },
                                                           child: Container(
-                                                            padding: const EdgeInsets.all(8),
-                                                            margin: const EdgeInsets.only(bottom: 8),
-                                                            decoration: boxDecorationDefault(
-                                                              borderRadius: BorderRadius.circular(6),
-                                                              color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8),
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    bottom: 8),
+                                                            decoration:
+                                                                boxDecorationDefault(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          6),
+                                                              color: context
+                                                                      .isDarkMode
+                                                                  ? appScreenBackgroundDark
+                                                                  : appScreenBackground,
                                                             ),
                                                             child: Row(
                                                               children: [
                                                                 CachedImageWidget(
-                                                                  url: controller.patientList[index].profileImage.validate(),
+                                                                  url: controller
+                                                                      .patientList[
+                                                                          index]
+                                                                      .profileImage
+                                                                      .validate(),
                                                                   height: 35,
                                                                   width: 35,
-                                                                  fit: BoxFit.cover,
+                                                                  fit: BoxFit
+                                                                      .cover,
                                                                   radius: 20,
-                                                                ).cornerRadiusWithClipRRect(40),
+                                                                ).cornerRadiusWithClipRRect(
+                                                                    40),
                                                                 10.width,
                                                                 Text(
-                                                                  controller.patientList[index].fullName.validate(),
-                                                                  style: primaryTextStyle(color: context.isDarkMode ? null : darkGrayTextColor),
+                                                                  controller
+                                                                      .patientList[
+                                                                          index]
+                                                                      .fullName
+                                                                      .validate(),
+                                                                  style: primaryTextStyle(
+                                                                      color: context
+                                                                              .isDarkMode
+                                                                          ? null
+                                                                          : darkGrayTextColor),
                                                                 ).expand(),
-                                                                if (controller.selectedPatient.value?.id == controller.patientList[index].id) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                                if (controller
+                                                                        .selectedPatient
+                                                                        .value
+                                                                        ?.id ==
+                                                                    controller
+                                                                        .patientList[
+                                                                            index]
+                                                                        .id)
+                                                                  Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      color:
+                                                                          appColorPrimary,
+                                                                      size: 20),
                                                               ],
                                                             ),
                                                           ),
-                                                        ).paddingSymmetric(vertical: 8);
+                                                        ).paddingSymmetric(
+                                                            vertical: 8);
                                                       },
                                                     ).expand(),
                                                   ),
@@ -262,7 +372,8 @@ class BedAssignScreen extends StatelessWidget {
                             16.height,
                             Obx(
                               () {
-                                final encounterId = controller.selectedEncounterId.value;
+                                final encounterId =
+                                    controller.selectedEncounterId.value;
                                 return AppTextField(
                                   key: ValueKey(encounterId),
                                   textStyle: primaryTextStyle(size: 12),
@@ -271,61 +382,124 @@ class BedAssignScreen extends StatelessWidget {
                                   nextFocus: controller.bedTypeFocus,
                                   textFieldType: TextFieldType.NAME,
                                   readOnly: true,
-                                  onTap: (controller.isEditMode.value || !controller.isEncounterSelectionEnabled.value)
+                                  onTap: (controller.isEditMode.value ||
+                                          !controller
+                                              .isEncounterSelectionEnabled
+                                              .value)
                                       ? null
                                       : () async {
-                                          if (controller.selectedPatient.value != null) {
-                                            await controller.fetchEncounters(controller.selectedPatient.value!.id);
+                                          if (controller
+                                                  .selectedPatient.value !=
+                                              null) {
+                                            await controller.fetchEncounters(
+                                                controller
+                                                    .selectedPatient.value!.id);
                                             serviceCommonBottomSheet(
                                               // ignore: use_build_context_synchronously
                                               context,
-                                              child: GetBuilder<BedAssignController>(
+                                              child: GetBuilder<
+                                                  BedAssignController>(
                                                 builder: (_) {
                                                   return Obx(
                                                     () => BottomSelectionSheet(
-                                                      title: locale.value.chooseEncounter,
-                                                      hintText: locale.value.searchForEncounter,
+                                                      title: locale.value
+                                                          .chooseEncounter,
+                                                      hintText: locale.value
+                                                          .searchForEncounter,
                                                       hasError: false,
-                                                      isEmpty: controller.encounterList.isEmpty,
+                                                      isEmpty: controller
+                                                          .encounterList
+                                                          .isEmpty,
                                                       errorText: '',
                                                       isLoading: false.obs,
                                                       searchApiCall: (p0) {
-                                                        controller.searchEncounter(p0);
+                                                        controller
+                                                            .searchEncounter(
+                                                                p0);
                                                       },
                                                       onRetry: () {
-                                                        controller.fetchEncounters(controller.selectedPatient.value!.id);
+                                                        controller.fetchEncounters(
+                                                            controller
+                                                                .selectedPatient
+                                                                .value!
+                                                                .id);
                                                       },
-                                                      listWidget: AnimatedListView(
+                                                      listWidget:
+                                                          AnimatedListView(
                                                         shrinkWrap: true,
-                                                        itemCount: controller.encounterList.length,
-                                                        padding: EdgeInsets.zero,
-                                                        physics: const AlwaysScrollableScrollPhysics(),
-                                                        listAnimationType: ListAnimationType.Slide,
-                                                        itemBuilder: (ctx, index) {
+                                                        itemCount: controller
+                                                            .encounterList
+                                                            .length,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        physics:
+                                                            const AlwaysScrollableScrollPhysics(),
+                                                        listAnimationType:
+                                                            ListAnimationType
+                                                                .Slide,
+                                                        itemBuilder:
+                                                            (ctx, index) {
                                                           return GestureDetector(
                                                             onTap: () {
-                                                              hideKeyboard(context);
-                                                              controller.selectEncounter(controller.encounterList[index]);
+                                                              hideKeyboard(
+                                                                  context);
+                                                              controller.selectEncounter(
+                                                                  controller
+                                                                          .encounterList[
+                                                                      index]);
                                                               Get.back();
                                                             },
                                                             child: Container(
-                                                              padding: const EdgeInsets.all(12),
-                                                              margin: const EdgeInsets.only(bottom: 12),
-                                                              decoration: boxDecorationDefault(
-                                                                borderRadius: BorderRadius.circular(6),
-                                                                color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(12),
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      bottom:
+                                                                          12),
+                                                              decoration:
+                                                                  boxDecorationDefault(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            6),
+                                                                color: context
+                                                                        .isDarkMode
+                                                                    ? appScreenBackgroundDark
+                                                                    : appScreenBackground,
                                                               ),
                                                               child: Row(
                                                                 children: [
                                                                   Text(
-                                                                    locale.value.encounterWithId(controller.encounterList[index].id),
-                                                                    style: primaryTextStyle(color: context.isDarkMode ? null : darkGrayTextColor),
+                                                                    locale.value.encounterWithId(controller
+                                                                        .encounterList[
+                                                                            index]
+                                                                        .id),
+                                                                    style: primaryTextStyle(
+                                                                        color: context.isDarkMode
+                                                                            ? null
+                                                                            : darkGrayTextColor),
                                                                   ).expand(),
-                                                                  if (controller.selectedEncounterId.value == controller.encounterList[index].id) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                                  if (controller
+                                                                          .selectedEncounterId
+                                                                          .value ==
+                                                                      controller
+                                                                          .encounterList[
+                                                                              index]
+                                                                          .id)
+                                                                    Icon(
+                                                                        Icons
+                                                                            .check_circle,
+                                                                        color:
+                                                                            appColorPrimary,
+                                                                        size:
+                                                                            20),
                                                                 ],
                                                               ),
                                                             ),
-                                                          ).paddingSymmetric(vertical: 8);
+                                                          ).paddingSymmetric(
+                                                              vertical: 8);
                                                         },
                                                       ).expand(),
                                                     ),
@@ -334,12 +508,21 @@ class BedAssignScreen extends StatelessWidget {
                                               ),
                                             );
                                           } else {
-                                            toast(locale.value.pleaseSelectPatient);
+                                            toast(locale
+                                                .value.pleaseSelectPatient);
                                           }
                                         },
                                   decoration: commonInputDecoration(
                                     labelText: locale.value.encounter,
-                                    suffixIcon: (controller.isEditMode.value || !controller.isEncounterSelectionEnabled.value) ? null : const Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                                    suffixIcon: (controller.isEditMode.value ||
+                                            !controller
+                                                .isEncounterSelectionEnabled
+                                                .value)
+                                        ? null
+                                        : const Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color: dividerColor,
+                                            size: 22),
                                   ),
                                 );
                               },
@@ -349,7 +532,8 @@ class BedAssignScreen extends StatelessWidget {
                         ),
                         Obx(
                           () {
-                            final bedTypeName = controller.selectedBedType.value?.type;
+                            final bedTypeName =
+                                controller.selectedBedType.value?.type;
                             return AppTextField(
                               key: ValueKey(bedTypeName),
                               textStyle: primaryTextStyle(size: 12),
@@ -366,10 +550,13 @@ class BedAssignScreen extends StatelessWidget {
                                         context,
                                         child: Obx(
                                           () => BottomSelectionSheet(
-                                            title: locale.value.selectBedTypeTitle,
-                                            hintText: locale.value.searchBedTypeHintText,
+                                            title:
+                                                locale.value.selectBedTypeTitle,
+                                            hintText: locale
+                                                .value.searchBedTypeHintText,
                                             hasError: false,
-                                            isEmpty: controller.bedTypeList.isEmpty,
+                                            isEmpty:
+                                                controller.bedTypeList.isEmpty,
                                             errorText: '',
                                             isLoading: false.obs,
                                             searchApiCall: (p0) {
@@ -380,31 +567,67 @@ class BedAssignScreen extends StatelessWidget {
                                             },
                                             listWidget: AnimatedListView(
                                               shrinkWrap: true,
-                                              itemCount: controller.bedTypeList.length,
+                                              itemCount:
+                                                  controller.bedTypeList.length,
                                               padding: EdgeInsets.zero,
-                                              physics: const AlwaysScrollableScrollPhysics(),
-                                              listAnimationType: ListAnimationType.Slide,
+                                              physics:
+                                                  const AlwaysScrollableScrollPhysics(),
+                                              listAnimationType:
+                                                  ListAnimationType.Slide,
                                               itemBuilder: (ctx, index) {
                                                 return GestureDetector(
                                                   onTap: () {
                                                     hideKeyboard(context);
-                                                    controller.selectBedType(controller.bedTypeList[index]);
+                                                    controller.selectBedType(
+                                                        controller.bedTypeList[
+                                                            index]);
                                                     Get.back();
                                                   },
                                                   child: Container(
-                                                    padding: const EdgeInsets.all(12),
-                                                    margin: const EdgeInsets.only(bottom: 12),
-                                                    decoration: boxDecorationDefault(
-                                                      borderRadius: BorderRadius.circular(6),
-                                                      color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            12),
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            bottom: 12),
+                                                    decoration:
+                                                        boxDecorationDefault(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      color: context.isDarkMode
+                                                          ? appScreenBackgroundDark
+                                                          : appScreenBackground,
                                                     ),
                                                     child: Row(
                                                       children: [
                                                         Text(
-                                                          controller.bedTypeList[index].type.validate(),
-                                                          style: boldTextStyle(size: 16, color: context.isDarkMode ? null : darkGrayTextColor),
+                                                          controller
+                                                              .bedTypeList[
+                                                                  index]
+                                                              .type
+                                                              .validate(),
+                                                          style: boldTextStyle(
+                                                              size: 16,
+                                                              color: context
+                                                                      .isDarkMode
+                                                                  ? null
+                                                                  : darkGrayTextColor),
                                                         ).expand(),
-                                                        if (controller.selectedBedType.value?.type == controller.bedTypeList[index].type) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                        if (controller
+                                                                .selectedBedType
+                                                                .value
+                                                                ?.type ==
+                                                            controller
+                                                                .bedTypeList[
+                                                                    index]
+                                                                .type)
+                                                          Icon(
+                                                              Icons
+                                                                  .check_circle,
+                                                              color:
+                                                                  appColorPrimary,
+                                                              size: 20),
                                                       ],
                                                     ),
                                                   ),
@@ -417,7 +640,12 @@ class BedAssignScreen extends StatelessWidget {
                                     },
                               decoration: commonInputDecoration(
                                 labelText: locale.value.bedType,
-                                suffixIcon: controller.isEditMode.value ? null : const Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                                suffixIcon: controller.isEditMode.value
+                                    ? null
+                                    : const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: dividerColor,
+                                        size: 22),
                               ),
                             );
                           },
@@ -437,7 +665,8 @@ class BedAssignScreen extends StatelessWidget {
                               onTap: controller.isEditMode.value
                                   ? null
                                   : () async {
-                                      if (controller.selectedBedType.value == null) {
+                                      if (controller.selectedBedType.value ==
+                                          null) {
                                         toast(locale.value.pleaseSelectBedType);
                                         return;
                                       }
@@ -453,30 +682,51 @@ class BedAssignScreen extends StatelessWidget {
                                             errorText: '',
                                             isLoading: false.obs,
                                             searchApiCall: (p0) {
-                                              final filteredList = controller.bedList.where((bed) => bed.bed?.toLowerCase().contains(p0.toLowerCase()) ?? false).toList();
-                                              controller.bedList.value = filteredList;
+                                              final filteredList = controller
+                                                  .bedList
+                                                  .where((bed) =>
+                                                      bed.bed
+                                                          ?.toLowerCase()
+                                                          .contains(p0
+                                                              .toLowerCase()) ??
+                                                      false)
+                                                  .toList();
+                                              controller.bedList.value =
+                                                  filteredList;
                                             },
                                             onRetry: () {
                                               controller.fetchRooms();
                                             },
                                             listWidget: AnimatedListView(
                                               shrinkWrap: true,
-                                              itemCount: controller.bedList.length,
+                                              itemCount:
+                                                  controller.bedList.length,
                                               padding: EdgeInsets.zero,
-                                              physics: const AlwaysScrollableScrollPhysics(),
-                                              listAnimationType: ListAnimationType.Slide,
+                                              physics:
+                                                  const AlwaysScrollableScrollPhysics(),
+                                              listAnimationType:
+                                                  ListAnimationType.Slide,
                                               itemBuilder: (ctx, index) {
                                                 return GestureDetector(
                                                   onTap: () {
                                                     hideKeyboard(context);
-                                                    controller.selectBed(controller.bedList[index]);
+                                                    controller.selectBed(
+                                                        controller
+                                                            .bedList[index]);
                                                     Get.back();
                                                   },
                                                   child: Container(
-                                                    padding: const EdgeInsets.all(12),
-                                                    decoration: boxDecorationDefault(
-                                                      borderRadius: BorderRadius.circular(6),
-                                                      color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            12),
+                                                    decoration:
+                                                        boxDecorationDefault(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6),
+                                                      color: context.isDarkMode
+                                                          ? appScreenBackgroundDark
+                                                          : appScreenBackground,
                                                     ),
                                                     child: Row(
                                                       children: [
@@ -484,21 +734,45 @@ class BedAssignScreen extends StatelessWidget {
                                                           child: Row(
                                                             children: [
                                                               Text(
-                                                                controller.bedList[index].bed.validate(),
-                                                                style: boldTextStyle(size: 16, color: context.isDarkMode ? null : darkGrayTextColor),
+                                                                controller
+                                                                    .bedList[
+                                                                        index]
+                                                                    .bed
+                                                                    .validate(),
+                                                                style: boldTextStyle(
+                                                                    size: 16,
+                                                                    color: context
+                                                                            .isDarkMode
+                                                                        ? null
+                                                                        : darkGrayTextColor),
                                                               ),
                                                               8.width,
                                                               Text(
-                                                                locale.value.available,
-                                                                style: secondaryTextStyle(
+                                                                locale.value
+                                                                    .available,
+                                                                style:
+                                                                    secondaryTextStyle(
                                                                   size: 14,
-                                                                  color: BedColors.available,
+                                                                  color: BedColors
+                                                                      .available,
                                                                 ),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
-                                                        if (controller.selectedBed.value.id == controller.bedList[index].id) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                        if (controller
+                                                                .selectedBed
+                                                                .value
+                                                                .id ==
+                                                            controller
+                                                                .bedList[index]
+                                                                .id)
+                                                          Icon(
+                                                              Icons
+                                                                  .check_circle,
+                                                              color:
+                                                                  appColorPrimary,
+                                                              size: 20),
                                                       ],
                                                     ),
                                                   ),
@@ -511,7 +785,12 @@ class BedAssignScreen extends StatelessWidget {
                                     },
                               decoration: commonInputDecoration(
                                 labelText: locale.value.room,
-                                suffixIcon: controller.isEditMode.value ? null : const Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                                suffixIcon: controller.isEditMode.value
+                                    ? null
+                                    : const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: dividerColor,
+                                        size: 22),
                               ),
                             );
                           },
@@ -532,7 +811,13 @@ class BedAssignScreen extends StatelessWidget {
                                 },
                           decoration: commonInputDecoration(
                             labelText: locale.value.admissionDate,
-                            suffixIcon: controller.isEditMode.value ? null : commonLeadingWid(imgPath: Assets.iconsIcCalendar, color: secondaryTextColor, size: 10).paddingAll(16),
+                            suffixIcon: controller.isEditMode.value
+                                ? null
+                                : commonLeadingWid(
+                                        imgPath: Assets.iconsIcCalendar,
+                                        color: secondaryTextColor,
+                                        size: 10)
+                                    .paddingAll(16),
                           ),
                         ),
                         16.height,
@@ -549,7 +834,11 @@ class BedAssignScreen extends StatelessWidget {
                           },
                           decoration: commonInputDecoration(
                             labelText: locale.value.dischargeDate,
-                            suffixIcon: commonLeadingWid(imgPath: Assets.iconsIcCalendar, color: secondaryTextColor, size: 10).paddingAll(16),
+                            suffixIcon: commonLeadingWid(
+                                    imgPath: Assets.iconsIcCalendar,
+                                    color: secondaryTextColor,
+                                    size: 10)
+                                .paddingAll(16),
                           ),
                         ),
                         16.height,
@@ -593,7 +882,8 @@ class BedAssignScreen extends StatelessWidget {
                               controller: controller.weightController,
                               focus: controller.weightFocus,
                               nextFocus: controller.heightFocus,
-                              decoration: commonInputDecoration(labelText: locale.value.weightLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.weightLabel),
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   final weight = double.tryParse(value);
@@ -612,7 +902,8 @@ class BedAssignScreen extends StatelessWidget {
                               focus: controller.heightFocus,
                               nextFocus: controller.bloodPressureFocus,
                               textFieldType: TextFieldType.NUMBER,
-                              decoration: commonInputDecoration(labelText: locale.value.heightLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.heightLabel),
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   final height = double.tryParse(value);
@@ -630,12 +921,15 @@ class BedAssignScreen extends StatelessWidget {
                               focus: controller.bloodPressureFocus,
                               nextFocus: controller.heartRateFocus,
                               keyboardType: TextInputType.phone,
-                              decoration: commonInputDecoration(labelText: locale.value.bloodPressureLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.bloodPressureLabel),
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
-                                  final bloodPressureRegex = RegExp(r'^\d{2,3}/\d{2,3}$');
+                                  final bloodPressureRegex =
+                                      RegExp(r'^\d{2,3}/\d{2,3}$');
                                   if (!bloodPressureRegex.hasMatch(value)) {
-                                    return locale.value.pleaseEnterValidBloodPressure;
+                                    return locale
+                                        .value.pleaseEnterValidBloodPressure;
                                   }
                                 }
                                 return null;
@@ -648,12 +942,14 @@ class BedAssignScreen extends StatelessWidget {
                               controller: controller.heartRateController,
                               focus: controller.heartRateFocus,
                               nextFocus: controller.bloodGroupFocus,
-                              decoration: commonInputDecoration(labelText: locale.value.heartRateLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.heartRateLabel),
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   final heartRate = int.tryParse(value);
                                   if (heartRate == null || heartRate <= 0) {
-                                    return locale.value.pleaseEnterValidHeartRate;
+                                    return locale
+                                        .value.pleaseEnterValidHeartRate;
                                   }
                                 }
                                 return null;
@@ -662,7 +958,8 @@ class BedAssignScreen extends StatelessWidget {
                             ),
                             16.height,
                             AppTextField(
-                              key: ValueKey(controller.bloodGroupController.text),
+                              key: ValueKey(
+                                  controller.bloodGroupController.text),
                               textStyle: primaryTextStyle(size: 12),
                               controller: controller.bloodGroupController,
                               focus: controller.bloodGroupFocus,
@@ -671,14 +968,16 @@ class BedAssignScreen extends StatelessWidget {
                               onTap: controller.isEditMode.value
                                   ? null
                                   : () async {
-                                      List<String> filteredGroups = List.from(BedManagementStyles.bloodGroups);
+                                      List<String> filteredGroups = List.from(
+                                          BedManagementStyles.bloodGroups);
                                       serviceCommonBottomSheet(
                                         context,
                                         child: StatefulBuilder(
                                           builder: (context, setState) {
                                             return Obx(
                                               () => BottomSelectionSheet(
-                                                title: locale.value.bloodGroupLabel,
+                                                title: locale
+                                                    .value.bloodGroupLabel,
                                                 hintText: locale.value.search,
                                                 hasError: false,
                                                 isEmpty: filteredGroups.isEmpty,
@@ -686,42 +985,78 @@ class BedAssignScreen extends StatelessWidget {
                                                 isLoading: false.obs,
                                                 searchApiCall: (p0) {
                                                   setState(() {
-                                                    filteredGroups = BedManagementStyles.bloodGroups.where((g) => g.toLowerCase().contains(p0.toLowerCase())).toList();
+                                                    filteredGroups =
+                                                        BedManagementStyles
+                                                            .bloodGroups
+                                                            .where((g) => g
+                                                                .toLowerCase()
+                                                                .contains(p0
+                                                                    .toLowerCase()))
+                                                            .toList();
                                                   });
                                                 },
                                                 onRetry: () {},
                                                 listWidget: AnimatedListView(
                                                   shrinkWrap: true,
-                                                  itemCount: filteredGroups.length,
+                                                  itemCount:
+                                                      filteredGroups.length,
                                                   padding: EdgeInsets.zero,
-                                                  physics: const AlwaysScrollableScrollPhysics(),
-                                                  listAnimationType: ListAnimationType.Slide,
+                                                  physics:
+                                                      const AlwaysScrollableScrollPhysics(),
+                                                  listAnimationType:
+                                                      ListAnimationType.Slide,
                                                   itemBuilder: (ctx, index) {
-                                                    final group = filteredGroups[index];
+                                                    final group =
+                                                        filteredGroups[index];
                                                     return GestureDetector(
                                                       onTap: () {
                                                         hideKeyboard(context);
-                                                        controller.bloodGroupController.text = group;
+                                                        controller
+                                                            .bloodGroupController
+                                                            .text = group;
                                                         Get.back();
                                                       },
                                                       child: Container(
-                                                        padding: const EdgeInsets.all(12),
-                                                        margin: const EdgeInsets.only(bottom: 12),
-                                                        decoration: boxDecorationDefault(
-                                                          borderRadius: BorderRadius.circular(6),
-                                                          color: context.isDarkMode ? appScreenBackgroundDark : appScreenBackground,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(12),
+                                                        margin: const EdgeInsets
+                                                            .only(bottom: 12),
+                                                        decoration:
+                                                            boxDecorationDefault(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                          color: context
+                                                                  .isDarkMode
+                                                              ? appScreenBackgroundDark
+                                                              : appScreenBackground,
                                                         ),
                                                         child: Row(
                                                           children: [
                                                             Text(
                                                               group,
-                                                              style: primaryTextStyle(color: context.isDarkMode ? null : darkGrayTextColor),
+                                                              style: primaryTextStyle(
+                                                                  color: context
+                                                                          .isDarkMode
+                                                                      ? null
+                                                                      : darkGrayTextColor),
                                                             ).expand(),
-                                                            if (controller.bloodGroupController.text == group) Icon(Icons.check_circle, color: appColorPrimary, size: 20),
+                                                            if (controller
+                                                                    .bloodGroupController
+                                                                    .text ==
+                                                                group)
+                                                              Icon(
+                                                                  Icons
+                                                                      .check_circle,
+                                                                  color:
+                                                                      appColorPrimary,
+                                                                  size: 20),
                                                           ],
                                                         ),
                                                       ),
-                                                    ).paddingSymmetric(vertical: 8);
+                                                    ).paddingSymmetric(
+                                                        vertical: 8);
                                                   },
                                                 ).expand(),
                                               ),
@@ -732,7 +1067,12 @@ class BedAssignScreen extends StatelessWidget {
                                     },
                               decoration: commonInputDecoration(
                                 labelText: locale.value.bloodGroupLabel,
-                                suffixIcon: controller.isEditMode.value ? null : const Icon(Icons.keyboard_arrow_down_rounded, color: dividerColor, size: 22),
+                                suffixIcon: controller.isEditMode.value
+                                    ? null
+                                    : const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: dividerColor,
+                                        size: 22),
                               ),
                               textFieldType: TextFieldType.NAME,
                               isValidationRequired: false,
@@ -743,12 +1083,14 @@ class BedAssignScreen extends StatelessWidget {
                               controller: controller.temperatureController,
                               focus: controller.temperatureFocus,
                               nextFocus: controller.symptomsFocus,
-                              decoration: commonInputDecoration(labelText: locale.value.temperatureLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.temperatureLabel),
                               validator: (value) {
                                 if (value != null && value.isNotEmpty) {
                                   final temperature = double.tryParse(value);
                                   if (temperature == null || temperature <= 0) {
-                                    return locale.value.pleaseEnterValidTemperature;
+                                    return locale
+                                        .value.pleaseEnterValidTemperature;
                                   }
                                 }
                                 return null;
@@ -762,7 +1104,8 @@ class BedAssignScreen extends StatelessWidget {
                               focus: controller.symptomsFocus,
                               nextFocus: controller.notesFocus,
                               maxLines: 3,
-                              decoration: commonInputDecoration(labelText: locale.value.symptomsLabel),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.symptomsLabel),
                               textFieldType: TextFieldType.MULTILINE,
                               isValidationRequired: false,
                             ),
@@ -772,7 +1115,8 @@ class BedAssignScreen extends StatelessWidget {
                               controller: controller.notesController,
                               focus: controller.notesFocus,
                               maxLines: 3,
-                              decoration: commonInputDecoration(labelText: locale.value.notes),
+                              decoration: commonInputDecoration(
+                                  labelText: locale.value.notes),
                               textFieldType: TextFieldType.MULTILINE,
                               isValidationRequired: false,
                             ),
@@ -795,10 +1139,13 @@ class BedAssignScreen extends StatelessWidget {
           width: Get.width,
           child: AppButton(
             margin: const EdgeInsets.symmetric(horizontal: 16),
-            text: controller.isEditMode.value ? locale.value.update : locale.value.save,
+            text: controller.isEditMode.value
+                ? locale.value.update
+                : locale.value.save,
             color: appColorSecondary,
             textStyle: appButtonTextStyleWhite,
-            shapeBorder: RoundedRectangleBorder(borderRadius: radius(defaultAppButtonRadius / 2)),
+            shapeBorder: RoundedRectangleBorder(
+                borderRadius: radius(defaultAppButtonRadius / 2)),
             onTap: () {
               if (controller.formKey.currentState!.validate()) {
                 hideKeyboard(context);

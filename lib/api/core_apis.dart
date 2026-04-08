@@ -53,6 +53,71 @@ import 'package:kivicare_clinic_admin/screens/bed_management/model/bed_master_mo
 import 'package:kivicare_clinic_admin/screens/bed_management/model/bed_list_model.dart';
 
 class CoreServiceApis {
+  // Keep this false until backend fully supports bed-management endpoints.
+  static bool isBedFeatureEnabled = false;
+  static bool _isBedFeatureUnavailableFromBackend = false;
+
+  static bool get isBedFeatureAvailable =>
+      isBedFeatureEnabled && !_isBedFeatureUnavailableFromBackend;
+
+  static bool isBedFeatureUnavailableError(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('404') ||
+        message.contains('page not found') ||
+        message.contains('not found');
+  }
+
+  static void _markBedFeatureUnavailable({
+    String? endpoint,
+    int? statusCode,
+    Object? error,
+  }) {
+    if (_isBedFeatureUnavailableFromBackend) return;
+
+    _isBedFeatureUnavailableFromBackend = true;
+    final source = endpoint ?? 'bed endpoint';
+    final details = error != null ? error.toString() : 'HTTP $statusCode';
+    log('Bed feature disabled because $source is unavailable ($details).');
+  }
+
+  static Future<dynamic> _executeBedRequest(
+    String endPoint, {
+    HttpMethodType method = HttpMethodType.GET,
+    Map? request,
+    Map? extraKeys,
+  }) async {
+    if (!isBedFeatureAvailable) return null;
+
+    try {
+      final response = await buildHttpResponse(
+        endPoint,
+        method: method,
+        request: request,
+        extraKeys: extraKeys,
+      );
+
+      if (response.statusCode == 404) {
+        _markBedFeatureUnavailable(
+          endpoint: endPoint,
+          statusCode: response.statusCode,
+        );
+        return null;
+      }
+
+      return await handleResponse(response);
+    } catch (e) {
+      if (isBedFeatureUnavailableError(e)) {
+        _markBedFeatureUnavailable(endpoint: endPoint, error: e);
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  static BaseResponseModel _bedFeatureDisabledResponse() {
+    return BaseResponseModel(status: false, message: '');
+  }
+
   static Future<RxList<CategoryElement>> getCategoryList({
     String search = '',
     int page = 1,
@@ -1014,9 +1079,13 @@ class CoreServiceApis {
 
   // Bed Management APIs
   static Future<List<BedTypeElement>> getBedTypes() async {
-    final bedTypeListRes = BedTypeListRes.fromJson(await handleResponse(
-        await buildHttpResponse(APIEndPoints.bedTypeList,
-            method: HttpMethodType.GET)));
+    final response = await _executeBedRequest(
+      APIEndPoints.bedTypeList,
+      method: HttpMethodType.GET,
+    );
+    if (response == null) return <BedTypeElement>[];
+
+    final bedTypeListRes = BedTypeListRes.fromJson(response);
     return bedTypeListRes.data.validate();
   }
 
@@ -1027,14 +1096,30 @@ class CoreServiceApis {
     Function(bool)? lastPageCallBack,
     int? bedTypeId,
     String? status,
+    int? clinicId,
   }) async {
+    if (!isBedFeatureAvailable) {
+      if (page == 1) bedList.clear();
+      lastPageCallBack?.call(true);
+      return bedList.obs;
+    }
+
     String bedType = bedTypeId != null ? '&bed_type_id=$bedTypeId' : '';
     String bedStatus =
         status != null && status.isNotEmpty ? '&status=$status' : '';
-    final bedListRes = BedListRes.fromJson(await handleResponse(
-        await buildHttpResponse(
-            "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$bedType$bedStatus",
-            method: HttpMethodType.GET)));
+    String clinic = clinicId != null ? '&clinic_id=$clinicId' : '';
+
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$bedType$bedStatus$clinic",
+      method: HttpMethodType.GET,
+    );
+    if (response == null) {
+      if (page == 1) bedList.clear();
+      lastPageCallBack?.call(true);
+      return bedList.obs;
+    }
+
+    final bedListRes = BedListRes.fromJson(response);
     if (page == 1) bedList.clear();
     bedList.addAll(bedListRes.data);
     lastPageCallBack?.call(bedListRes.data.length != perPage);
@@ -1043,53 +1128,82 @@ class CoreServiceApis {
   }
 
   static Future<BaseResponseModel> deleteBed({required int bedId}) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId",
-            method: HttpMethodType.DELETE)));
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMaster}/$bedId",
+      method: HttpMethodType.DELETE,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> updateBedStatus({
     required int bedId,
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(
-      await handleResponse(
-        await buildHttpResponse(
-            "${APIEndPoints.bedStatus}/bed/$bedId/toggle-maintenance",
-            request: request,
-            method: HttpMethodType.POST),
-      ),
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedStatus}/bed/$bedId/toggle-maintenance",
+      request: request,
+      method: HttpMethodType.POST,
     );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> addBed({
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse(APIEndPoints.bedMaster,
-            request: request, method: HttpMethodType.POST)));
+    final response = await _executeBedRequest(
+      APIEndPoints.bedMaster,
+      request: request,
+      method: HttpMethodType.POST,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> updateBed({
     required int bedId,
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse("${APIEndPoints.bedMaster}/$bedId",
-            request: request, method: HttpMethodType.PUT)));
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMaster}/$bedId",
+      request: request,
+      method: HttpMethodType.PUT,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<RxList<BedMasterModel>> getBedMasters({
     int page = 1,
     int perPage = 10,
     String searchBed = '',
+    int? clinicId,
     required List<BedMasterModel> bedMasterList,
     Function(bool)? lastPageCallBack,
   }) async {
+    if (!isBedFeatureAvailable) {
+      if (page == 1) bedMasterList.clear();
+      lastPageCallBack?.call(true);
+      return bedMasterList.obs;
+    }
+
     final search = searchBed.isNotEmpty ? '&search=$searchBed' : '';
-    final response = await handleResponse(await buildHttpResponse(
-        "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$search",
-        method: HttpMethodType.GET));
+    final clinic = clinicId != null ? '&clinic_id=$clinicId' : '';
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMasterList}?per_page=$perPage&page=$page$search$clinic",
+      method: HttpMethodType.GET,
+    );
+    if (response == null) {
+      if (page == 1) bedMasterList.clear();
+      lastPageCallBack?.call(true);
+      return bedMasterList.obs;
+    }
+
     if (page == 1) bedMasterList.clear();
     if (response is List) {
       bedMasterList
@@ -1105,60 +1219,108 @@ class CoreServiceApis {
   }
 
   static Future<BedMasterModel> getBedMasterById(int id) async {
-    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse(
-        "${APIEndPoints.bedMaster}/$id",
-        method: HttpMethodType.GET)));
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMaster}/$id",
+      method: HttpMethodType.GET,
+    );
+    if (response == null) return BedMasterModel();
+
+    return BedMasterModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> deleteBedMaster(int id) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse("${APIEndPoints.bedMaster}/$id",
-            method: HttpMethodType.DELETE)));
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedMaster}/$id",
+      method: HttpMethodType.DELETE,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> addBedType({
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse(APIEndPoints.bedType,
-            request: request, method: HttpMethodType.POST)));
+    final response = await _executeBedRequest(
+      APIEndPoints.bedType,
+      request: request,
+      method: HttpMethodType.POST,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BaseResponseModel> updateBedType({
     required int id,
     required Map<String, dynamic> request,
   }) async {
-    return BaseResponseModel.fromJson(await handleResponse(
-        await buildHttpResponse("${APIEndPoints.bedType}/$id",
-            request: request, method: HttpMethodType.PUT)));
+    final response = await _executeBedRequest(
+      "${APIEndPoints.bedType}/$id",
+      request: request,
+      method: HttpMethodType.PUT,
+    );
+    if (response == null) return _bedFeatureDisabledResponse();
+
+    return BaseResponseModel.fromJson(response);
   }
 
   static Future<BedMasterModel> bedAllocationApi({
     required Map<String, dynamic> request,
   }) async {
-    return BedMasterModel.fromJson(await handleResponse(await buildHttpResponse(
-        APIEndPoints.bedAllocation,
-        request: request,
-        method: HttpMethodType.POST)));
+    final response = await _executeBedRequest(
+      APIEndPoints.bedAllocation,
+      request: request,
+      method: HttpMethodType.POST,
+    );
+    if (response == null) return BedMasterModel();
+
+    return BedMasterModel.fromJson(response);
   }
 
   static Future<Map<String, dynamic>> getBedStatusSummary(
       {int clinicId = 0}) async {
+    if (!isBedFeatureAvailable) {
+      return {
+        'status': false,
+        'data': {
+          'statistics': <String, dynamic>{},
+        }
+      };
+    }
+
     final String clinic = clinicId > 0 ? '?clinic_id=$clinicId' : '';
-    return await handleResponse(await buildHttpResponse(
-        '${APIEndPoints.bedStatus}$clinic',
-        method: HttpMethodType.GET));
+    final response = await _executeBedRequest(
+      '${APIEndPoints.bedStatus}$clinic',
+      method: HttpMethodType.GET,
+    );
+    if (response == null) {
+      return {
+        'status': false,
+        'data': {
+          'statistics': <String, dynamic>{},
+        }
+      };
+    }
+
+    return response;
   }
 
   static Future<List<BedMasterModel>> getLatestUpdatedBeds() async {
     // final String clinicId = loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? 'clinic_id=${selectedAppClinic.value.id}' : '';
-    final bedListRes = BedListRes.fromJson(await handleResponse(
-        await buildHttpResponse(APIEndPoints.bedsAvailable,
-            method: HttpMethodType.GET)));
+    final response = await _executeBedRequest(
+      APIEndPoints.bedsAvailable,
+      method: HttpMethodType.GET,
+    );
+    if (response == null) return <BedMasterModel>[];
+
+    final bedListRes = BedListRes.fromJson(response);
     return bedListRes.data.validate();
   }
 
   static Future<int?> getBedIdByName(String bedName) async {
+    if (!isBedFeatureAvailable) return null;
+
     try {
       List<BedMasterModel> bedMasterList = [];
       final bedsRx = await getBedMasters(
@@ -1179,6 +1341,8 @@ class CoreServiceApis {
   }
 
   static Future<int?> getBedIdByNameFromBedList(String bedName) async {
+    if (!isBedFeatureAvailable) return null;
+
     try {
       final beds = await getBedList(
         bedList: <BedMasterModel>[],

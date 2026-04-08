@@ -10,6 +10,7 @@ import 'password_set_success.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/local_storage.dart';
+import '../../../utils/secure_storage_helper.dart';
 
 class ChangePassController extends GetxController {
   RxBool isLoading = false.obs;
@@ -36,33 +37,43 @@ class ChangePassController extends GetxController {
   }
 
   @override
-  void onInit() {
-    oldPasswordCont.text = getValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
+  void onInit() async {
+    oldPasswordCont.text = await SecureStorageHelper.getUserPassword();
+
+    // Remove any old insecure password value if it exists.
+    removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
     super.onInit();
   }
 
   RxBool newPasshasFocus = false.obs;
 
-
   Future<void> saveForm() async {
     isLoading(true);
-    if (getValueFromLocal(SharedPreferenceConst.USER_PASSWORD) != oldPasswordCont.text.trim()) {
+    final storedPassword = await SecureStorageHelper.getUserPassword();
+
+    if (storedPassword != oldPasswordCont.text.trim()) {
+      isLoading(false);
       return toast(locale.value.yourOldPasswordDoesnT);
     } else if (newpasswordCont.text.trim() != confirmPasswordCont.text.trim()) {
+      isLoading(false);
       return toast(locale.value.yourNewPasswordDoesnT);
-    } else if ((oldPasswordCont.text.trim() == newpasswordCont.text.trim()) && oldPasswordCont.text.trim() == confirmPasswordCont.text.trim()) {
+    } else if ((oldPasswordCont.text.trim() == newpasswordCont.text.trim()) &&
+        oldPasswordCont.text.trim() == confirmPasswordCont.text.trim()) {
+      isLoading(false);
       return toast(locale.value.oldAndNewPassword);
     }
     hideKeyBoardWithoutContext();
 
     final Map<String, dynamic> req = {
-      'old_password': getValueFromLocal(SharedPreferenceConst.USER_PASSWORD),
+      'old_password': storedPassword,
       'new_password': confirmPasswordCont.text.trim(),
     };
 
     await AuthServiceApis.changePasswordAPI(request: req).then((value) async {
       isLoading(false);
-      setValueToLocal(SharedPreferenceConst.USER_PASSWORD, confirmPasswordCont.text.trim());
+      await SecureStorageHelper.saveUserPassword(
+          confirmPasswordCont.text.trim());
+      removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
       loginUserData.value.apiToken = value.data.apiToken;
       Get.to(() => const PasswordSetSuccess());
     }).catchError((e) {

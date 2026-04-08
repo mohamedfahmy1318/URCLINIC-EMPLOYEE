@@ -9,7 +9,6 @@ import '../../components/cached_image_widget.dart';
 import '../../components/loader_widget.dart';
 import '../../generated/assets.dart';
 import '../../main.dart';
-import '../../utils/app_common.dart';
 import '../../utils/empty_error_state_widget.dart';
 import '../Encounter/encounter_dashboard/encounter_dashboard.dart';
 import 'appointments_controller.dart';

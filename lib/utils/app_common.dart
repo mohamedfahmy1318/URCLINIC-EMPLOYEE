@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kivicare_clinic_admin/api/core_apis.dart';
@@ -15,9 +16,19 @@ import '../locale/app_localizations.dart';
 import '../locale/languages.dart';
 import 'local_storage.dart';
 
-bool isIqonicProduct = DOMAIN_URL.contains("apps.iqonic.design") ||
-    DOMAIN_URL.contains("iqonic.design") ||
-    DOMAIN_URL.contains("innoquad.in");
+bool isIqonicProduct = !kReleaseMode &&
+    (DOMAIN_URL.contains("apps.iqonic.design") ||
+        DOMAIN_URL.contains("iqonic.design") ||
+        DOMAIN_URL.contains("innoquad.in"));
+
+/// Demo credentials must be explicitly enabled in non-release builds only.
+const bool kEnableDemoCredentials =
+    bool.fromEnvironment('ENABLE_DEMO_CREDENTIALS', defaultValue: false);
+
+bool get shouldShowDemoCredentials =>
+    !kReleaseMode &&
+    kEnableDemoCredentials &&
+    appConfigs.value.isDummyCredential == 1;
 
 //Firebase App Name Topic
 String get appNameTopic => APP_NAME

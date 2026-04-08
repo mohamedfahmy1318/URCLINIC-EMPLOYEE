@@ -31,7 +31,10 @@ class NewUpdateDialog extends StatelessWidget {
               60.height,
               Text(locale.value.newUpdate, style: primaryTextStyle(size: 18)),
               8.height,
-              Text("${locale.value.anUpdateTo}  $APP_NAME ${locale.value.isAvailableGoTo}", style: secondaryTextStyle(), textAlign: TextAlign.left),
+              Text(
+                  "${locale.value.anUpdateTo}  $APP_NAME ${locale.value.isAvailableGoTo}",
+                  style: secondaryTextStyle(),
+                  textAlign: TextAlign.left),
               24.height,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -70,10 +73,20 @@ class NewUpdateDialog extends StatelessWidget {
                             exit(0);
                           }
                         } else if (isIOS) {
-                          if (appConfigs.value.clinicadminAppUrl.clinicadminAppAppStore.trim().isNotEmpty) {
-                            commonLaunchUrl(appConfigs.value.clinicadminAppUrl.clinicadminAppAppStore.trim(), launchMode: LaunchMode.externalApplication);
+                          if (appConfigs
+                              .value.clinicadminAppUrl.clinicadminAppAppStore
+                              .trim()
+                              .isNotEmpty) {
+                            commonLaunchUrl(
+                                appConfigs.value.clinicadminAppUrl
+                                    .clinicadminAppAppStore
+                                    .trim(),
+                                launchMode: LaunchMode.externalApplication);
+                          } else if (APP_APPSTORE_URL.trim().isNotEmpty) {
+                            commonLaunchUrl(APP_APPSTORE_URL,
+                                launchMode: LaunchMode.externalApplication);
                           } else {
-                            commonLaunchUrl(APP_APPSTORE_URL, launchMode: LaunchMode.externalApplication);
+                            toast(locale.value.invalidUrl);
                           }
                           if (canClose) {
                             Get.back();
@@ -91,7 +104,8 @@ class NewUpdateDialog extends StatelessWidget {
         ),
         Positioned(
           top: -42,
-          child: Image.asset(Assets.imagesForceUpdate, height: 100, width: 100, fit: BoxFit.cover),
+          child: Image.asset(Assets.imagesForceUpdate,
+              height: 100, width: 100, fit: BoxFit.cover),
         ),
       ],
     );

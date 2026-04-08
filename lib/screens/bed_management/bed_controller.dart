@@ -11,7 +11,8 @@ import 'model/bed_master_model.dart';
 class BedController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isLastPage = false.obs;
-  Rx<Future<RxList<BedMasterModel>>> bedListFuture = Future(() => RxList<BedMasterModel>()).obs;
+  Rx<Future<RxList<BedMasterModel>>> bedListFuture =
+      Future(() => RxList<BedMasterModel>()).obs;
   RxList<BedMasterModel> bedList = RxList();
   RxInt page = 1.obs;
 
@@ -20,16 +21,27 @@ class BedController extends GetxController {
   RxBool isSearchText = false.obs;
   StreamController<String> searchStream = StreamController<String>();
 
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
+
   @override
   void onInit() {
     searchStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getBedList();
     });
-    getBedList();
+    if (isBedFeatureAvailable) {
+      getBedList();
+    }
     super.onInit();
   }
 
   Future<void> getBedList({bool showLoader = true, String search = ""}) async {
+    if (!isBedFeatureAvailable) {
+      bedList.clear();
+      isLastPage(true);
+      isLoading(false);
+      return;
+    }
+
     isLoading(showLoader);
     await bedListFuture(
       CoreServiceApis.getBedList(
@@ -41,7 +53,9 @@ class BedController extends GetxController {
         },
       ),
     ).then((value) {}).catchError((e) {
-      log('getAppointments E: $e');
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        log('getAppointments E: $e');
+      }
     }).whenComplete(() => isLoading(false));
   }
 

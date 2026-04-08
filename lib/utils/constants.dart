@@ -10,7 +10,7 @@ import '../screens/auth/model/login_roles_model.dart';
 class Constants {
   static const perPageItem = 20;
   static var labelTextSize = 16;
-  static const mapLinkForIOS = 'http://maps.apple.com/?q=';
+  static const mapLinkForIOS = 'https://maps.apple.com/?q=';
   static var googleMapPrefix =
       'https://www.google.com/maps/search/?api=1&query=';
   static const DEFAULT_EMAIL = 'vendor@kivicare.com';

@@ -8,7 +8,7 @@ import 'package:kivicare_clinic_admin/models/base_response_model.dart';
 class BedTypeFormController extends GetxController {
   Rx<TextEditingController> nameController = TextEditingController().obs;
   Rx<TextEditingController> descriptionController = TextEditingController().obs;
-   RxBool isLoading = false.obs;
+  RxBool isLoading = false.obs;
 
   FocusNode bedTypeNameFocus = FocusNode();
   FocusNode bedTypeFocus = FocusNode();
@@ -21,6 +21,8 @@ class BedTypeFormController extends GetxController {
   TextEditingController get descriptionCont => descriptionController.value;
 
   Map<String, dynamic>? bedTypeData;
+
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
 
   BedTypeFormController({this.bedTypeData});
 
@@ -48,6 +50,10 @@ class BedTypeFormController extends GetxController {
   }
 
   Future<void> saveBedType() async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     if (nameController.value.text.isEmpty) {
       toast(locale.value.pleaseEnterBedTypeName);
       return;
@@ -73,11 +79,13 @@ class BedTypeFormController extends GetxController {
       if (response.status == true) {
         toast(response.message);
         Get.back(result: true); // Pass true to indicate successful save
-      } else {
+      } else if (response.message.isNotEmpty) {
         toast(response.message);
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }

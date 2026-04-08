@@ -26,10 +26,13 @@ import 'utils/push_notification_service.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  log('${FirebaseTopicConst.notificationDataKey}: ${message.data}');
-  log('${FirebaseTopicConst.notificationKey} -->: ${message.notification}');
-  log('${FirebaseTopicConst.notificationTitleKey} -->: ${message.notification!.title}');
-  log('${FirebaseTopicConst.notificationBodyKey} -->: ${message.notification!.body}');
+  if (!kReleaseMode) {
+    final RemoteNotification? notification = message.notification;
+    log('${FirebaseTopicConst.notificationDataKey}: ${message.data}');
+    log('${FirebaseTopicConst.notificationKey} -->: $notification');
+    log('${FirebaseTopicConst.notificationTitleKey} -->: ${notification?.title ?? ''}');
+    log('${FirebaseTopicConst.notificationBodyKey} -->: ${notification?.body ?? ''}');
+  }
 }
 
 Rx<BaseLanguage> locale = Rx<BaseLanguage>(LanguageEn());
@@ -88,7 +91,9 @@ void main() async {
     log('getThemeFromLocal from cache E: $e');
   }
 
-  HttpOverrides.global = MyHttpOverrides();
+  if (!kReleaseMode) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
   runApp(const MyApp());
 }
 

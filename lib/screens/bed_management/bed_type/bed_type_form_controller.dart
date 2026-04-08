@@ -10,7 +10,7 @@ import '../bed_status_controller.dart';
 class BedTypeFormController extends GetxController {
   Rx<TextEditingController> nameController = TextEditingController().obs;
   Rx<TextEditingController> descriptionController = TextEditingController().obs;
-   RxBool isLoading = false.obs;
+  RxBool isLoading = false.obs;
 
   FocusNode bedTypeNameFocus = FocusNode();
   FocusNode bedTypeFocus = FocusNode();
@@ -23,6 +23,8 @@ class BedTypeFormController extends GetxController {
   TextEditingController get descriptionCont => descriptionController.value;
 
   Map<String, dynamic>? bedTypeData;
+
+  bool get isBedFeatureAvailable => CoreServiceApis.isBedFeatureAvailable;
 
   BedTypeFormController({this.bedTypeData});
 
@@ -50,10 +52,16 @@ class BedTypeFormController extends GetxController {
   }
 
   Future<void> saveBedType({bool isEdit = false}) async {
+    if (!isBedFeatureAvailable) {
+      return;
+    }
+
     if (nameController.value.text.isEmpty) {
       toast(locale.value.pleaseEnterBedTypeName);
-      final BedStatusController bedStatusController = Get.find();
-      bedStatusController.fetchBedTypes();
+      if (Get.isRegistered<BedStatusController>()) {
+        final BedStatusController bedStatusController = Get.find();
+        bedStatusController.fetchBedTypes();
+      }
       return;
     }
 
@@ -76,13 +84,17 @@ class BedTypeFormController extends GetxController {
       }
 
       if (response.status == true) {
-        toast(isEdit ? locale.value.bedTypeEditedSuccessfully : locale.value.bedTypeSavedSuccessfully);
+        toast(isEdit
+            ? locale.value.bedTypeEditedSuccessfully
+            : locale.value.bedTypeSavedSuccessfully);
         Get.back(result: true);
-      } else {
+      } else if (response.message.isNotEmpty) {
         toast(response.message);
       }
     } catch (e) {
-      toast(e.toString());
+      if (!CoreServiceApis.isBedFeatureUnavailableError(e)) {
+        toast(e.toString());
+      }
     } finally {
       isLoading(false);
     }
