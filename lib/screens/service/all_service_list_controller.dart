@@ -15,7 +15,8 @@ import 'manage_service/service_apis.dart';
 import 'model/service_list_model.dart';
 
 class AllServicesController extends GetxController {
-  Rx<Future<RxList<ServiceElement>>> serviceListFuture = Future(() => RxList<ServiceElement>()).obs;
+  Rx<Future<RxList<ServiceElement>>> serviceListFuture =
+      Future(() => RxList<ServiceElement>()).obs;
   RxBool isLoading = false.obs;
   RxList<ServiceElement> serviceList = RxList<ServiceElement>();
   RxList<ServiceElement> doctorServiceList = RxList<ServiceElement>();
@@ -35,42 +36,44 @@ class AllServicesController extends GetxController {
 
   RxList<ServiceElement> selectedServiceTemp = RxList<ServiceElement>();
 
-  Rx<ServiceElement> singleServiceSelect = ServiceElement(status: false.obs).obs;
+  Rx<ServiceElement> singleServiceSelect =
+      ServiceElement(status: false.obs).obs;
 
   RxString appBarTitle = locale.value.services.obs;
 
   @override
   void onInit() {
+    final dynamic args = Get.arguments;
+
     try {
       // Arguments processed
-      if (Get.arguments is Doctor) {
-        doctorData(Get.arguments);
+      if (args is Doctor) {
+        doctorData(args);
         if (doctorData.value.firstName.isNotEmpty) {
           appBarTitle("${doctorData.value.firstName}${locale.value.sServices}");
         }
-      }
-
-      if (Get.arguments is ClinicData) {
-        clinicData(Get.arguments);
+      } else if (args is ClinicData) {
+        clinicData(args);
 
         if (clinicData.value.name.isNotEmpty) {
           appBarTitle("${clinicData.value.name}${locale.value.sServices}");
         }
-      }
-
-      if (Get.arguments[0] is Doctor) {
-        doctorData(Get.arguments[0]);
-        if (doctorData.value.firstName.isNotEmpty) {
-          appBarTitle("${doctorData.value.firstName}${locale.value.sServices}");
+      } else if (args is List) {
+        if (args.isNotEmpty && args[0] is Doctor) {
+          doctorData(args[0]);
+          if (doctorData.value.firstName.isNotEmpty) {
+            appBarTitle(
+                "${doctorData.value.firstName}${locale.value.sServices}");
+          }
         }
-      }
 
-      if (Get.arguments[1] is ServiceElement) {
-        singleServiceSelect(Get.arguments[1]);
-      }
+        if (args.length > 1 && args[1] is ServiceElement) {
+          singleServiceSelect(args[1]);
+        }
 
-      if (Get.arguments[2] is ClinicData) {
-        clinicData(Get.arguments[2]);
+        if (args.length > 2 && args[2] is ClinicData) {
+          clinicData(args[2]);
+        }
       }
     } catch (e) {
       log('AllServicesCont Get.arguments onInit E: $e');
@@ -81,7 +84,8 @@ class AllServicesController extends GetxController {
 
   @override
   void onReady() {
-    _scrollController.addListener(() => Get.context != null ? hideKeyboard(Get.context) : null);
+    _scrollController.addListener(
+        () => Get.context != null ? hideKeyboard(Get.context) : null);
     searchServiceStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getAllServices();
     });
@@ -91,8 +95,12 @@ class AllServicesController extends GetxController {
   }
 
   void getSelServicesList() {
-    if (Get.arguments is List<ServiceElement>) {
-      selectedService.addAll(Get.arguments as List<ServiceElement>);
+    final dynamic args = Get.arguments;
+
+    if (args is List &&
+        args.isNotEmpty &&
+        args.every((element) => element is ServiceElement)) {
+      selectedService.addAll(args.cast<ServiceElement>());
     }
   }
 
@@ -123,8 +131,13 @@ class AllServicesController extends GetxController {
       CoreServiceApis.getServiceList(
         page: page.value,
         serviceList: serviceList,
-        clinicId: clinicData.value.id.isNegative && loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? selectedAppClinic.value.id : clinicData.value.id,
-        doctorId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? loginUserData.value.id : doctorData.value.doctorId,
+        clinicId: clinicData.value.id.isNegative &&
+                loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+            ? selectedAppClinic.value.id
+            : clinicData.value.id,
+        doctorId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+            ? loginUserData.value.id
+            : doctorData.value.doctorId,
         search: searchServiceCont.text.trim(),
         lastPageCallBack: (p0) {
           isLastPage(p0);
@@ -147,8 +160,13 @@ class AllServicesController extends GetxController {
         page: page.value,
         perPage: 100,
         serviceList: doctorServiceList,
-        clinicId: clinicData.value.id.isNegative && loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? selectedAppClinic.value.id : clinicData.value.id,
-        doctorId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? loginUserData.value.id : doctorData.value.doctorId,
+        clinicId: clinicData.value.id.isNegative &&
+                loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+            ? selectedAppClinic.value.id
+            : clinicData.value.id,
+        doctorId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+            ? loginUserData.value.id
+            : doctorData.value.doctorId,
         search: searchServiceCont.text.trim(),
         lastPageCallBack: (p0) {
           isLastPage(p0);
@@ -168,7 +186,9 @@ class AllServicesController extends GetxController {
       try {
         for (final service in serviceList) {
           for (final assignDoctor in service.assignDoctor) {
-            if (assignDoctor.doctorId == loginUserData.value.id && assignDoctor.clinicId == selectedAppClinic.value.id && assignDoctor.serviceId == service.id) {
+            if (assignDoctor.doctorId == loginUserData.value.id &&
+                assignDoctor.clinicId == selectedAppClinic.value.id &&
+                assignDoctor.serviceId == service.id) {
               service.doctorCharges = assignDoctor.charges;
             }
           }
@@ -179,27 +199,38 @@ class AllServicesController extends GetxController {
     }
   }
 
-  Future<void> updateServicesStatus({required int id, required int status}) async {
-    if (isLoading.value) return; // Returns from here if already call in progress
+  Future<void> updateServicesStatus(
+      {required int id, required int status}) async {
+    if (isLoading.value)
+      return; // Returns from here if already call in progress
     isLoading(true);
-    ServiceFormApis.updateServicesStatus(serviceId: id, request: {"status": status}).then((value) {
-      toast(value.message.trim().isNotEmpty ? value.message.trim() : locale.value.statusUpdatedSuccessfully);
+    ServiceFormApis.updateServicesStatus(
+        serviceId: id, request: {"status": status}).then((value) {
+      toast(value.message.trim().isNotEmpty
+          ? value.message.trim()
+          : locale.value.statusUpdatedSuccessfully);
     }).catchError((e) {
       toast(e.toString());
     }).whenComplete(() => isLoading(false));
   }
 
-  Future<void> changeServicePrice({required int serviceId, required String price}) async {
+  Future<void> changeServicePrice(
+      {required int serviceId, required String price}) async {
     isLoading(true);
     await CoreServiceApis.assignDoctor(
       request: {
         "service_id": serviceId,
         "clinic_id": selectedAppClinic.value.id,
-        "assign_doctors": [SelectDoctor(doctorId: loginUserData.value.id, price: price.trim()).toJson()],
+        "assign_doctors": [
+          SelectDoctor(doctorId: loginUserData.value.id, price: price.trim())
+              .toJson()
+        ],
       },
     ).then((value) async {
       Get.back(result: true);
-      toast(value.message.isNotEmpty ? value.message : locale.value.priceUpdatedSuccessfully);
+      toast(value.message.isNotEmpty
+          ? value.message
+          : locale.value.priceUpdatedSuccessfully);
       getAllServices();
     }).catchError((e) {
       toast(e.toString());

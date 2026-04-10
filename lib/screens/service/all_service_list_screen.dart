@@ -19,7 +19,8 @@ import 'all_service_list_controller.dart';
 class AllServicesScreen extends StatelessWidget {
   AllServicesScreen({super.key});
 
-  final AllServicesController serviceListCont = Get.put(AllServicesController());
+  final AllServicesController serviceListCont =
+      Get.put(AllServicesController());
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +32,13 @@ class AllServicesScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              Get.to(() => AddServiceSrceen(controller: serviceListCont), arguments: serviceListCont.doctorServiceList);
+              Get.to(() => AddServiceSrceen(controller: serviceListCont),
+                  arguments: serviceListCont.doctorServiceList);
             },
-            icon: const Icon(Icons.add_circle_outline_rounded, size: 28, color: Colors.white),
-          ).paddingOnly(right: 8).visible(loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)),
+            icon: const Icon(Icons.add_circle_outline_rounded,
+                size: 28, color: Colors.white),
+          ).paddingOnly(right: 8).visible(
+              loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)),
         ],
         body: SizedBox(
           height: Get.height,
@@ -51,7 +55,9 @@ class AllServicesScreen extends StatelessWidget {
                 24.height,
                 SnapHelperWidget(
                   future: serviceListCont.serviceListFuture.value,
-                  loadingWidget: serviceListCont.isLoading.value ? const Offstage() : const LoaderWidget(),
+                  loadingWidget: serviceListCont.isLoading.value
+                      ? const Offstage()
+                      : const LoaderWidget(),
                   errorBuilder: (error) {
                     return NoDataWidget(
                       title: error,
@@ -73,12 +79,17 @@ class AllServicesScreen extends StatelessWidget {
                         listAnimationType: ListAnimationType.None,
                         emptyWidget: NoDataWidget(
                           title: locale.value.noServicesFound,
-                          subTitle: locale.value.oppsNoServicesFoundAtMomentTryAgainLater,
+                          subTitle: locale
+                              .value.oppsNoServicesFoundAtMomentTryAgainLater,
                           imageWidget: const EmptyStateWidget(),
-                        ).paddingSymmetric(horizontal: 32).paddingBottom(Get.height * 0.15).visible(!serviceListCont.isLoading.value),
+                        )
+                            .paddingSymmetric(horizontal: 32)
+                            .paddingBottom(Get.height * 0.15)
+                            .visible(!serviceListCont.isLoading.value),
                         onSwipeRefresh: () async {
                           serviceListCont.page(1);
-                          return serviceListCont.getAllServices(showloader: false);
+                          return serviceListCont.getAllServices(
+                              showloader: false);
                         },
                         onNextPage: () async {
                           if (!serviceListCont.isLastPage.value) {
@@ -87,24 +98,40 @@ class AllServicesScreen extends StatelessWidget {
                           }
                         },
                         itemBuilder: (ctx, index) {
-                          final ServiceElement service = serviceListCont.serviceList[index];
+                          final ServiceElement service =
+                              serviceListCont.serviceList[index];
                           return AllServiceCard(
                             serviceElement: service,
+                            showActionButton: false,
                             onClickAssignDoctor: () {
-                              if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)) {
+                              if (loginUserData.value.userRole
+                                  .contains(EmployeeKeyConst.doctor)) {
                                 Get.bottomSheet(
                                   ChangePriceComponent(
-                                    serviceElement: serviceListCont.serviceList[index],
+                                    serviceElement:
+                                        serviceListCont.serviceList[index],
                                     changePriceCont: TextEditingController(
-                                      text: serviceListCont.serviceList[index].assignDoctor.isEmpty ? serviceListCont.serviceList[index].charges.toString() : serviceListCont.serviceList[index].doctorCharges.toString(),
+                                      text: serviceListCont.serviceList[index]
+                                              .assignDoctor.isEmpty
+                                          ? serviceListCont
+                                              .serviceList[index].charges
+                                              .toString()
+                                          : serviceListCont
+                                              .serviceList[index].doctorCharges
+                                              .toString(),
                                     ),
                                     onSave: (p0) {
-                                      serviceListCont.changeServicePrice(serviceId: serviceListCont.serviceList[index].id, price: p0);
+                                      serviceListCont.changeServicePrice(
+                                          serviceId: serviceListCont
+                                              .serviceList[index].id,
+                                          price: p0);
                                     },
                                   ),
                                 );
                               } else {
-                                Get.to(() => AssingDoctorScreen(), arguments: service)?.then((value) {
+                                Get.to(() => AssingDoctorScreen(),
+                                        arguments: service)
+                                    ?.then((value) {
                                   if (value == true) {
                                     serviceListCont.page(1);
                                     serviceListCont.getAllServices();
@@ -126,7 +153,10 @@ class AllServicesScreen extends StatelessWidget {
     );
   }
 
-  Future<void> handleStatusChangeClick({required BuildContext context, required bool statusValue, required int index}) async {
+  Future<void> handleStatusChangeClick(
+      {required BuildContext context,
+      required bool statusValue,
+      required int index}) async {
     showConfirmDialogCustom(
       context,
       primaryColor: appColorPrimary,
@@ -135,7 +165,10 @@ class AllServicesScreen extends StatelessWidget {
       negativeText: locale.value.cancel,
       onAccept: (ctx) async {
         serviceListCont.serviceList[index].status(statusValue);
-        await serviceListCont.updateServicesStatus(id: serviceListCont.serviceList[index].id, status: serviceListCont.serviceList[index].status.value.getIntBool());
+        await serviceListCont.updateServicesStatus(
+            id: serviceListCont.serviceList[index].id,
+            status:
+                serviceListCont.serviceList[index].status.value.getIntBool());
       },
     );
   }

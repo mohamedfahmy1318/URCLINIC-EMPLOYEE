@@ -23,11 +23,13 @@ import 'model/appointments_res_model.dart';
 class AppointmentsController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isLastPage = false.obs;
-  Rx<Future<RxList<AppointmentData>>> getAppointments = Future(() => RxList<AppointmentData>()).obs;
+  Rx<Future<RxList<AppointmentData>>> getAppointments =
+      Future(() => RxList<AppointmentData>()).obs;
   RxList<AppointmentData> appointments = RxList();
   RxInt page = 1.obs;
   Rx<Doctor> selectedDoctor = Doctor().obs;
-  Rx<ServiceElement> selectedServiceData = ServiceElement(status: false.obs).obs;
+  Rx<ServiceElement> selectedServiceData =
+      ServiceElement(status: false.obs).obs;
   Rx<PatientModel> selectedPatient = PatientModel().obs;
   RxString status = "".obs;
   RxString paymentStatus = "".obs;
@@ -43,7 +45,8 @@ class AppointmentsController extends GetxController {
   StreamController<String> searchStream = StreamController<String>();
   final _scrollController = ScrollController();
 
-  Rx<PatientArgumentModel> patientDetailArgument = PatientArgumentModel(patientModel: PatientModel()).obs;
+  Rx<PatientArgumentModel> patientDetailArgument =
+      PatientArgumentModel(patientModel: PatientModel()).obs;
 
   @override
   void onInit() {
@@ -51,7 +54,8 @@ class AppointmentsController extends GetxController {
       patientDetailArgument(Get.arguments);
       selectedPatient(patientDetailArgument.value.patientModel);
     }
-    _scrollController.addListener(() => Get.context != null ? hideKeyboard(Get.context) : null);
+    _scrollController.addListener(
+        () => Get.context != null ? hideKeyboard(Get.context) : null);
     searchStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getAppointmentList();
     });
@@ -59,7 +63,8 @@ class AppointmentsController extends GetxController {
     super.onInit();
   }
 
-  Future<void> getAppointmentList({bool showloader = true, String search = ""}) async {
+  Future<void> getAppointmentList(
+      {bool showloader = true, String search = ""}) async {
     if (showloader) {
       isLoading(true);
     }
@@ -72,8 +77,14 @@ class AppointmentsController extends GetxController {
         filterByStatus: status.value,
         serviceId: selectedServiceData.value.id,
         patientId: selectedPatient.value.id,
-        doctorId: selectedDoctor.value.id,
-        clinicId: clinicId.value > 0 ? clinicId.value : loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ? selectedAppClinic.value.id : null,
+        doctorId: selectedDoctor.value.doctorId > 0
+            ? selectedDoctor.value.doctorId
+            : selectedDoctor.value.id,
+        clinicId: clinicId.value > 0
+            ? clinicId.value
+            : loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)
+                ? selectedAppClinic.value.id
+                : null,
         page: page.value,
         search: searchCont.text.trim(),
         appointments: appointments,
@@ -115,7 +126,9 @@ class AppointmentsController extends GetxController {
             id: id,
             request: {'status': postStatus(status: status)},
           ).then((value) {
-            toast(value.message.trim().isEmpty ? locale.value.statusHasBeenUpdated : value.message.trim());
+            toast(value.message.trim().isEmpty
+                ? locale.value.statusHasBeenUpdated
+                : value.message.trim());
             if (isBack) {
               Get.back();
             }

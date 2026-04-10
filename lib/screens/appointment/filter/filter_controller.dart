@@ -27,7 +27,8 @@ import '../../bed_management/all_bed_controller.dart';
 class FilterController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isLastPage = false.obs;
-  Rx<Future<RxList<PatientModel>>> gePatientFuture = Future(() => RxList<PatientModel>()).obs;
+  Rx<Future<RxList<PatientModel>>> gePatientFuture =
+      Future(() => RxList<PatientModel>()).obs;
   RxList<PatientModel> patientList = RxList();
   Rx<PatientModel> selectedPatient = PatientModel().obs;
   RxInt patientPage = 1.obs;
@@ -35,7 +36,8 @@ class FilterController extends GetxController {
   RxString screenType = "".obs;
 
   //Service List
-  Rx<Future<RxList<ServiceElement>>> serviceListFuture = Future(() => RxList<ServiceElement>()).obs;
+  Rx<Future<RxList<ServiceElement>>> serviceListFuture =
+      Future(() => RxList<ServiceElement>()).obs;
   RxBool isServiceLoading = false.obs;
   RxList<ServiceElement> serviceList = RxList();
   RxList<ClinicData> clinicList = RxList();
@@ -46,9 +48,12 @@ class FilterController extends GetxController {
   TextEditingController searchServiceCont = TextEditingController();
   StreamController<String> searchServiceStream = StreamController<String>();
   final _scrollServiceController = ScrollController();
-  Rx<ServiceElement> selectedServiceData = ServiceElement(status: false.obs).obs;
-  Rx<Future<RxList<ClinicData>>> clinicListFuture = Future(() => RxList<ClinicData>()).obs;
-  Rx<Future<RxList<CategoryElement>>> categoryListFuture = Future(() => RxList<CategoryElement>()).obs;
+  Rx<ServiceElement> selectedServiceData =
+      ServiceElement(status: false.obs).obs;
+  Rx<Future<RxList<ClinicData>>> clinicListFuture =
+      Future(() => RxList<ClinicData>()).obs;
+  Rx<Future<RxList<CategoryElement>>> categoryListFuture =
+      Future(() => RxList<CategoryElement>()).obs;
   TextEditingController selectedFirstDateCont = TextEditingController();
   TextEditingController selectedLastDateCont = TextEditingController();
   RxString selectedFirstDate = ''.obs;
@@ -87,7 +92,7 @@ class FilterController extends GetxController {
     {"title": "Pending", "value": StatusConst.pending},
     {"title": "Confirmed", "value": StatusConst.confirmed},
     {"title": "Check-in", "value": StatusConst.check_in},
-    {"title": "Completed", "value": StatusConst.checkout},
+    {"title": "Completed", "value": StatusConst.completed},
     {"title": "Cancelled", "value": StatusConst.cancelled},
   ].obs;
   RxList paymentStatusList = [
@@ -117,7 +122,10 @@ class FilterController extends GetxController {
   @override
   void onInit() {
     getArgs();
-    if (Get.arguments != null && Get.arguments is List && Get.arguments.length == 2 && (Get.arguments[0] is String || Get.arguments[1] is String)) {
+    if (Get.arguments != null &&
+        Get.arguments is List &&
+        Get.arguments.length == 2 &&
+        (Get.arguments[0] is String || Get.arguments[1] is String)) {
       screenType("bed_management");
       filterList = ["Bed Type"].obs;
       getBedTypes(); // Only call getBedTypes for bed management
@@ -138,7 +146,10 @@ class FilterController extends GetxController {
 
   void getArgs() {
     // Only process bed arguments if this is bed management
-    if (screenType.value == "bed_management" && Get.arguments != null && Get.arguments is List && Get.arguments.length == 2) {
+    if (screenType.value == "bed_management" &&
+        Get.arguments != null &&
+        Get.arguments is List &&
+        Get.arguments.length == 2) {
       if (Get.arguments[0] != null && Get.arguments[0] is String) {
         selectedBedType(Get.arguments[0] as String);
       }
@@ -157,7 +168,8 @@ class FilterController extends GetxController {
     }
   }
 
-  Future<void> getPatientList({bool showloader = true, String search = ""}) async {
+  Future<void> getPatientList(
+      {bool showloader = true, String search = ""}) async {
     if (showloader) {
       isLoading(true);
     }
@@ -166,7 +178,12 @@ class FilterController extends GetxController {
         page: patientPage.value,
         search: patientSearchCont.text.trim(),
         patientsList: patientList,
-        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? selectedAppClinic.value.id : null,
+        clinicId:
+            loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ||
+                    loginUserData.value.userRole
+                        .contains(EmployeeKeyConst.receptionist)
+                ? selectedAppClinic.value.id
+                : null,
         lastPageCallBack: (p0) {
           isLastPage(p0);
         },
@@ -178,7 +195,8 @@ class FilterController extends GetxController {
 
   //get patient Info
   void getPatient() {
-    _scrollController.addListener(() => Get.context != null ? hideKeyboard(Get.context) : null);
+    _scrollController.addListener(
+        () => Get.context != null ? hideKeyboard(Get.context) : null);
     searchStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getPatientList();
     });
@@ -187,21 +205,28 @@ class FilterController extends GetxController {
 
   //get Service Info
   void getService() {
-    _scrollServiceController.addListener(() => Get.context != null ? hideKeyboard(Get.context) : null);
+    _scrollServiceController.addListener(
+        () => Get.context != null ? hideKeyboard(Get.context) : null);
     searchServiceStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getServicesList();
     });
     getServicesList();
   }
 
-  Future<void> getServicesList({bool showloader = true, String search = ""}) async {
+  Future<void> getServicesList(
+      {bool showloader = true, String search = ""}) async {
     if (showloader) {
       isServiceLoading(true);
     }
     await serviceListFuture(
       CoreServiceApis.getServiceList(
         serviceList: serviceList,
-        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) || loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? selectedAppClinic.value.id : null,
+        clinicId:
+            loginUserData.value.userRole.contains(EmployeeKeyConst.doctor) ||
+                    loginUserData.value.userRole
+                        .contains(EmployeeKeyConst.receptionist)
+                ? selectedAppClinic.value.id
+                : null,
         search: searchServiceCont.text.trim(),
         page: servicePage.value,
         lastPageCallBack: (p0) {
@@ -214,7 +239,8 @@ class FilterController extends GetxController {
   }
 
   // clinic
-  Future<void> getClinicsList({bool showloader = true, String search = ""}) async {
+  Future<void> getClinicsList(
+      {bool showloader = true, String search = ""}) async {
     if (showloader) {
       isClinicLoading(true);
     }
@@ -235,14 +261,20 @@ class FilterController extends GetxController {
   // category
   Future<void> getCategoryList({String search = ''}) async {
     isCategoryLoading(true);
-    await categoryListFuture(CoreServiceApis.getCategoryList(categories: categoryList, page: categoryPage.value, search: searchCategoryCont.text)).then((value) {}).catchError((e) {
+    await categoryListFuture(CoreServiceApis.getCategoryList(
+            categories: categoryList,
+            page: categoryPage.value,
+            search: searchCategoryCont.text))
+        .then((value) {})
+        .catchError((e) {
       log('getCategoryList: $e');
     }).whenComplete(() => isCategoryLoading(false));
   }
 
   //Doctors
   void getDoctor() {
-    _scrollDoctorController.addListener(() => Get.context != null ? hideKeyboard(Get.context) : null);
+    _scrollDoctorController.addListener(
+        () => Get.context != null ? hideKeyboard(Get.context) : null);
     searchDoctorStream.stream.debounce(const Duration(seconds: 1)).listen((s) {
       getDoctorsList();
     });
@@ -257,7 +289,10 @@ class FilterController extends GetxController {
       CoreServiceApis.getDoctors(
         page: doctorPage.value,
         doctors: doctors,
-        clinicId: loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist) ? selectedAppClinic.value.id : null,
+        clinicId:
+            loginUserData.value.userRole.contains(EmployeeKeyConst.receptionist)
+                ? selectedAppClinic.value.id
+                : null,
         search: searchDoctorCont.text.trim(),
         lastPageCallBack: (p0) {
           isDoctorLastPage(p0);
@@ -301,7 +336,8 @@ class FilterController extends GetxController {
       selectedFirstDateCont.text = '';
       selectedLastDateCont.text = '';
 
-      final AppointmentsController appointmentsCont = Get.find<AppointmentsController>();
+      final AppointmentsController appointmentsCont =
+          Get.find<AppointmentsController>();
       appointmentsCont.selectedDoctor(selectedDoctor.value);
       appointmentsCont.categoryId(0);
       appointmentsCont.selectedServiceData(selectedServiceData.value);
@@ -338,7 +374,8 @@ class FilterController extends GetxController {
       case "Category":
         return FilterCategoryComponent(filterCont: filterCont).expand(flex: 2);
       case "Payment Status":
-        return FilterPaymentStatusComponent(filterCont: filterCont).expand(flex: 2);
+        return FilterPaymentStatusComponent(filterCont: filterCont)
+            .expand(flex: 2);
       default:
         getPatient();
         return PatientComponent(filterCont: filterCont).expand(flex: 2);
@@ -353,7 +390,8 @@ class FilterController extends GetxController {
           // Bed Type Filter
           Text(
             locale.value.bedType,
-            style: boldTextStyle(size: 16, color: Get.isDarkMode ? Colors.white : Colors.black),
+            style: boldTextStyle(
+                size: 16, color: Get.isDarkMode ? Colors.white : Colors.black),
           ),
           16.height,
           Obx(
@@ -365,9 +403,14 @@ class FilterController extends GetxController {
                     selectedBedType('');
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     margin: const EdgeInsets.all(4),
-                    decoration: boxDecorationDefault(borderRadius: BorderRadius.circular(6), color: selectedBedType.value.isEmpty ? appColorPrimary : Get.context!.cardColor),
+                    decoration: boxDecorationDefault(
+                        borderRadius: BorderRadius.circular(6),
+                        color: selectedBedType.value.isEmpty
+                            ? appColorPrimary
+                            : Get.context!.cardColor),
                     child: Text(
                       'All',
                       style: primaryTextStyle(
@@ -384,9 +427,14 @@ class FilterController extends GetxController {
                       selectedBedType(type);
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
                       margin: const EdgeInsets.all(4),
-                      decoration: boxDecorationDefault(borderRadius: BorderRadius.circular(6), color: selectedBedType.value == type ? appColorPrimary : Get.context!.cardColor),
+                      decoration: boxDecorationDefault(
+                          borderRadius: BorderRadius.circular(6),
+                          color: selectedBedType.value == type
+                              ? appColorPrimary
+                              : Get.context!.cardColor),
                       child: Text(
                         type,
                         style: primaryTextStyle(
@@ -425,15 +473,15 @@ class FilterController extends GetxController {
           // Appointments
           AppointmentsController appointmentsCont = Get.find();
           appointmentsCont.selectedDoctor(selectedDoctor.value);
-        appointmentsCont.categoryId(selectedCategory.value.id);
+          appointmentsCont.categoryId(selectedCategory.value.id);
           appointmentsCont.selectedServiceData(selectedServiceData.value);
           appointmentsCont.selectedPatient(selectedPatient.value);
           appointmentsCont.status(status.value);
-        appointmentsCont.paymentStatus(paymentStatus.value);
-        appointmentsCont.selectedCategory(selectedCategory.value);
-        appointmentsCont.lastDate(selectedLastDate.value);
-        appointmentsCont.clinicId(selectedClinic.value.id);
-        appointmentsCont.firstDate(selectedFirstDate.value);
+          appointmentsCont.paymentStatus(paymentStatus.value);
+          appointmentsCont.selectedCategory(selectedCategory.value);
+          appointmentsCont.lastDate(selectedLastDate.value);
+          appointmentsCont.clinicId(selectedClinic.value.id);
+          appointmentsCont.firstDate(selectedFirstDate.value);
           Get.back();
           appointmentsCont.getAppointmentList();
         }
