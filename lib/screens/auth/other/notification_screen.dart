@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kivicare_clinic_admin/utils/app_common.dart';
@@ -10,6 +12,7 @@ import '../../../main.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/empty_error_state_widget.dart';
+import '../../../utils/notification_controller.dart';
 import '../../appointment/appointment_detail.dart';
 import '../../appointment/model/appointments_res_model.dart';
 import '../model/notification_model.dart';
@@ -31,7 +34,7 @@ class NotificationScreen extends StatelessWidget {
           GestureDetector(
             onTap: (){
               notificationScreenController.init(isReadAll: true);
-              unreadNotificationCount(0);
+              NotificationController.to.markAllRead();
             },
             child: Text(locale.value.readAll,style: secondaryTextStyle(color: Colors.white)),
           ).paddingOnly(right: 16)
@@ -74,6 +77,13 @@ class NotificationScreen extends StatelessWidget {
                   final NotificationData notification = notificationScreenController.notificationDetail[index];
                   return GestureDetector(
                     onTap: () async {
+                      final bool wasUnread = notification.readAt.trim().isEmpty;
+                      if (wasUnread) {
+                        final int? notifIntId = int.tryParse(notification.id);
+                        if (notifIntId != null) {
+                          unawaited(NotificationController.to.markAsRead(notifIntId));
+                        }
+                      }
                       if (notification.data.notificationDetail.id > 0 && notification.data.notificationDetail.appointmentId!= -1) {
                         await Get.to(
                           () => AppointmentDetail(),

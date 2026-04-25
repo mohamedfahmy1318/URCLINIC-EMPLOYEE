@@ -1,7 +1,7 @@
 name: kivicare_clinic_admin
 description: A new Flutter project.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.9.1+28
+version: 1.9.2+29
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -24,6 +24,7 @@ dependencies:
   flutter_svg_provider: ^1.0.7
   stream_transform: ^2.1.1
   flutter_local_notifications: ^19.5.0
+  app_badge_plus: ^1.1.2
   carousel_slider: ^5.1.1
   flutter_spinkit: ^5.2.2
   responsive_navigation_bar: ^6.1.0

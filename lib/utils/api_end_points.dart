@@ -15,6 +15,8 @@ class APIEndPoints {
   static const String getNotification = 'notification-list';
   static const String removeNotification = 'notification-remove';
   static const String clearAllNotification = 'notification-deleteall';
+  static const String notificationUnreadCount = 'notifications/unread-count';
+  static const String notificationMarkRead = 'notification-mark-read';
 
   //home choose service api
   static const String vendorDashboardList = 'vendor-dashboard-list';

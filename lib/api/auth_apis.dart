@@ -84,7 +84,7 @@ class AuthServiceApis {
 
   static Future<void> clearData({bool isFromDeleteAcc = false}) async {
     GoogleSignIn.instance.signOut();
-    PushNotificationService().unsubscribeFirebaseTopic();
+    await PushNotificationService().unsubscribeFirebaseTopic();
     if (isFromDeleteAcc) {
       localStorage.erase();
       removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);

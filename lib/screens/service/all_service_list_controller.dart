@@ -201,8 +201,9 @@ class AllServicesController extends GetxController {
 
   Future<void> updateServicesStatus(
       {required int id, required int status}) async {
-    if (isLoading.value)
+    if (isLoading.value) {
       return; // Returns from here if already call in progress
+    }
     isLoading(true);
     ServiceFormApis.updateServicesStatus(
         serviceId: id, request: {"status": status}).then((value) {

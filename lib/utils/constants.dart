@@ -172,6 +172,7 @@ class PaymentStatus {
 //region Firebase Topic keys
 class FirebaseTopicConst {
   static const additionalDataKey = 'additional_data';
+  static const idKey = 'id';
   static const vendorApp = 'vendorApp';
   static const vendor = EmployeeKeyConst.vendor;
   static const doctor = EmployeeKeyConst.doctor;
@@ -356,7 +357,10 @@ RxList<LoginRoleData> loginRoles = [
 //endregion
 
 //region Status
+/// Source of truth for FCM `data.type` values. Backend MUST emit one of these
+/// strings — anything else falls through to the unrouted-log path.
 class NotificationConst {
+  // Appointment lifecycle (patient → employee and employee → patient).
   static const newAppointment = 'new_appointment';
   static const checkoutAppointment = 'checkout_appointment';
   static const rejectAppointment = 'reject_appointment';
@@ -364,8 +368,37 @@ class NotificationConst {
   static const cancelAppointment = 'cancel_appointment';
   static const rescheduleAppointment = 'reschedule_appointment';
   static const quickAppointment = 'quick_appointment';
+
+  // Generic appointment status / payment update.
+  static const appointmentStatusChanged = 'appointment_status_changed';
+  static const paymentStatusChanged = 'payment_status_changed';
+
+  // Account.
   static const changePassword = 'change_password';
   static const forgetEmailPassword = 'forget_email_password';
+
+  // Generic deep-link to appointment detail (legacy fallback).
+  static const appointmentDetail = 'appointment_detail';
+
+  // Payload field keys.
+  static const typeKey = 'type';
+  static const unreadCountKey = 'unread_count';
+  static const unreadCountCamelKey = 'unreadCount';
+
+  /// Types that all route to the appointment-detail screen with the payload
+  /// `id`. Add new appointment-related types here, not in the routing code.
+  static const Set<String> appointmentDetailTypes = <String>{
+    newAppointment,
+    checkoutAppointment,
+    rejectAppointment,
+    acceptAppointment,
+    cancelAppointment,
+    rescheduleAppointment,
+    quickAppointment,
+    appointmentStatusChanged,
+    paymentStatusChanged,
+    appointmentDetail,
+  };
 }
 //endregion
 

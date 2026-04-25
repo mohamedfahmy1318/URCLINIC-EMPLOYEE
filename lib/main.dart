@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -21,11 +22,38 @@ import 'utils/colors.dart';
 import 'utils/common_base.dart';
 import 'utils/constants.dart';
 import 'utils/local_storage.dart';
+import 'utils/notification_controller.dart';
 import 'utils/push_notification_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try {
+    final dynamic raw =
+        message.data['unreadCount'] ?? message.data['unread_count'];
+    final int parsed =
+        raw is int ? raw : int.tryParse(raw?.toString() ?? '') ?? -1;
+
+    if (parsed >= 0) {
+      await GetStorage.init();
+      await GetStorage()
+          .write(NotificationController.pendingUnreadStorageKey, parsed);
+
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+        try {
+          if (await AppBadgePlus.isSupported()) {
+            await AppBadgePlus.updateBadge(parsed < 0 ? 0 : parsed);
+          }
+        } catch (_) {
+          // Method channel may be unavailable in the bg isolate on some OEMs.
+        }
+      }
+    }
+  } catch (e) {
+    if (!kReleaseMode) log('bg handler error: $e');
+  }
+
   if (!kReleaseMode) {
     final RemoteNotification? notification = message.notification;
     log('${FirebaseTopicConst.notificationDataKey}: ${message.data}');
@@ -39,17 +67,22 @@ Rx<BaseLanguage> locale = Rx<BaseLanguage>(LanguageEn());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-      .then((value) {
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    PushNotificationService().initFirebaseMessaging();
+
+  await GetStorage.init();
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  try {
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+    Get.put(NotificationController(), permanent: true);
+    await PushNotificationService().setupFirebaseMessaging();
     if (kReleaseMode) {
       FlutterError.onError =
           FirebaseCrashlytics.instance.recordFlutterFatalError;
     }
-  }).catchError(onError);
-
-  await GetStorage.init();
+  } catch (e) {
+    if (!kReleaseMode) log('Firebase init error: $e');
+  }
   //
   fontFamilyPrimaryGlobal =
       GoogleFonts.interTight(fontWeight: FontWeight.w500).fontFamily;

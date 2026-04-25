@@ -1357,4 +1357,35 @@ class CoreServiceApis {
       return null;
     }
   }
+
+  static Future<void> markNotificationAsRead(int notificationId) async {
+    await handleResponse(
+      await buildHttpResponse(
+        APIEndPoints.notificationMarkRead,
+        method: HttpMethodType.POST,
+        request: <String, dynamic>{'id': notificationId},
+      ),
+    );
+  }
+
+  static Future<int> getUnreadNotificationCount() async {
+    final int userId = loginUserData.value.id;
+    final String query = userId > 0 ? '?userId=$userId' : '';
+    final dynamic response = await handleResponse(
+      await buildHttpResponse(
+        '${APIEndPoints.notificationUnreadCount}$query',
+        method: HttpMethodType.GET,
+      ),
+    );
+
+    dynamic node = response;
+    if (node is Map && node['data'] != null) node = node['data'];
+    if (node is Map) {
+      final dynamic v = node['unread_count'] ?? node['count'] ?? 0;
+      if (v is int) return v < 0 ? 0 : v;
+      final int parsed = int.tryParse(v.toString()) ?? 0;
+      return parsed < 0 ? 0 : parsed;
+    }
+    return 0;
+  }
 }
