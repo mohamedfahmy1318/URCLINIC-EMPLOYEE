@@ -97,6 +97,7 @@ class SharedPreferenceConst {
 //region SettingsLocalConst
 class SettingsLocalConst {
   static const THEME_MODE = 'THEME_MODE';
+  static const NOTIFICATION_ENABLED = 'NOTIFICATION_ENABLED';
 }
 //endregion
 

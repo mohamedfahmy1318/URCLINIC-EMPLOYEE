@@ -135,6 +135,31 @@ class SettingScreen extends StatelessWidget {
                 ),
               ),
             ),
+            Obx(
+              () => SettingItemWidget(
+                title: locale.value.notifications,
+                onTap: () {
+                  settingsController.onNotificationToggle(
+                    !settingsController.isNotificationEnabled.value,
+                  );
+                },
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                titleTextStyle: primaryTextStyle(),
+                leading: commonLeadingWid(
+                  imgPath: Assets.navigationIcNotifyOutlined,
+                  color: appColorPrimary,
+                ),
+                trailing: Switch.adaptive(
+                  value: settingsController.isNotificationEnabled.value,
+                  onChanged: settingsController.isUpdatingNotification.value
+                      ? null
+                      : (value) {
+                          settingsController.onNotificationToggle(value);
+                        },
+                ),
+              ),
+            ),
             SettingItemWidget(
               title: locale.value.changePassword,
               onTap: () {

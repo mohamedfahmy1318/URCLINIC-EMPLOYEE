@@ -9,12 +9,15 @@ import '../../../utils/app_common.dart';
 import '../../../utils/common_base.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/local_storage.dart';
+import '../../../utils/push_notification_service.dart';
 import '../sign_in_sign_up/signin_screen.dart';
 
 class SettingsController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isPayment = false.obs;
   RxBool isTouchId = false.obs;
+  RxBool isNotificationEnabled = true.obs;
+  RxBool isUpdatingNotification = false.obs;
 
   Rx<LanguageDataModel> selectedLang = LanguageDataModel().obs;
   List<ThemeModeData> themeModes = [
@@ -40,6 +43,8 @@ class SettingsController extends GetxController {
 
   @override
   Future<void> onInit() async {
+    isNotificationEnabled(PushNotificationService().isNotificationsEnabled);
+
     if (localeLanguageList.isNotEmpty) {
       selectedLanguageCode(
           getValueFromLocal(SELECTED_LANGUAGE_CODE) ?? DEFAULT_LANGUAGE);
@@ -53,6 +58,23 @@ class SettingsController extends GetxController {
     log('ISDARK: ${isDarkMode.value}');
 
     super.onInit();
+  }
+
+  Future<void> onNotificationToggle(bool enabled) async {
+    if (isUpdatingNotification.value) return;
+
+    final bool previous = isNotificationEnabled.value;
+    isNotificationEnabled(enabled);
+    isUpdatingNotification(true);
+
+    try {
+      await PushNotificationService().setNotificationsEnabled(enabled);
+    } catch (e) {
+      isNotificationEnabled(previous);
+      toast(e.toString());
+    } finally {
+      isUpdatingNotification(false);
+    }
   }
 
   @override

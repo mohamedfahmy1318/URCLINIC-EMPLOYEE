@@ -11,7 +11,8 @@ import 'filter_controller.dart';
 class FilterScreen extends StatelessWidget {
   FilterScreen({super.key});
 
-  final FilterController filterCont = Get.put(FilterController(), permanent: true);
+  final FilterController filterCont =
+      Get.put(FilterController(), permanent: true);
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +24,16 @@ class FilterScreen extends StatelessWidget {
           onPressed: () {
             filterCont.clearFilter();
           },
-          child: Text(locale.value.clearAllFilters, style: boldTextStyle(size: 14, color: whiteTextColor)),
+          child: Text(locale.value.clearAllFilters,
+              style: boldTextStyle(size: 14, color: whiteTextColor)),
         ),
       ],
       body: Container(
         height: Get.height,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: isDarkMode.value ? appScreenBackgroundDark : appScreenBackground,
+          color:
+              isDarkMode.value ? appScreenBackgroundDark : appScreenBackground,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,11 +48,15 @@ class FilterScreen extends StatelessWidget {
             ).expand(),
             Obx(
               () => Container(
-                decoration: boxDecorationDefault(borderRadius: radius(0), color: context.cardColor),
+                decoration: boxDecorationDefault(
+                    borderRadius: radius(0), color: context.cardColor),
                 width: Get.width,
                 padding: const EdgeInsets.all(16),
                 child: filterCont.applyButton(),
-              ).visible(filterCont.screenType.value == "bed_management" || filterCont.selectedDoctor.value.doctorId > 0 || filterCont.selectedServiceData.value.id > 0 || filterCont.selectedPatient.value.id > 0 || filterCont.status.isNotEmpty),
+              ).visible(
+                filterCont.screenType.value == "bed_management" ||
+                    filterCont.hasActiveAppointmentFilters,
+              ),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:kivicare_clinic_admin/api/core_apis.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -87,7 +88,7 @@ class FilterController extends GetxController {
   RxBool isSearchText = false.obs;
   StreamController<String> searchStream = StreamController<String>();
   final _scrollController = ScrollController();
-  RxList filterList = ["Patient", "Service", "Doctor", "Status"].obs;
+  RxList filterList = ["Patient", "Service", "Doctor", "Status", "Date"].obs;
   RxList statusList = [
     {"title": "Pending", "value": StatusConst.pending},
     {"title": "Confirmed", "value": StatusConst.confirmed},
@@ -132,16 +133,61 @@ class FilterController extends GetxController {
     } else {
       screenType("appointment");
       if (loginUserData.value.userRole.contains(EmployeeKeyConst.doctor)) {
-        filterList = ["Patient", "Service", "Status"].obs;
+        filterList = ["Patient", "Service", "Status", "Date"].obs;
       }
       getPatient();
       getService();
       getDoctor();
+      _syncAppointmentFilters();
     }
     filterType(filterList[0]);
     getClinicsList();
     getCategoryList();
     super.onInit();
+  }
+
+  void _syncAppointmentFilters() {
+    if (!Get.isRegistered<AppointmentsController>()) return;
+
+    final AppointmentsController appointmentsCont = Get.find();
+    selectedPatient(appointmentsCont.selectedPatient.value);
+    selectedDoctor(appointmentsCont.selectedDoctor.value);
+    selectedServiceData(appointmentsCont.selectedServiceData.value);
+    selectedCategory(appointmentsCont.selectedCategory.value);
+    status(appointmentsCont.status.value);
+    paymentStatus(appointmentsCont.paymentStatus.value);
+    selectedFirstDate(appointmentsCont.firstDate.value);
+    selectedLastDate(appointmentsCont.lastDate.value);
+
+    selectedFirstDateCont.text =
+        _formatFilterDateForField(selectedFirstDate.value);
+    selectedLastDateCont.text =
+        _formatFilterDateForField(selectedLastDate.value);
+  }
+
+  String _formatFilterDateForField(String value) {
+    if (value.trim().isEmpty) return '';
+    try {
+      final DateTime parsed =
+          DateFormat(DateFormatConst.DD_MM_YYYY).parse(value);
+      return DateFormat(DateFormatConst.DD_MM_YY).format(parsed);
+    } catch (_) {
+      return value;
+    }
+  }
+
+  bool get hasActiveAppointmentFilters {
+    final bool hasDateFilter =
+        selectedFirstDate.value.isNotEmpty || selectedLastDate.value.isNotEmpty;
+    return selectedDoctor.value.doctorId > 0 ||
+        selectedDoctor.value.id > 0 ||
+        selectedServiceData.value.id > 0 ||
+        selectedPatient.value.id > 0 ||
+        status.value.isNotEmpty ||
+        paymentStatus.value.isNotEmpty ||
+        selectedCategory.value.id > 0 ||
+        selectedClinic.value.id > 0 ||
+        hasDateFilter;
   }
 
   void getArgs() {
@@ -472,6 +518,23 @@ class FilterController extends GetxController {
         } else {
           // Appointments
           AppointmentsController appointmentsCont = Get.find();
+          final String normalizedFirstDate = selectedFirstDate.value.trim();
+          final String normalizedLastDate = selectedLastDate.value.trim();
+
+          final String effectiveFirstDate = normalizedFirstDate.isNotEmpty
+              ? normalizedFirstDate
+              : normalizedLastDate;
+          final String effectiveLastDate = normalizedLastDate.isNotEmpty
+              ? normalizedLastDate
+              : normalizedFirstDate;
+
+          selectedFirstDate(effectiveFirstDate);
+          selectedLastDate(effectiveLastDate);
+          selectedFirstDateCont.text =
+              _formatFilterDateForField(selectedFirstDate.value);
+          selectedLastDateCont.text =
+              _formatFilterDateForField(selectedLastDate.value);
+
           appointmentsCont.selectedDoctor(selectedDoctor.value);
           appointmentsCont.categoryId(selectedCategory.value.id);
           appointmentsCont.selectedServiceData(selectedServiceData.value);
@@ -479,9 +542,9 @@ class FilterController extends GetxController {
           appointmentsCont.status(status.value);
           appointmentsCont.paymentStatus(paymentStatus.value);
           appointmentsCont.selectedCategory(selectedCategory.value);
-          appointmentsCont.lastDate(selectedLastDate.value);
+          appointmentsCont.lastDate(effectiveLastDate);
           appointmentsCont.clinicId(selectedClinic.value.id);
-          appointmentsCont.firstDate(selectedFirstDate.value);
+          appointmentsCont.firstDate(effectiveFirstDate);
           Get.back();
           appointmentsCont.getAppointmentList();
         }

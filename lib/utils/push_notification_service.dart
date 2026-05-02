@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -17,9 +18,14 @@ import '../screens/appointment/model/appointments_res_model.dart';
 import 'app_common.dart';
 import 'common_base.dart';
 import 'constants.dart';
+import 'local_storage.dart';
 import 'notification_controller.dart';
 
 class PushNotificationService {
+  PushNotificationService._();
+  static final PushNotificationService _instance = PushNotificationService._();
+  factory PushNotificationService() => _instance;
+
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -37,7 +43,39 @@ class PushNotificationService {
     'zoom.us',
   };
 
+  bool get isNotificationsEnabled {
+    final dynamic raw =
+        getValueFromLocal(SettingsLocalConst.NOTIFICATION_ENABLED);
+    if (raw is bool) return raw;
+    if (raw is int) return raw == 1;
+
+    final String normalized = (raw?.toString() ?? '').trim().toLowerCase();
+    if (normalized == '1' || normalized == 'true') return true;
+    if (normalized == '0' || normalized == 'false') return false;
+    return true;
+  }
+
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    setValueToLocal(SettingsLocalConst.NOTIFICATION_ENABLED, enabled);
+
+    if (!enabled) {
+      await unsubscribeFirebaseTopic();
+      if (Get.isRegistered<NotificationController>()) {
+        await NotificationController.to.markAllRead();
+      }
+      await _clearBadge();
+      return;
+    }
+
+    await setupFirebaseMessaging();
+    await registerFCMandTopics();
+    if (Get.isRegistered<NotificationController>()) {
+      unawaited(NotificationController.to.fetchUnreadCount());
+    }
+  }
+
   Future<void> setupFirebaseMessaging() async {
+    if (!isNotificationsEnabled) return;
     await _initializeLocalNotifications();
     await _requestAndroidPostNotifications();
     await initFirebaseMessaging();
@@ -188,12 +226,14 @@ class PushNotificationService {
         sound: true,
       );
     } catch (e) {
-      if (!kReleaseMode) log('setForegroundNotificationPresentationOptions: $e');
+      if (!kReleaseMode) {
+        log('setForegroundNotificationPresentationOptions: $e');
+      }
     }
   }
 
   Future<void> registerFCMandTopics() async {
-    if (!isLoggedIn.value) return;
+    if (!isNotificationsEnabled || !isLoggedIn.value) return;
 
     if (Platform.isIOS) {
       final String? apnsToken = await _awaitApnsToken();
@@ -265,6 +305,8 @@ class PushNotificationService {
 
   void handleNotificationClick(RemoteMessage message,
       {bool isForeGround = false}) {
+    if (!isNotificationsEnabled) return;
+
     final String messageId =
         message.messageId ?? message.data['message_id']?.toString() ?? '';
 
@@ -401,6 +443,8 @@ class PushNotificationService {
     String message,
     RemoteMessage remoteMessage,
   ) async {
+    if (!isNotificationsEnabled) return;
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       FirebaseTopicConst.notificationChannelIdKey,
@@ -458,6 +502,17 @@ class PushNotificationService {
       }
     } catch (_) {
       // Never let badge plumbing break notification routing.
+    }
+  }
+
+  Future<void> _clearBadge() async {
+    if (!Platform.isAndroid) return;
+    try {
+      if (await AppBadgePlus.isSupported()) {
+        await AppBadgePlus.updateBadge(0);
+      }
+    } catch (e) {
+      if (!kReleaseMode) log('badge reset failed: $e');
     }
   }
 }

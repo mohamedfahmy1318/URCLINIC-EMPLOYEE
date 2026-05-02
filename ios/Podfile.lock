@@ -1,4 +1,6 @@
 PODS:
+  - app_badge_plus (1.2.9):
+    - Flutter
   - AppAuth (2.0.0):
     - AppAuth/Core (= 2.0.0)
     - AppAuth/ExternalUserAgent (= 2.0.0)
@@ -225,6 +227,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - app_badge_plus (from `.symlinks/plugins/app_badge_plus/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
@@ -282,6 +285,8 @@ SPEC REPOS:
     - SwiftyGif
 
 EXTERNAL SOURCES:
+  app_badge_plus:
+    :path: ".symlinks/plugins/app_badge_plus/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   file_picker:
@@ -330,6 +335,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  app_badge_plus: 6032bcb1e31689948ff63404c5d6f118001a9dee
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd

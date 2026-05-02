@@ -97,6 +97,8 @@ class AuthServiceApis {
       final tempIsRemeberMe =
           getValueFromLocal(SharedPreferenceConst.IS_REMEMBER_ME);
       final tempTheme = getValueFromLocal(SettingsLocalConst.THEME_MODE);
+      final tempNotificationEnabled =
+          getValueFromLocal(SettingsLocalConst.NOTIFICATION_ENABLED);
       final tempLang = getValueFromLocal(SELECTED_LANGUAGE_CODE);
       final tempUserName = loginUserData.value.userName;
 
@@ -111,6 +113,10 @@ class AuthServiceApis {
       setValueToLocal(SharedPreferenceConst.USER_NAME, tempUserName);
       setValueToLocal(SettingsLocalConst.THEME_MODE, tempTheme);
       setValueToLocal(SELECTED_LANGUAGE_CODE, tempLang);
+      if (tempNotificationEnabled is bool) {
+        setValueToLocal(
+            SettingsLocalConst.NOTIFICATION_ENABLED, tempNotificationEnabled);
+      }
 
       removeValueFromLocal(SharedPreferenceConst.USER_PASSWORD);
 

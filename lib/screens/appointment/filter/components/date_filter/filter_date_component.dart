@@ -25,7 +25,11 @@ class FilterDateComponent extends StatelessWidget {
             textFieldType: TextFieldType.NAME,
             controller: filterCont.selectedFirstDateCont,
             decoration: inputDecoration(
-              suffixIcon: commonLeadingWid(imgPath: Assets.iconsIcCalendar, color: iconColor, size: 10).paddingAll(16),
+              suffixIcon: commonLeadingWid(
+                      imgPath: Assets.iconsIcCalendar,
+                      color: iconColor,
+                      size: 10)
+                  .paddingAll(16),
               getContext,
               fillColor: isDarkMode.value ? black : white,
               filled: true,
@@ -41,7 +45,12 @@ class FilterDateComponent extends StatelessWidget {
 
               if (pickedDate != null) {
                 filterCont.selectedFirstDate(pickedDate.formatDateddmmYYYY());
-                filterCont.selectedFirstDateCont.text = pickedDate.formatDateDDMMYY();
+                filterCont.selectedFirstDateCont.text =
+                    pickedDate.formatDateDDMMYY();
+                // Default to single-day filtering unless user picks a new end date.
+                filterCont.selectedLastDate(pickedDate.formatDateddmmYYYY());
+                filterCont.selectedLastDateCont.text =
+                    pickedDate.formatDateDDMMYY();
                 filterCont.tampDate.value = pickedDate;
               }
             },
@@ -55,14 +64,24 @@ class FilterDateComponent extends StatelessWidget {
             textStyle: primaryTextStyle(size: 12),
             textFieldType: TextFieldType.NAME,
             decoration: inputDecoration(
-              suffixIcon: commonLeadingWid(imgPath: Assets.iconsIcCalendar, color: iconColor, size: 10).paddingAll(16),
+              suffixIcon: commonLeadingWid(
+                      imgPath: Assets.iconsIcCalendar,
+                      color: iconColor,
+                      size: 10)
+                  .paddingAll(16),
               getContext,
               fillColor: isDarkMode.value ? black : white,
               filled: true,
-              hintText: 'Select the Last Date',
+              hintText: 'Select the Last Date (Optional)',
             ),
-            suffixPasswordVisibleWidget: commonLeadingWid(imgPath: Assets.iconsIcEye, color: appColorPrimary, size: 12).paddingAll(14),
-            suffixPasswordInvisibleWidget: commonLeadingWid(imgPath: Assets.iconsIcEyeSlash, color: appColorPrimary).paddingAll(14),
+            suffixPasswordVisibleWidget: commonLeadingWid(
+                    imgPath: Assets.iconsIcEye,
+                    color: appColorPrimary,
+                    size: 12)
+                .paddingAll(14),
+            suffixPasswordInvisibleWidget: commonLeadingWid(
+                    imgPath: Assets.iconsIcEyeSlash, color: appColorPrimary)
+                .paddingAll(14),
             onTap: () async {
               final DateTime? pickedDate = await showDatePicker(
                 context: getContext,
@@ -72,7 +91,8 @@ class FilterDateComponent extends StatelessWidget {
               );
               if (pickedDate != null) {
                 filterCont.selectedLastDate(pickedDate.formatDateddmmYYYY());
-                filterCont.selectedLastDateCont.text = pickedDate.formatDateDDMMYY();
+                filterCont.selectedLastDateCont.text =
+                    pickedDate.formatDateDDMMYY();
               }
             },
           ).paddingSymmetric(horizontal: 8);

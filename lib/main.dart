@@ -28,6 +28,24 @@ import 'utils/push_notification_service.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await GetStorage.init();
+
+  final dynamic notificationsEnabledRaw =
+      GetStorage().read(SettingsLocalConst.NOTIFICATION_ENABLED);
+  bool notificationsEnabled = true;
+  if (notificationsEnabledRaw is bool) {
+    notificationsEnabled = notificationsEnabledRaw;
+  } else if (notificationsEnabledRaw is int) {
+    notificationsEnabled = notificationsEnabledRaw == 1;
+  } else {
+    final String normalized =
+        (notificationsEnabledRaw?.toString() ?? '').trim().toLowerCase();
+    if (normalized == '0' || normalized == 'false') {
+      notificationsEnabled = false;
+    }
+  }
+
+  if (!notificationsEnabled) return;
 
   try {
     final dynamic raw =
@@ -36,7 +54,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         raw is int ? raw : int.tryParse(raw?.toString() ?? '') ?? -1;
 
     if (parsed >= 0) {
-      await GetStorage.init();
       await GetStorage()
           .write(NotificationController.pendingUnreadStorageKey, parsed);
 
